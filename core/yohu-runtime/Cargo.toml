@@ -1,0 +1,8 @@
+[package]
+name = "yohu-runtime"
+description = "YoWebDocPreview — 宿主运行时：原子写 / OS 数据根（零产品类型）"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]

@@ -1,0 +1,16 @@
+//! yohu-domain — 纯领域层（无 IO）。
+//!
+//! URL→DocRef 解析、manifest 模型与校验、更新时间归一化对比、
+//! 导出文件名派生。只依赖 yohu-protocol 与 serde。
+//!
+//! 设置键表与默认值已迁至 yohu-protocol（wire 单源），domain 不再重复定义。
+
+pub mod doc_ref;
+pub mod manifest;
+pub mod naming;
+pub mod time_cmp;
+
+pub use doc_ref::*;
+pub use manifest::*;
+pub use naming::*;
+pub use time_cmp::*;

@@ -1,0 +1,18 @@
+[package]
+name = "yohu-source"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+yohu-protocol = { path = "../yohu-protocol" }
+yohu-domain = { path = "../yohu-domain" }
+tokio = { workspace = true }
+reqwest = { workspace = true }
+async-trait = { workspace = true }
+serde_json = { workspace = true }
+regex = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+wiremock = "0.6"
