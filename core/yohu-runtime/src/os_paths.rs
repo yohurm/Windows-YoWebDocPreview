@@ -75,7 +75,7 @@ mod tests {
 
     #[test]
     fn app_data_root_joins_product_name() {
-        let p = app_data_root("YoWebDocPreview");
-        assert!(p.ends_with("YoWebDocPreview"));
+        let p = app_data_root("YoDocPreview");
+        assert!(p.ends_with("YoDocPreview"));
     }
 }

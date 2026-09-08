@@ -4,6 +4,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::identity::DATA_DIR_NAME;
+
 /// 主题（默认跟随系统）
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -66,7 +68,7 @@ pub struct AppSettings {
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
-            library_root: "%LOCALAPPDATA%\\YoWebDocPreview\\library".into(),
+            library_root: format!("%LOCALAPPDATA%\\{DATA_DIR_NAME}\\library"),
             concurrency: 4,
             request_timeout_sec: 15,
             image_download: true,
@@ -91,6 +93,7 @@ mod tests {
         let s = AppSettings::default();
         assert_eq!(s.concurrency, 4);
         assert_eq!(s.request_timeout_sec, 15);
+        assert!(s.library_root.contains(DATA_DIR_NAME));
         assert!(s.image_download);
         assert_eq!(s.theme, Theme::System);
     }

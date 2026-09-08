@@ -24,9 +24,10 @@ mod tests {
     #[test]
     fn identity_constants_are_project_owned() {
         // 应用身份为本项目自有资产，禁止套用 ADBTools（ADR-W9）
-        assert_eq!(PRODUCT_NAME, "YoWebDocPreview");
-        assert_eq!(IDENTIFIER, "com.yohu.webdocpreview");
-        assert_ne!(DATA_DIR_NAME, "YohuAdbTools");
+        assert_eq!(PRODUCT_NAME, "YoDocPreview");
+        assert_eq!(DISPLAY_NAME, "YoDocPreview");
+        assert_eq!(IDENTIFIER, "com.yohu.docpreview");
+        assert_eq!(DATA_DIR_NAME, "YoDocPreview");
     }
 
     #[test]

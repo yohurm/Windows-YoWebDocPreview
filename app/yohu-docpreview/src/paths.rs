@@ -1,7 +1,7 @@
 //! 路径规划（ADR-W10 承载于 yohu-runtime）：全部在 LocalAppData，无管理员权限。
 //!
 //! ```text
-//! %LOCALAPPDATA%\YoWebDocPreview\       # local_root（固定，不随 libraryRoot 迁移）
+//! %LOCALAPPDATA%\YoDocPreview\          # local_root（固定，不随 libraryRoot 迁移）
 //! ├── settings\settings.json
 //! ├── logs\                             # panic-*.log
 //! ├── runs\<run_id>\state.json          # 批量断点
@@ -17,7 +17,7 @@ use yohu_runtime::app_data_root;
 /// 应用路径集（启动时冻结；`libraryRoot` 重启生效）。
 #[derive(Debug, Clone)]
 pub struct AppPaths {
-    /// `%LOCALAPPDATA%\YoWebDocPreview`
+    /// `%LOCALAPPDATA%\YoDocPreview`
     pub local_root: PathBuf,
     pub settings_dir: PathBuf,
     /// 崩溃日志目录
@@ -83,7 +83,7 @@ mod tests {
 
     #[test]
     fn empty_or_template_library_root_uses_default() {
-        for s in ["", "  ", r"%LOCALAPPDATA%\YoWebDocPreview\library"] {
+        for s in ["", "  ", r"%LOCALAPPDATA%\YoDocPreview\library"] {
             let p = AppPaths::resolve(s);
             assert_eq!(p.library_root, AppPaths::local_root().join("library"));
         }
