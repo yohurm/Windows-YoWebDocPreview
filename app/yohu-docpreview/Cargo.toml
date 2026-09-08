@@ -1,0 +1,27 @@
+[package]
+name = "yohu-docpreview"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "yohu_docpreview_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { workspace = true }
+yohu-protocol = { path = "../../core/yohu-protocol" }
+serde_json = { workspace = true }
+
+[dependencies]
+yohu-protocol = { path = "../../core/yohu-protocol" }
+yohu-runtime = { path = "../../core/yohu-runtime" }
+yohu-domain = { path = "../../core/yohu-domain" }
+yohu-md-convert = { path = "../../core/yohu-md-convert" }
+yohu-source = { path = "../../core/yohu-source" }
+tauri = { workspace = true }
+tauri-plugin-dialog = "2"
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true }
