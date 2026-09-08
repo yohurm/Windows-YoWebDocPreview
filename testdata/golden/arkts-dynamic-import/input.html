@@ -1,0 +1,497 @@
+<html><head></head><body><a name="ZH-CN_TOPIC_0000002696249697"></a><a name="ZH-CN_TOPIC_0000002696249697"></a>   <h1>动态加载</h1>   <div>    <p>动态import支持条件延迟加载，支持部分反射功能，可以提升页面的加载速度；动态import支持加载HSP模块/HAR模块/ohpm包/Native库等，并且HAR模块之间可通过变量动态import来访问彼此导出的内容，可避免编译期强依赖，实现模块解耦。</p>    <div class="section" id="技术适用场景介绍">     <a name="ZH-CN_TOPIC_0000002696249697__%E6%8A%80%E6%9C%AF%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D"></a><a name="%E6%8A%80%E6%9C%AF%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D"></a>     <h4>技术适用场景介绍</h4>     <p>应用开发的有些场景中，如果希望根据条件导入模块或者按需导入模块，可以使用动态import代替<a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/introduction-to-arkts#导入">静态import</a>。下面是可能会需要动态import的场景：</p>     <ul>      <li>当静态import的模块明显降低了代码的加载速度且很少被使用，或者并不需要马上使用它。</li>      <li>当静态import的模块明显占用了大量的系统内存且很少被使用。</li>      <li>当被导入的模块，在加载时并不存在，需要异步获取。</li>      <li>当需要动态构建模块说明符时，应使用动态import。静态import仅支持静态说明符。</li>      <li>当导入的模块存在副作用（即模块中包含直接运行的代码），这些副作用仅在满足特定条件时才需要。</li>     </ul>    </div>    <div class="section" id="业务扩展场景介绍">     <a name="ZH-CN_TOPIC_0000002696249697__%E4%B8%9A%E5%8A%A1%E6%89%A9%E5%B1%95%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D"></a><a name="%E4%B8%9A%E5%8A%A1%E6%89%A9%E5%B1%95%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D"></a>     <h4>业务扩展场景介绍</h4>     <p>动态import在业务上除了能实现条件延迟加载，还可以实现部分反射功能。实例如下，HAP动态import HAR包harlibrary，并调用类Calc的静态成员函数staticAdd()、成员函数instanceAdd()，以及全局方法addHarLibrary()。</p>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/harlibrary/src/main/ets/utils/Calc.ets#L16-L37">// harlibrary's src/main/ets/utils/Calc.ets
+export class Calc {
+  public static staticAdd(a: number, b: number): number {
+    let c = a + b;
+    console.info('DynamicImport I am harlibrary in staticAdd, %d + %d = %d', a, b, c);
+    return c;
+  }
+
+  public instanceAdd(a: number, b: number): number {
+    let c = a + b;
+    console.info('DynamicImport I am harlibrary in instanceAdd, %d + %d = %d', a, b, c);
+    return c;
+  }
+}
+
+export function addHarLibrary(a: number, b: number): number {
+  let c = a + b;
+  console.info('DynamicImport I am harlibrary in addHarLibrary, %d + %d = %d', a, b, c);
+  return c;
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/harlibrary/Index.ets#L18-L21">// harlibrary's Index.ets
+export { Calc, addHarLibrary } from './src/main/ets/utils/Calc'</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L23-L70">// HAP's oh-package.json5
+"dependencies": {
+  "harlibrary": "file:../harlibrary",
+  // ...
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L85-L103">// HAP's src/main/ets/pages/Index.ets
+import('harlibrary').then((ns: ESObject) =&gt; {
+  ns.Calc.staticAdd(8, 9); // 调用静态成员函数staticAdd()
+  let calc: ESObject = new ns.Calc(); // 实例化类Calc
+  calc.instanceAdd(10, 11); // 调用成员函数instanceAdd()
+  ns.addHarLibrary(6, 7); // 调用全局方法addHarLibrary()
+
+  // 使用类、成员函数和方法的字符串名字进行反射调用
+  let className = 'Calc';
+  let methodName = 'instanceAdd';
+  let staticMethod = 'staticAdd';
+  let functionName = 'addHarLibrary';
+  ns[className][staticMethod](12, 13); // 调用静态成员函数staticAdd()
+  let calc1: ESObject = new ns[className](); // 实例化类Calc
+  calc1[methodName](14, 15); // 调用成员函数instanceAdd()
+  ns[functionName](16, 17); // 调用全局方法addHarLibrary()
+})</pre>    </div>    <div class="section" id="动态import实现方案介绍">     <a name="ZH-CN_TOPIC_0000002696249697__%E5%8A%A8%E6%80%81import%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%A1%88%E4%BB%8B%E7%BB%8D"></a><a name="%E5%8A%A8%E6%80%81import%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%A1%88%E4%BB%8B%E7%BB%8D"></a>     <h4>动态import实现方案介绍</h4>     <p>动态import根据入参是常量或变量，分为动态import常量表达式和动态import变量表达式两大特性规格。</p>     <p>以下是动态import支持的规格列表：</p>     <div class="tablenoborder">      <table class="docs-auto">       <thead>        <tr>         <th align="left" class="cellrowborder" id="mcps1.3.4.4.1.4.1.1" valign="top" width="33.33333333333333%">动态import场景</th>         <th align="left" class="cellrowborder" id="mcps1.3.4.4.1.4.1.2" valign="top" width="33.33333333333333%">动态import详细分类</th>         <th align="left" class="cellrowborder" id="mcps1.3.4.4.1.4.1.3" valign="top" width="33.33333333333333%">说明</th>        </tr>       </thead>               <tbody><tr>         <td class="cellrowborder" valign="top" width="33.33333333333333%">本地工程模块</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">动态import模块内文件路径</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">要求路径以./或../开头。</td>        </tr>        <tr>         <td class="cellrowborder" valign="top" width="33.33333333333333%">本地工程模块</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">动态import HSP模块名</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">-</td>        </tr>        <tr>         <td class="cellrowborder" valign="top" width="33.33333333333333%">本地工程模块</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">动态import HSP模块文件路径</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">-</td>        </tr>        <tr>         <td class="cellrowborder" valign="top" width="33.33333333333333%">本地工程模块</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">动态import HAR模块名</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">-</td>        </tr>        <tr>         <td class="cellrowborder" valign="top" width="33.33333333333333%">本地工程模块</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">动态import HAR模块文件路径</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">-</td>        </tr>        <tr>         <td class="cellrowborder" valign="top" width="33.33333333333333%">远程包</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">动态import远程HAR模块名</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">-</td>        </tr>        <tr>         <td class="cellrowborder" valign="top" width="33.33333333333333%">远程包</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">动态import ohpm包名</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">-</td>        </tr>        <tr>         <td class="cellrowborder" valign="top" width="33.33333333333333%">API</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">动态import @system.*</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">-</td>        </tr>        <tr>         <td class="cellrowborder" valign="top" width="33.33333333333333%">API</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">动态import @ohos.*</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">-</td>        </tr>        <tr>         <td class="cellrowborder" valign="top" width="33.33333333333333%">API</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">动态import @arkui-x.*</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">-</td>        </tr>        <tr>         <td class="cellrowborder" valign="top" width="33.33333333333333%">模块Native库</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">动态import libNativeLibrary.so</td>         <td class="cellrowborder" valign="top" width="33.33333333333333%">-</td>        </tr>             </tbody></table>     </div>     <div class="note">      <img originheight="38" originwidth="102" src="https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/ea/v3/peVBTz8ETjabpGbSBKAdFQ/note_3.0-zh-cn.png?HW-CC-KV=V1&amp;HW-CC-Date=20260907T063407Z&amp;HW-CC-Expire=86400&amp;HW-CC-Sign=69332EC2A6467B43B708424D7D5313708A8DA9C3EDFAFE5136F71092B89DB09D"><span class="notetitle"> </span>      <div class="notebody">       <p>1.当前所有import中使用的模块名都是依赖方oh-package.json5文件中dependencies项的别名。</p>       <p>2.本地模块在依赖方的dependencies中配置的别名建议与moduleName以及packageName三者一致。moduleName指的是被依赖的HSP/HAR的module.json5中配置的名字，packageName指的是被依赖的HSP/HAR的oh-package.json5中配置的名字。</p>       <p>3.import一个模块名，实际的行为是import该模块的入口文件，一般为Index.ets/ts。</p>      </div>     </div>    </div>    <div class="section" id="动态import实现中的关键点">     <a name="ZH-CN_TOPIC_0000002696249697__%E5%8A%A8%E6%80%81import%E5%AE%9E%E7%8E%B0%E4%B8%AD%E7%9A%84%E5%85%B3%E9%94%AE%E7%82%B9"></a><a name="%E5%8A%A8%E6%80%81import%E5%AE%9E%E7%8E%B0%E4%B8%AD%E7%9A%84%E5%85%B3%E9%94%AE%E7%82%B9"></a>     <h4>动态import实现中的关键点</h4>    </div>    <div class="section" id="动态import常量表达式">     <a name="ZH-CN_TOPIC_0000002696249697__%E5%8A%A8%E6%80%81import%E5%B8%B8%E9%87%8F%E8%A1%A8%E8%BE%BE%E5%BC%8F"></a><a name="%E5%8A%A8%E6%80%81import%E5%B8%B8%E9%87%8F%E8%A1%A8%E8%BE%BE%E5%BC%8F"></a>     <h4>[h2]动态import常量表达式</h4>     <p>动态import常量表达式是指动态import的入参为常量的场景。下面以HAP引用其他模块的API的示例来说明典型用法。</p>     <p>本文示例代码中的路径，如Index.ets，是根据当前DevEco Studio的模块配置设置的。如果后续有变化，请调整文件的位置和相对路径。</p>     <ul>      <li><strong>HAP常量动态import HAR模块名</strong></li>     </ul>     <pre class="TypeScript">// HAR's Index.ets
+export function add(a: number, b: number): number {
+  let c = a + b;
+  console.info('DynamicImport I am a HAR, %d + %d = %d', a, b, c);
+  return c;
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L106-L111">// HAP's src/main/ets/pages/Index.ets
+import('myhar').then((ns: ESObject) =&gt; {
+  console.info('DynamicImport ns.add(3, 5) = %d', ns.add(3, 5));
+})</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L18-L24">// 可使用 await 处理动态import (必须在 async 函数内使用)
+async function asyncDynamicImport() {
+  let ns = await import('myhar');
+  console.info('DynamicImport ns.add(3, 5) = %d', ns.add(3, 5));
+}</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L24-L71">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "myhar": "file:../myHar",
+  // ...
+}</pre>     <ul>      <li><strong>HAP常量动态import HAR模块文件路径</strong></li>     </ul>     <pre class="TypeScript">// HAR's Index.ets
+export function add(a: number, b: number): number {
+  let c = a + b;
+  console.info('DynamicImport I am a HAR, %d + %d = %d', a, b, c);
+  return c;
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L114-L119">// HAP's src/main/ets/pages/Index.ets
+import('myhar/Index').then((ns: ESObject) =&gt; {
+  console.info('DynamicImport ns.add(3, 5) = %d', ns.add(3, 5));
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L24-L71">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "myhar": "file:../myHar",
+  // ...
+}</pre>     <ul>      <li><strong>HAP常量动态import HSP模块名</strong></li>     </ul>     <pre class="TypeScript">// HSP's Index.ets
+export function add(a: number, b: number): number {
+  let c = a + b;
+  console.info('DynamicImport I am a HSP, %d + %d = %d', a, b, c);
+  return c;
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L122-L127">// HAP's src/main/ets/pages/Index.ets
+import('myhsp').then((ns: ESObject) =&gt; {
+  console.info('DynamicImport ns.add(3, 5) = %d', ns.add(3, 5));
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L25-L72">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "myhsp": "file:../myHsp",
+  // ...
+}</pre>     <ul>      <li><strong>HAP常量动态import HSP模块名文件路径</strong></li>     </ul>     <pre class="TypeScript">// HSP's Index.ets
+export function add(a: number, b: number): number {
+  let c = a + b;
+  console.info('DynamicImport I am a HSP, %d + %d = %d', a, b, c);
+  return c;
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L130-L135">// HAP's src/main/ets/pages/Index.ets
+import('myhsp/Index').then((ns: ESObject) =&gt; {
+  console.info('DynamicImport ns.add(3, 5) = %d', ns.add(3, 5));
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L25-L72">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "myhsp": "file:../myHsp",
+  // ...
+}</pre>     <ul>      <li><strong>HAP常量动态import远程HAR模块名</strong></li>     </ul>     <pre class="TypeScript">// HAP's src/main/ets/pages/Index.ets
+import('@ohos/crypto-js').then((ns: ESObject) =&gt; {
+  console.info('DynamicImport @ohos/crypto-js: ' + ns.CryptoJS.src);
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L26-L73">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "@ohos/crypto-js": "2.0.3-rc.0",
+  // ...
+}</pre>     <ul>      <li><strong>HAP常量动态import ohpm包</strong></li>     </ul>     <pre class="TypeScript">// HAP's src/main/ets/pages/Index.ets
+import('@ohos/hypium').then((ns: ESObject) =&gt; {
+  console.info('DynamicImport @ohos/hypium: ', ns.TestType.FUNCTION.toString());
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L27-L74">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "@ohos/hypium": "1.0.19",
+  // ...
+}</pre>     <ul>      <li><strong>HAP常量动态import自己的单文件</strong></li>     </ul>     <pre class="TypeScript">// HAP's src/main/ets/Calc.ets
+export function add(a: number, b: number): number {
+  let c = a + b;
+  console.info('DynamicImport I am a HAP, %d + %d = %d', a, b, c);
+  return c;
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L154-L159">// HAP's src/main/ets/pages/Index.ets
+import('../Calc').then((ns: ESObject) =&gt; {
+  console.info('DynamicImport ns.add(3, 5) = %d', ns.add(3, 5));
+})</pre>     <ul>      <li><strong>HAP常量动态import自己的Native库</strong></li>     </ul>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/cpp/types/libentry/index.d.ts#L16-L19">// libentry.so's index.d.ts
+export const add: (a: number, b: number) =&gt; number;</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L162-L167">// HAP's src/main/ets/pages/Index.ets
+import('libentry.so').then((ns: ESObject) =&gt; {
+  console.info('DynamicImport libentry.so: ' + ns.default.add(2, 3));
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L28-L75">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "libentry.so": "file:./src/main/cpp/types/libentry",
+  // ...
+}</pre>     <ul>      <li><strong>HAP常量动态import加载API</strong></li>     </ul>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L170-L197">// HAP's src/main/ets/pages/Index.ets
+import('@system.app').then((ns: ESObject) =&gt; {
+  ns.default.getInfo();
+});
+// ...
+import('@ohos.curves').then((ns: ESObject) =&gt; {
+  ns.default.springMotion(0.555, 0.75, 0.001).interpolate(1);
+});
+// ...
+import('@ohos.matrix4').then((ns: ESObject) =&gt; {
+  ns.default.identity().transformPoint([1, 2])[0];
+});
+// ...
+import('@ohos.hilog').then((ns: ESObject) =&gt; {
+  ns.default.info(0x0000, 'testTag', '%{public}s', 'DynamicImport @ohos.hilog.');
+  hilog.info(0x000, 'testTag', '%{public}d', ns.default.LogLevel.DEBUG);
+});</pre>    </div>    <div class="section" id="动态import变量表达式">     <a name="ZH-CN_TOPIC_0000002696249697__%E5%8A%A8%E6%80%81import%E5%8F%98%E9%87%8F%E8%A1%A8%E8%BE%BE%E5%BC%8F"></a><a name="%E5%8A%A8%E6%80%81import%E5%8F%98%E9%87%8F%E8%A1%A8%E8%BE%BE%E5%BC%8F"></a>     <h4>[h2]动态import变量表达式</h4>     <p>DevEco Studio中模块间的依赖关系通过oh-package.json5中的dependencies字段进行配置。dependencies列表中所有的模块默认都会进行安装（本地模块）或下载（远程模块），但是不会默认参与编译。HAP/HSP编译时会以入口文件（一般为Index.ets/Index.ts）开始搜索依赖关系，搜索到的模块或文件才会加入编译。</p>     <p>在编译期，静态import和常量动态import可以被打包工具rollup及其插件识别解析，加入依赖树中，参与编译流程，最终生成方舟字节码。但是，如果是变量动态import，该变量值可能需要进行运算或外部传入才能得到，在编译态无法解析其内容，也就无法加入编译。为了将这部分模块/文件加入编译，还需要额外增加一个runtimeOnly的buildOption配置，用于指定动态import的变量实际的模块名或文件路径。</p>     <p><strong>1. runtimeOnly字段schema配置格式</strong></p>     <p>在HAP/HSP/HAR的build-profile.json5中的buildOption中增加runtimeOnly配置项，仅在通过变量动态import时配置，静态import和常量动态import无需配置；并且，通过变量动态import加载API时也无需配置runtimeOnly。如下实例说明如何配置通过变量动态import其他模块，以及变量动态import本模块自己的单文件：</p>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L199-L215">// HAP's src/main/ets/pages/Index.ets
+// 变量动态import其他模块myHar
+let harName = 'myhar';
+import(harName).then((ns: ESObject) =&gt; {
+  console.info('DynamicImport ns.add(3, 5) = %d', ns.add(3, 5));
+});
+// ...
+
+// 变量动态import本模块自己的单文件
+let filePath = '../utils/Calc';
+import(filePath).then((ns: ESObject) =&gt; {
+  console.info('DynamicImport ns.add(3, 5) = %d', ns.add(3, 5));
+});</pre>     <p>对应的runtimeOnly配置：</p>     <pre class="json">"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      "packages": [ "myhar" ],
+      "sources": [ "./src/main/ets/utils/Calc.ets" ]
+    }
+  }
+}</pre>     <p>"runtimeOnly"的"packages"：用于配置本模块变量动态import其他模块名，要求与dependencies中配置的名字一致。</p>     <p>"runtimeOnly"的"sources"：用于配置本模块变量动态import自己的文件路径，路径相对于当前build-profile.json5文件。</p>     <p><strong>2. 使用实例</strong></p>     <ul>      <li><strong>HAP变量动态import HAR模块名</strong></li>     </ul>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/myHar/Index.ets#L18-L25">// HAR's Index.ets
+export function add(a: number, b: number): number {
+  let c = a + b;
+  console.info('DynamicImport I am a HAR, %d + %d = %d', a, b, c);
+  return c;
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L218-L224">// HAP's src/main/ets/pages/Index.ets
+let harPackageName = 'myhar';
+import(harPackageName).then((ns: ESObject) =&gt; {
+  console.info('DynamicImport ns.add(3, 5) = %d', ns.add(3, 5));
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L24-L71">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "myhar": "file:../myHar",
+  // ...
+}</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/build-profile.json5#L19-L115">// HAP's build-profile.json5
+"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      "packages": [
+        "myhar",
+        // 仅用于使用变量动态import其他模块名场景，静态import或常量动态import无需配置。
+        // ...
+      ],
+      // ...
+    }
+  },
+  // ...
+},</pre>     <ul>      <li><strong>HAP变量动态import HSP模块名</strong></li>     </ul>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/myHsp/Index.ets#L16-L23">// HSP's Index.ets
+export function add(a: number, b: number): number {
+  let c = a + b;
+  console.info('DynamicImport I am a HSP, %d + %d = %d', a, b, c);
+  return c;
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L227-L233">// HAP's src/main/ets/pages/Index.ets
+let hspPackageName = 'myhsp';
+import(hspPackageName).then((ns: ESObject) =&gt; {
+  console.info('DynamicImport ns.add(3, 5) = %d', ns.add(3, 5));
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L25-L72">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "myhsp": "file:../myHsp",
+  // ...
+}</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/build-profile.json5#L20-L116">// HAP's build-profile.json5
+"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      "packages": [
+        // ...
+        "myhsp",
+        // 仅用于使用变量动态import其他模块名场景，静态import或常量动态import无需配置。
+        // ...
+      ],
+      // ...
+    }
+  },
+  // ...
+},</pre>     <ul>      <li><strong>HAP变量动态import远程HAR模块名</strong></li>     </ul>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L236-L242">// HAP's src/main/ets/pages/Index.ets
+let remoteHarPackageName = '@ohos/crypto-js';
+import(remoteHarPackageName).then((ns: ESObject) =&gt; {
+  console.info('DynamicImport @ohos/crypto-js: ' + ns.CryptoJS.src);
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L26-L73">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "@ohos/crypto-js": "2.0.3-rc.0",
+  // ...
+}</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/build-profile.json5#L22-L117">// HAP's build-profile.json5
+"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      "packages": [
+        // ...
+        "@ohos/crypto-js",
+        // ...
+      ],
+      // ...
+    }
+  },
+  // ...
+},</pre>     <ul>      <li><strong>HAP变量动态import ohpm包</strong></li>     </ul>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L245-L251">// HAP's src/main/ets/pages/Index.ets
+let ohpmPackageName = '@ohos/hypium';
+import(ohpmPackageName).then((ns: ESObject) =&gt; {
+  console.info('DynamicImport @ohos/hypium: ', ns.TestType.FUNCTION.toString());
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L27-L74">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "@ohos/hypium": "1.0.19",
+  // ...
+}</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/build-profile.json5#L21-L118">// HAP's build-profile.json5
+"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      "packages": [
+        // ...
+        "@ohos/hypium",
+        // ...
+      ],
+      // ...
+    }
+  },
+  // ...
+},</pre>     <ul>      <li><strong>HAP变量动态import自己的单文件</strong></li>     </ul>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/Calc.ets#L16-L23">// HAP's src/main/ets/Calc.ets
+export function add(a: number, b: number): number {
+  let c = a + b;
+  console.info('DynamicImport I am a HAP, %d + %d = %d', a, b, c);
+  return c;
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L254-L260">// HAP's src/main/ets/pages/Index.ets
+let calcFilePath = '../Calc';
+import(calcFilePath).then((ns: ESObject) =&gt; {
+  console.info('DynamicImport ns.add(3, 5) = %d', ns.add(3, 5));
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/build-profile.json5#L25-L119">// HAP's build-profile.json5
+"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      // ...
+      "sources": [
+        // ...
+        "./src/main/ets/Calc.ets"
+      ]
+    }
+  },
+  // ...
+},</pre>     <ul>      <li><strong>HAP变量动态import自己的Native库</strong></li>     </ul>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/cpp/types/libentry/index.d.ts#L16-L19">// libentry.so's index.d.ts
+export const add: (a: number, b: number) =&gt; number;</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L263-L269">// HAP's src/main/ets/pages/Index.ets
+let soName = 'libentry.so';
+import(soName).then((ns: ESObject) =&gt; {
+  console.info('DynamicImport libentry.so: ' + ns.default.add(2, 3));
+});</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L28-L75">// HAP's oh-package.json5
+"dependencies": {
+  // ...
+  "libentry.so": "file:./src/main/cpp/types/libentry",
+  // ...
+}</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/build-profile.json5#L23-L120">// HAP's build-profile.json5
+"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      "packages": [
+        // ...
+        "libentry.so",
+        // ...
+      ],
+      // ...
+    }
+  },
+  // ...
+},</pre>     <ul>      <li><strong>HAP变量动态import加载API</strong></li>     </ul>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L272-L302">// HAP's src/main/ets/pages/Index.ets
+let packageName = '@system.app';
+import(packageName).then((ns: ESObject) =&gt; {
+  ns.default.getInfo();
+});
+// ...
+let packageName = '@ohos.curves';
+import(packageName).then((ns: ESObject) =&gt; {
+  ns.default.springMotion(0.555, 0.75, 0.001).interpolate(1);
+});
+// ...
+let packageName = '@ohos.matrix4';
+import(packageName).then((ns: ESObject) =&gt; {
+  ns.default.identity().transformPoint([1, 2])[0];
+});
+// ...
+let packageName = '@ohos.hilog';
+import(packageName).then((ns: ESObject) =&gt; {
+  ns.default.info(0x0000, 'testTag', '%{public}s', 'DynamicImport @ohos.hilog.');
+})</pre>     <p>通过变量动态import加载API时无需配置runtimeOnly。</p>    </div>    <div class="section" id="har模块间动态import依赖解耦">     <a name="ZH-CN_TOPIC_0000002696249697__har%E6%A8%A1%E5%9D%97%E9%97%B4%E5%8A%A8%E6%80%81import%E4%BE%9D%E8%B5%96%E8%A7%A3%E8%80%A6"></a><a name="har%E6%A8%A1%E5%9D%97%E9%97%B4%E5%8A%A8%E6%80%81import%E4%BE%9D%E8%B5%96%E8%A7%A3%E8%80%A6"></a>     <h4>[h2]HAR模块间动态import依赖解耦</h4>     <p>当应用包含多个HAR包，HAR包之间的依赖关系比较复杂。在DevEco Studio中配置依赖关系时，可能会形成循环依赖。这时，如果HAR之间的依赖关系中仅有变量动态import，可以将HAR包之间直接依赖关系转移到HAP/HSP中配置，HAR包之间无需配置依赖关系，从而达到HAR包间依赖解耦的目的。如下示意图：</p>     <p><span><img originheight="173" originwidth="568" src="https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/45/v3/L1djBNEKSe2u4twrlWPPTA/zh-cn_image_0000002742122241.png?HW-CC-KV=V1&amp;HW-CC-Date=20260907T063407Z&amp;HW-CC-Expire=86400&amp;HW-CC-Sign=113145617D86E52265E920CD08DB6F0EF8824225879171D5E49A2CC7AF1388D9"></span></p>     <p>HAR之间的依赖关系转移至HAP/HSP后：</p>     <p><span><img originheight="283" originwidth="374" src="https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/4f/v3/U62nc3HgTmiwH0edq4uv6g/zh-cn_image_0000002712243326.png?HW-CC-KV=V1&amp;HW-CC-Date=20260907T063407Z&amp;HW-CC-Expire=86400&amp;HW-CC-Sign=2306D2BF06A1DEE07FF93B0102502432CC07DB80BBF354FB2DB317D0765C529B"></span></p>     <p><strong>使用限制</strong></p>     <ul>      <li>仅限在本地源码HAR包之间存在循环依赖时，使用该规避方案。</li>      <li>被转移依赖的HAR之间只能通过变量动态import，不能有静态import或常量动态import。</li>      <li>转移依赖时，需同时转移<strong>dependencies</strong>和<strong>runtimeOnly</strong>依赖配置。</li>      <li>HSP不支持转移依赖。即：HAP-&gt;HSP1-&gt;HSP2-&gt;HSP3，这里的HSP2和HSP3不能转移到HAP上面。</li>      <li>转移依赖的整个链路上只能有HAR包，不能跨越HSP转移。即：HAP-&gt;HAR1-&gt;HAR2-&gt;HSP-&gt;HAR3-&gt;HAR4，HAR1对HAR2的依赖可以转移到HAP上，HAR3对HAR4的依赖可以转移到HSP上。但是，不能将HAR3或HAR4转移到HAP上。</li>      <li>如果引用了其他工程模块、远程包或集成HSP，需确保在<a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-hvigor-build-profile-app" target="_blank">工程级build-profile.json5文件</a>中的<strong>useNormalizedOHMUrl</strong>配置一致，同时设置为true或false，否则可能导致运行错误：<strong>Cannot find dynamic-import module library</strong>。</li>     </ul>     <p><strong>使用实例</strong></p>     <p>下面的实例通过在单向依赖HAP-&gt;HAR1-&gt;HAR2-&gt;HAR3之上增加依赖HAR2-&gt;HAR1、HAR3-&gt;HAR1，形成了循环依赖。</p>     <p><span><img originheight="173" originwidth="568" src="https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/a1/v3/SruwdAdEQTKyffdqXJddOA/zh-cn_image_0000002742122241.png?HW-CC-KV=V1&amp;HW-CC-Date=20260907T063407Z&amp;HW-CC-Expire=86400&amp;HW-CC-Sign=183E1D76C4B66A114DB79C50768B7CDC1069A0D58EAA6C90E5AC0C96CC536834"></span></p>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/src/main/ets/pages/Index.ets#L304-L310">// HAP's src/main/ets/pages/Index.ets
+let harName = 'har1'
+import(harName).then((ns: ESObject) =&gt; {
+  console.info('[DynamicImport] hap -&gt; har1, 0 + 1 = ' + ns.ClassHar1.add(0, 1));
+})</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har1/src/main/ets/utils/Calc.ets#L16-L36">// HAR1's src/main/ets/utils/Calc.ets
+export class ClassHar1 {
+  public static isImportedHar2: boolean = false;
+
+  static add(a: number, b: number): number {
+    const c = a + b;
+    console.info('[DynamicImport] ClassHar1.add(), %d + %d = %d', a, b, c);
+
+    if (!ClassHar1.isImportedHar2) {
+      const harName = 'har2';
+      import(harName).then((ns: ESObject) =&gt; {
+        ClassHar1.isImportedHar2 = true;
+        console.info('[DynamicImport] har1 -&gt; har2, 1 + 2 = ' + ns.ClassHar2.add(1, 2));
+      })
+    }
+
+    return c;
+  }
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har1/Index.ets#L18-L21">// HAR1's Index.ets
+export { ClassHar1 } from './src/main/ets/utils/Calc';</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har2/src/main/ets/utils/Calc.ets#L16-L45">// HAR2's src/main/ets/utils/Calc.ets
+export class ClassHar2 {
+  public static isImportedHar1: boolean = false;
+  public static isImportedHar3: boolean = false;
+
+  static add(a: number, b: number): number {
+    const c = a + b;
+    console.info('[DynamicImport] ClassHar2.add(), %d + %d = %d', a, b, c);
+
+    if (!ClassHar2.isImportedHar1) {
+      const harName = 'har1';
+      import(harName).then((ns: ESObject) =&gt; {
+        ClassHar2.isImportedHar1 = true;
+        console.info('[DynamicImport] har2 -&gt; har1, 2 + 1 = ' + ns.ClassHar1.add(2, 1));
+      })
+    }
+
+    if (!ClassHar2.isImportedHar3) {
+      const harName = 'har3';
+      import(harName).then((ns: ESObject) =&gt; {
+        ClassHar2.isImportedHar3 = true;
+        console.info('[DynamicImport] har2 -&gt; har3, 2 + 3 = ' + ns.ClassHar3.add(2, 3));
+      })
+    }
+
+    return c;
+  }
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har2/Index.ets#L18-L21">// HAR2's Index.ets
+export { ClassHar2 } from './src/main/ets/utils/Calc';</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har3/src/main/ets/utils/Calc.ets#L16-L36">// HAR3's src/main/ets/utils/Calc.ets
+export class ClassHar3 {
+  public static isImportedHar1: boolean = false;
+
+  static add(a: number, b: number): number {
+    const c = a + b;
+    console.info('[DynamicImport] ClassHar3.add(), %d + %d = %d', a, b, c);
+
+    if (!ClassHar3.isImportedHar1) {
+      const harName = 'har1';
+      import(harName).then((ns: ESObject) =&gt; {
+        ClassHar3.isImportedHar1 = true;
+        console.info('[DynamicImport] har3 -&gt; har1, 3 + 1 = ' + ns.ClassHar1.add(3, 1));
+      })
+    }
+
+    return c;
+  }
+}</pre>     <pre class="TypeScript" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har3/Index.ets#L18-L21">// HAR3's Index.ets
+export { ClassHar3 } from './src/main/ets/utils/Calc';</pre>     <p>若未对HAR之间的<strong>dependencies</strong>和<strong>runtimeOnly</strong>配置进行依赖解耦，ohpm无法解决循环依赖，依赖安装失败。</p>     <pre class="text">// HAP's oh-package.json5
+"dependencies": {
+  "har1": "file:../har1"
+}
+// HAP's build-profile.json5
+"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      "packages": [
+        "har1"
+      ]
+    }
+  }
+}
+
+// HAR1's oh-package.json5
+"dependencies": {
+  "har2": "file:../har2"
+}
+// HAR1's build-profile.json5
+"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      "packages": [
+        "har2"
+      ]
+    }
+  }
+}
+
+// HAR2's oh-package.json5
+"dependencies": {
+  "har1": "file:../har1",
+  "har3": "file:../har3"
+}
+// HAR2's build-profile.json5
+"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      "packages": [
+        "har1",
+        "har3"
+      ]
+    }
+  }
+}
+
+// HAR3's oh-package.json5
+"dependencies": {
+  "har1": "file:../har1"
+}
+// HAR3's build-profile.json5
+"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      "packages": [
+        "har1"
+      ]
+    }
+  }
+}</pre>     <p><strong>对应的报错信息如下：</strong></p>     <pre class="text">ohpm ERROR: Run install command failed
+Error: 00618005 Invalid Dependency
+Error Message: Invalid dependency har2@~\Coupled\har2 -&gt; har2@1.0.0.
+
+Try the following:
+The name of an indirect dependency cannot be the same as the module name.</pre>     <p>将HAR之间的<strong>dependencies</strong>和<strong>runtimeOnly</strong>配置转移到HAP中，解耦了包间循环依赖，程序能够正确运行。</p>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/oh-package.json5#L57-L62">// HAP's oh-package.json5
+"har1": "file:../har1",
+"har2": "file:../har2",
+"har3": "file:../har3"</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/entry/build-profile.json5#L24-L121">// HAP's build-profile.json5
+"buildOption": {
+  "arkOptions": {
+    "runtimeOnly": {
+      "packages": [
+        // ...
+        "har1",
+        "har2",
+        "har3"
+      ],
+      // ...
+    }
+  },
+  // ...
+},</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har1/oh-package.json5#L23-L26">// HAR1's oh-package.json5
+"dependencies": {}</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har1/build-profile.json5#L18-L22">// HAR1's build-profile.json5
+"buildOption": {
+},</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har2/oh-package.json5#L23-L26">// HAR2's oh-package.json5
+"dependencies": {}</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har2/build-profile.json5#L18-L22">// HAR2's build-profile.json5
+"buildOption": {
+},</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har3/oh-package.json5#L23-L26">// HAR3's oh-package.json5
+"dependencies": {}</pre>     <pre class="JSON5" codehub="https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/HarmonyOS-7.0-Release-20260722/ArkTS/ArkTSRuntime/ArkTSModule/DynamicImport/har3/build-profile.json5#L18-L22">// HAR3's build-profile.json5
+"buildOption": {
+},</pre>     <p><strong>对应的运行日志如下：</strong></p>     <pre class="text">[DynamicImport] ClassHar1.add(), 0 + 1 = 1
+[DynamicImport] hap -&gt; har1, 0 + 1 = 1
+[DynamicImport] ClassHar2.add(), 1 + 2 = 3
+[DynamicImport] har1 -&gt; har2, 1 + 2 = 3
+[DynamicImport] ClassHar1.add(), 2 + 1 = 3
+[DynamicImport] har2 -&gt; har1, 2 + 1 = 3
+[DynamicImport] ClassHar3.add(), 2 + 3 = 5
+[DynamicImport] har2 -&gt; har3, 2 + 3 = 5
+[DynamicImport] ClassHar1.add(), 3 + 1 = 4
+[DynamicImport] har3 -&gt; har1, 3 + 1 = 4</pre>    </div>   </div>   <div></div></body></html>
