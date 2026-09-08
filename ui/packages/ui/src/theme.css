@@ -97,8 +97,6 @@
   --yo-header-bar-h: 32px;
   --yo-caption-btn-w: 46px;
   --yo-chrome-btn-w: 40px;
-  --yo-hero-input-w: 680px;
-  --yo-hero-input-h: 48px;
 
   --yo-win-caption-hover: rgba(0, 0, 0, 0.0578);
   --yo-win-caption-pressed: rgba(0, 0, 0, 0.0419);
@@ -200,17 +198,6 @@ body {
   line-height: 1.5;
   user-select: none;
   overflow: hidden;
-}
-
-@keyframes yo-hero-appear {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @keyframes yo-rotate {
@@ -548,40 +535,6 @@ body {
   box-shadow: var(--yo-shadow-xs);
 }
 
-.yo-omnibox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  height: 28px;
-  background: var(--yo-bg-input);
-  border: 1px solid var(--yo-line);
-  border-radius: var(--yo-radius-sm);
-  padding: 0 6px 0 10px;
-  transition: border-color var(--yo-transition-fast), box-shadow var(--yo-transition-fast);
-}
-
-.yo-omnibox:focus-within {
-  border-color: var(--yo-accent);
-  background: var(--yo-bg-card);
-  box-shadow: 0 0 0 2px var(--yo-accent-glow);
-}
-
-.yo-omnibox__input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: var(--yo-font-sm);
-  color: var(--yo-text);
-  font-family: inherit;
-}
-
-.yo-omnibox__input::placeholder {
-  color: var(--yo-text-placeholder);
-}
-
 .yo-titlebar {
   display: flex;
   align-items: stretch;
@@ -600,27 +553,19 @@ body {
 .yo-titlebar__leading {
   display: flex;
   align-items: stretch;
-  flex-shrink: 0;
-  padding-inline-start: 4px;
-}
-
-.yo-titlebar__center {
   flex: 1;
   min-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 var(--yo-space-sm);
+  justify-content: flex-start;
+  padding-inline-start: 12px;
+  gap: 2px;
 }
 
-.yo-titlebar__center-slot {
-  width: 100%;
-  max-width: 720px;
-  height: 28px;
+.yo-titlebar__title-slot {
   display: flex;
   align-items: center;
-  -webkit-app-region: no-drag;
-  app-region: no-drag;
+  justify-content: flex-start;
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .yo-titlebar__trailing {
@@ -639,14 +584,33 @@ body {
   padding-inline-end: 2px;
 }
 
-.yo-titlebar__title {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 var(--yo-space-sm);
+.yo-titlebar__home {
+  display: block;
+  min-width: 0;
+  padding: 0 var(--yo-space-sm) 0 0;
   font-size: var(--yo-font-base);
   font-weight: 700;
   letter-spacing: -0.2px;
   color: var(--yo-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yo-titlebar__home {
+  height: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: start;
+  cursor: pointer;
+  outline: none;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.yo-titlebar__home:hover {
+  color: var(--yo-accent);
 }
 
 .yo-chrome-btn {
@@ -680,21 +644,6 @@ body {
 .yo-chrome-btn.is-on {
   color: var(--yo-accent);
   background-color: var(--yo-accent-weak);
-}
-
-.yo-chrome-brand {
-  width: auto;
-  padding: 0 var(--yo-space-sm);
-  font-size: var(--yo-font-base);
-  font-weight: 700;
-  letter-spacing: -0.2px;
-  color: var(--yo-text);
-}
-
-.yo-omnibox__go {
-  width: 28px;
-  height: 24px;
-  border-radius: var(--yo-radius-xs);
 }
 
 .yo-win-caption {
