@@ -10,6 +10,7 @@
     "withGlobalTauri": false,
     "windows": [
       {
+        "label": "main",
         "title": "YoWebDocPreview",
         "width": 1280,
         "height": 840,
