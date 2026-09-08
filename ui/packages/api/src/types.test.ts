@@ -3,6 +3,7 @@
 import { describe, expect, it } from "vitest";
 
 import { EVENT_NAMES } from "./events";
+import { DISPLAY_NAME, PRODUCT_NAME } from "./identity";
 import type { AppSettings, DocMeta } from "./types";
 
 describe("EVENT_NAMES", () => {
@@ -11,6 +12,13 @@ describe("EVENT_NAMES", () => {
       expect(name).not.toContain(".");
       expect(name).toMatch(/^\w+\/\w+$/);
     }
+  });
+});
+
+describe("identity contract", () => {
+  it("mirrors protocol display name", () => {
+    expect(DISPLAY_NAME).toBe("YoDocPreview");
+    expect(PRODUCT_NAME).toBe("YoDocPreview");
   });
 });
 

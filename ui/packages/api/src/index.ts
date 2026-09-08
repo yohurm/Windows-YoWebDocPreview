@@ -10,3 +10,4 @@ export * from "./commands";
 export * from "./error";
 export * from "./subscriptions";
 export * from "./window";
+export * from "./identity";
