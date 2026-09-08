@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "packages/ui/src",
+    "packages/api/src",
+    "packages/workbench/src",
+    "packages/modules/*/src",
+    "apps/shell/src",
+    "apps/shell/vite.config.ts",
+    "vitest.config.ts",
+    "test-setup.ts"
+  ]
+}

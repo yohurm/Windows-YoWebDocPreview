@@ -1,0 +1,911 @@
+/*
+ * YoUI 设计系统 v2 - 现代化桌面工作台设计风格
+ * 灵感参考：Linear / Raycast / VSCode / Tailwind UI
+ * 特性：
+ * 1. 深度精致的色阶系统与双模式（Light / Dark）
+ * 2. 细腻的圆角 (6px/10px/14px) 与阴影层级 (Elevation system)
+ * 3. 玻璃拟态 (Backdrop-blur) 与通透微边框 (1px border/border-subtle)
+ * 4. 丝滑的状态转换动画与现代高质感排版
+ */
+
+:root {
+  /* 品牌色与强调色 (Linear 风格的现代蓝紫色相) */
+  --yo-accent: #3b82f6;
+  --yo-accent-hover: #2563eb;
+  --yo-accent-active: #1d4ed8;
+  --yo-accent-weak: #eff6ff;
+  --yo-accent-border: #bfdbfe;
+  --yo-accent-text: #1d4ed8;
+  --yo-accent-glow: rgba(59, 130, 246, 0.25);
+
+  /* 背景色阶 (浅色系：纯净极简灰白) */
+  --yo-bg-app: #f8fafc;
+  --yo-bg-sidebar: #f1f5f9;
+  --yo-bg-card: #ffffff;
+  --yo-bg-card-hover: #f8fafc;
+  --yo-bg-subtle: #f1f5f9;
+  --yo-bg-hover: rgba(0, 0, 0, 0.04);
+  --yo-bg-active: rgba(0, 0, 0, 0.08);
+
+  /* 边框与分割线 */
+  --yo-line: #e2e8f0;
+  --yo-line-subtle: #f1f5f9;
+  --yo-line-strong: #cbd5e1;
+
+  /* 文字层级 */
+  --yo-text: #0f172a;
+  --yo-text-secondary: #475569;
+  --yo-text-muted: #64748b;
+  --yo-text-placeholder: #94a3b8;
+  --yo-text-inverse: #ffffff;
+
+  /* 状态功能色 */
+  --yo-ok: #10b981;
+  --yo-ok-weak: #ecfdf5;
+  --yo-ok-border: #a7f3d0;
+  --yo-ok-text: #047857;
+
+  --yo-warn: #f59e0b;
+  --yo-warn-weak: #fffbeb;
+  --yo-warn-border: #fde68a;
+  --yo-warn-text: #b45309;
+
+  --yo-danger: #ef4444;
+  --yo-danger-hover: #dc2626;
+  --yo-danger-weak: #fef2f2;
+  --yo-danger-border: #fecaca;
+  --yo-danger-text: #b91c1c;
+
+  --yo-info: #0ea5e9;
+  --yo-info-weak: #f0f9ff;
+  --yo-info-border: #bae6fd;
+  --yo-info-text: #0369a1;
+
+  /* 代码与语法块 */
+  --yo-code-bg: #f8fafc;
+  --yo-code-border: #e2e8f0;
+  --yo-code-inline-bg: #f1f5f9;
+
+  /* 圆角 */
+  --yo-radius-xs: 4px;
+  --yo-radius-sm: 6px;
+  --yo-radius: 10px;
+  --yo-radius-lg: 14px;
+  --yo-radius-full: 9999px;
+
+  /* 阴影与微立体感 */
+  --yo-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --yo-shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
+  --yo-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+  --yo-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+
+  /* 字体族 */
+  --yo-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --yo-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* 动效过渡 */
+  --yo-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --yo-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+  --yo-accent: #3b82f6;
+  --yo-accent-hover: #60a5fa;
+  --yo-accent-active: #2563eb;
+  --yo-accent-weak: rgba(59, 130, 246, 0.15);
+  --yo-accent-border: rgba(59, 130, 246, 0.3);
+  --yo-accent-text: #93c5fd;
+  --yo-accent-glow: rgba(59, 130, 246, 0.35);
+
+  --yo-bg-app: #090d16;
+  --yo-bg-sidebar: #0e131f;
+  --yo-bg-card: #131926;
+  --yo-bg-card-hover: #192233;
+  --yo-bg-subtle: #182030;
+  --yo-bg-hover: rgba(255, 255, 255, 0.05);
+  --yo-bg-active: rgba(255, 255, 255, 0.1);
+
+  --yo-line: #1e293b;
+  --yo-line-subtle: #172033;
+  --yo-line-strong: #334155;
+
+  --yo-text: #f8fafc;
+  --yo-text-secondary: #cbd5e1;
+  --yo-text-muted: #94a3b8;
+  --yo-text-placeholder: #64748b;
+  --yo-text-inverse: #090d16;
+
+  --yo-ok: #34d399;
+  --yo-ok-weak: rgba(16, 185, 129, 0.15);
+  --yo-ok-border: rgba(16, 185, 129, 0.3);
+  --yo-ok-text: #6ee7b7;
+
+  --yo-warn: #fbbf24;
+  --yo-warn-weak: rgba(245, 158, 11, 0.15);
+  --yo-warn-border: rgba(245, 158, 11, 0.3);
+  --yo-warn-text: #fcd34d;
+
+  --yo-danger: #f87171;
+  --yo-danger-hover: #ef4444;
+  --yo-danger-weak: rgba(239, 68, 68, 0.15);
+  --yo-danger-border: rgba(239, 68, 68, 0.3);
+  --yo-danger-text: #fca5a5;
+
+  --yo-info: #38bdf8;
+  --yo-info-weak: rgba(14, 165, 233, 0.15);
+  --yo-info-border: rgba(14, 165, 233, 0.3);
+  --yo-info-text: #7dd3fc;
+
+  --yo-code-bg: #0b0f19;
+  --yo-code-border: #1e293b;
+  --yo-code-inline-bg: #1e293b;
+
+  --yo-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --yo-shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --yo-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --yo-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--yo-font);
+  background: var(--yo-bg-app);
+  color: var(--yo-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  user-select: none;
+  overflow: hidden;
+}
+
+/* 优雅滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--yo-line);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--yo-line-strong);
+}
+
+/* ── 按钮 Button ── */
+.yo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.25;
+  border-radius: var(--yo-radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: var(--yo-accent);
+  color: #ffffff;
+  transition: all var(--yo-transition-fast);
+  box-shadow: var(--yo-shadow-xs);
+  outline: none;
+  white-space: nowrap;
+}
+
+.yo-btn:hover:not(:disabled) {
+  background: var(--yo-accent-hover);
+  box-shadow: 0 2px 6px var(--yo-accent-glow);
+  transform: translateY(-0.5px);
+}
+
+.yo-btn:active:not(:disabled) {
+  background: var(--yo-accent-active);
+  transform: translateY(0);
+}
+
+.yo-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.yo-btn--secondary {
+  background: var(--yo-bg-card);
+  color: var(--yo-text);
+  border-color: var(--yo-line);
+  box-shadow: var(--yo-shadow-xs);
+}
+.yo-btn--secondary:hover:not(:disabled) {
+  background: var(--yo-bg-subtle);
+  border-color: var(--yo-line-strong);
+  box-shadow: var(--yo-shadow-sm);
+  transform: translateY(-0.5px);
+}
+
+.yo-btn--ghost {
+  background: transparent;
+  color: var(--yo-text-muted);
+  border-color: transparent;
+  box-shadow: none;
+}
+.yo-btn--ghost:hover:not(:disabled) {
+  background: var(--yo-bg-hover);
+  color: var(--yo-text);
+}
+
+.yo-btn--danger {
+  background: var(--yo-danger);
+  color: #fff;
+}
+.yo-btn--danger:hover:not(:disabled) {
+  background: var(--yo-danger-hover);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* ── 输入框 Input ── */
+.yo-input {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: var(--yo-text);
+  background: var(--yo-bg-card);
+  border: 1px solid var(--yo-line);
+  border-radius: var(--yo-radius-sm);
+  transition: all var(--yo-transition-fast);
+  outline: none;
+  box-shadow: var(--yo-shadow-xs);
+}
+
+.yo-input::placeholder {
+  color: var(--yo-text-placeholder);
+}
+
+.yo-input:hover:not(:disabled) {
+  border-color: var(--yo-line-strong);
+}
+
+.yo-input:focus {
+  border-color: var(--yo-accent);
+  box-shadow: 0 0 0 3px var(--yo-accent-glow);
+}
+
+.yo-input:disabled {
+  background: var(--yo-bg-subtle);
+  color: var(--yo-text-muted);
+  cursor: not-allowed;
+}
+
+/* ── 徽章 Badge ── */
+.yo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border-radius: var(--yo-radius-full);
+  background: var(--yo-info-weak);
+  color: var(--yo-info-text);
+  border: 1px solid var(--yo-info-border);
+}
+
+.yo-badge--warn {
+  background: var(--yo-warn-weak);
+  color: var(--yo-warn-text);
+  border-color: var(--yo-warn-border);
+}
+
+.yo-badge--ok {
+  background: var(--yo-ok-weak);
+  color: var(--yo-ok-text);
+  border-color: var(--yo-ok-border);
+}
+
+.yo-badge--danger {
+  background: var(--yo-danger-weak);
+  color: var(--yo-danger-text);
+  border-color: var(--yo-danger-border);
+}
+
+/* ── 现代卡片 Card ── */
+.yo-card {
+  background: var(--yo-bg-card);
+  border: 1px solid var(--yo-line);
+  border-radius: var(--yo-radius);
+  box-shadow: var(--yo-shadow-sm);
+  padding: 20px;
+  transition: border-color var(--yo-transition-fast), box-shadow var(--yo-transition-fast);
+}
+
+.yo-card--interactive:hover {
+  border-color: var(--yo-line-strong);
+  box-shadow: var(--yo-shadow);
+}
+
+/* ── 进度条 ProgressBar ── */
+.yo-progress {
+  height: 6px;
+  width: 100%;
+  background: var(--yo-line);
+  border-radius: var(--yo-radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.yo-progress__bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--yo-accent), #60a5fa);
+  border-radius: var(--yo-radius-full);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── 数据表格 Table ── */
+.yo-table-container {
+  border: 1px solid var(--yo-line);
+  border-radius: var(--yo-radius);
+  overflow: hidden;
+  box-shadow: var(--yo-shadow-xs);
+  background: var(--yo-bg-card);
+}
+
+.yo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.yo-table th {
+  background: var(--yo-bg-subtle);
+  color: var(--yo-text-muted);
+  font-weight: 600;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--yo-line);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.yo-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--yo-line-subtle);
+  color: var(--yo-text-secondary);
+}
+
+.yo-table tr:last-child td {
+  border-bottom: none;
+}
+
+.yo-table tr:hover td {
+  background: var(--yo-bg-hover);
+  color: var(--yo-text);
+}
+
+/* ── 目录树 Tree ── */
+.yo-tree {
+  list-style: none;
+}
+
+.yo-tree-node {
+  margin: 1px 0;
+}
+
+.yo-tree-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--yo-text-secondary);
+  border-radius: var(--yo-radius-sm);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--yo-transition-fast);
+}
+
+.yo-tree-item:hover {
+  background: var(--yo-bg-hover);
+  color: var(--yo-text);
+}
+
+.yo-tree-item.is-active {
+  background: var(--yo-accent-weak);
+  color: var(--yo-accent-text);
+  font-weight: 600;
+}
+
+/* ── 空状态与提示 ── */
+.yo-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+  color: var(--yo-text-muted);
+  font-size: 13.5px;
+  gap: 12px;
+}
+
+.yo-empty-icon {
+  width: 48px;
+  height: 48px;
+  opacity: 0.4;
+  color: var(--yo-text-placeholder);
+}
+
+.yo-ok-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--yo-ok-text);
+  background: var(--yo-ok-weak);
+  border: 1px solid var(--yo-ok-border);
+  padding: 8px 12px;
+  border-radius: var(--yo-radius-sm);
+  font-size: 13px;
+}
+
+.yo-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--yo-danger-text);
+  background: var(--yo-danger-weak);
+  border: 1px solid var(--yo-danger-border);
+  padding: 8px 12px;
+  border-radius: var(--yo-radius-sm);
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+.yo-muted {
+  color: var(--yo-text-muted);
+  font-size: 12.5px;
+}
+
+/* ── Markdown 渲染排版 ── */
+.yo-md {
+  line-height: 1.7;
+  font-size: 14.5px;
+  color: var(--yo-text);
+  user-select: text;
+}
+
+.yo-md h1, .yo-md h2, .yo-md h3, .yo-md h4 {
+  color: var(--yo-text);
+  font-weight: 600;
+  margin: 1.4em 0 0.6em;
+  line-height: 1.3;
+}
+
+.yo-md h1 {
+  font-size: 1.75em;
+  border-bottom: 1px solid var(--yo-line);
+  padding-bottom: 0.4em;
+}
+
+.yo-md h2 {
+  font-size: 1.35em;
+  border-bottom: 1px solid var(--yo-line-subtle);
+  padding-bottom: 0.3em;
+}
+
+.yo-md p {
+  margin: 0.8em 0;
+}
+
+.yo-md pre {
+  background: var(--yo-code-bg);
+  border: 1px solid var(--yo-code-border);
+  border-radius: var(--yo-radius);
+  padding: 14px 16px;
+  overflow: auto;
+  font-family: var(--yo-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 1em 0;
+  box-shadow: var(--yo-shadow-xs);
+}
+
+.yo-md code {
+  font-family: var(--yo-mono);
+  background: var(--yo-code-inline-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.88em;
+  color: var(--yo-accent-text);
+}
+
+.yo-md pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--yo-text);
+}
+
+.yo-md blockquote {
+  border-left: 3px solid var(--yo-accent);
+  background: var(--yo-accent-weak);
+  margin: 1.2em 0;
+  padding: 10px 16px;
+  border-radius: 0 var(--yo-radius-sm) var(--yo-radius-sm) 0;
+  color: var(--yo-text-secondary);
+}
+
+.yo-md table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.2em 0;
+}
+
+.yo-md th, .yo-md td {
+  border: 1px solid var(--yo-line);
+  padding: 8px 12px;
+  font-size: 13.5px;
+}
+
+.yo-md th {
+  background: var(--yo-bg-subtle);
+  font-weight: 600;
+}
+
+.yo-md img {
+  max-width: 100%;
+  border-radius: var(--yo-radius-sm);
+  margin: 0.8em 0;
+  box-shadow: var(--yo-shadow-sm);
+}
+
+.yo-md ul, .yo-md ol {
+  padding-left: 1.5em;
+  margin: 0.8em 0;
+}
+
+.yo-md li {
+  margin: 0.3em 0;
+}
+
+/* ── 现代化通用类与布局 ── */
+.yo-omnibox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--yo-bg-input);
+  border: 1.5px solid var(--yo-line);
+  border-radius: var(--yo-radius);
+  padding: 4px 8px 4px 12px;
+  transition: all var(--yo-transition-fast);
+}
+
+.yo-omnibox:focus-within {
+  border-color: var(--yo-accent);
+  background: var(--yo-bg-card);
+  box-shadow: 0 0 0 3px var(--yo-accent-weak);
+}
+
+.yo-omnibox__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  color: var(--yo-text);
+  font-family: inherit;
+}
+
+.yo-omnibox__input::placeholder {
+  color: var(--yo-text-muted);
+}
+
+/* 现代化全真网页视图 */
+.yo-web-view-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--yo-bg-card);
+  overflow: hidden;
+}
+
+.yo-web-view-frame {
+  width: 100%;
+  flex: 1;
+  border: none;
+  background: #ffffff;
+}
+
+/* 侧边大纲抽屉 / 栏目 */
+.yo-toc-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--yo-line);
+  background: var(--yo-bg-sidebar);
+  display: flex;
+  flex-direction: column;
+  transition: width var(--yo-transition-base);
+}
+
+.yo-toc-sidebar--collapsed {
+  width: 0;
+  overflow: hidden;
+  border-left: none;
+}
+
+/* ── 现代化标题栏 TitleBar ── */
+.yo-titlebar {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  background: var(--yo-bg-sidebar);
+  border-bottom: 1px solid var(--yo-line);
+  padding: 0 0 0 14px;
+  user-select: none;
+  flex-shrink: 0;
+  z-index: 100;
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+.yo-titlebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.yo-titlebar__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, var(--yo-accent), #60a5fa);
+  color: #ffffff;
+  box-shadow: var(--yo-shadow-xs);
+}
+
+.yo-titlebar__titles {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.yo-titlebar__title {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--yo-text);
+}
+
+.yo-titlebar__subtitle {
+  font-size: 11px;
+  color: var(--yo-text-muted);
+}
+
+.yo-titlebar__center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 12px;
+}
+
+.yo-titlebar__trailing {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.yo-titlebar__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 12px;
+}
+
+.yo-titlebar__controls {
+  display: flex;
+  height: 100%;
+}
+
+.yo-titlebar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--yo-text-muted);
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--yo-transition-fast), color var(--yo-transition-fast);
+}
+
+.yo-titlebar__btn:hover {
+  background-color: var(--yo-bg-hover);
+  color: var(--yo-text);
+}
+
+.yo-titlebar__btn--close:hover {
+  background-color: #e81123 !important;
+  color: #ffffff !important;
+}
+
+.yo-titlebar__btn--close:active {
+  background-color: #bf0f1d !important;
+  color: #ffffff !important;
+}
+
+/* 导航分段药丸按钮 */
+.yo-titlebar__nav {
+  display: flex;
+  align-items: center;
+  background: var(--yo-bg-card);
+  padding: 2px 4px;
+  border-radius: 8px;
+  border: 1px solid var(--yo-line);
+  gap: 2px;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.yo-titlebar__nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--yo-text-secondary);
+  cursor: pointer;
+  transition: all var(--yo-transition-fast);
+}
+
+.yo-titlebar__nav-btn:hover {
+  background: var(--yo-bg-hover);
+  color: var(--yo-text);
+}
+
+.yo-titlebar__nav-btn.active {
+  background: var(--yo-accent);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.yo-titlebar__nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── 专栏章节树 CatalogTree ── */
+.yo-catalog-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--yo-bg-sidebar);
+  border-right: 1px solid var(--yo-line);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+}
+
+.yo-catalog-header {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--yo-line);
+  background: var(--yo-bg-card);
+}
+
+.yo-catalog-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--yo-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.yo-catalog-loading-badge {
+  font-size: 10.5px;
+  color: var(--yo-accent);
+}
+
+.yo-catalog-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.yo-catalog-empty {
+  padding: 24px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--yo-text-muted);
+}
+
+.yo-catalog-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: var(--yo-radius-xs);
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--yo-text-secondary);
+  transition: all var(--yo-transition-fast);
+}
+
+.yo-catalog-row:hover {
+  background: var(--yo-bg-hover);
+  color: var(--yo-text);
+}
+
+.yo-catalog-row--active {
+  background: var(--yo-accent-weak);
+  color: var(--yo-accent);
+  font-weight: 600;
+}
+
+.yo-catalog-arrow {
+  font-size: 9px;
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--yo-text-muted);
+  transition: transform var(--yo-transition-fast);
+}
+
+.yo-catalog-arrow--open {
+  transform: rotate(90deg);
+}
+
+.yo-catalog-leaf-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--yo-text-muted);
+  opacity: 0.4;
+  margin: 0 4.5px;
+  flex-shrink: 0;
+}
+
+.yo-catalog-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+

@@ -1,0 +1,14 @@
+{
+  "name": "@yohu/module-preview",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
+  "dependencies": {
+    "@yohu/api": "workspace:*",
+    "@yohu/ui": "workspace:*",
+    "dompurify": "^3.2.4",
+    "markdown-it": "^14.1.0",
+    "solid-js": "^1.9.5"
+  }
+}
