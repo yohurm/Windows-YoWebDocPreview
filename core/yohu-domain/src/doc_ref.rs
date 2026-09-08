@@ -8,10 +8,12 @@ use yohu_protocol::DocRef;
 /// 华为开发者文档站 URL 前缀
 pub const HUAWEI_DOC_PREFIX: &str = "https://developer.huawei.com/consumer/cn/doc/";
 
-/// 华为六 catalog（最长匹配优先纪律：design-guides 先于 guides 类）
+/// 华为文档 catalog 路径段（含 NEXT/V5）
 pub const HUAWEI_CATALOGS: &[&str] = &[
     "design-guides",
+    "harmonyos-guides-V5",
     "harmonyos-guides",
+    "harmonyos-references-V5",
     "harmonyos-references",
     "harmonyos-faqs",
     "best-practices",
@@ -85,6 +87,16 @@ mod tests {
         );
         assert_eq!(r.source_id, "huawei-harmonyos");
         assert_eq!(r.catalog.as_deref(), Some("harmonyos-guides"));
+        assert_eq!(r.slug, "resource-categories-and-access");
+    }
+
+    #[test]
+    fn parses_huawei_guides_v5_url() {
+        let r = parse_url(
+            "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/resource-categories-and-access",
+        );
+        assert_eq!(r.source_id, "huawei-harmonyos");
+        assert_eq!(r.catalog.as_deref(), Some("harmonyos-guides-V5"));
         assert_eq!(r.slug, "resource-categories-and-access");
     }
 
