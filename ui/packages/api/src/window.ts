@@ -20,16 +20,6 @@ export async function windowIsMaximized(): Promise<boolean> {
   return getCurrentWindow().isMaximized();
 }
 
-export async function windowShow(): Promise<void> {
-  const win = getCurrentWindow();
-  await win.show();
-  try {
-    await win.setFocus();
-  } catch {
-    // 忽略 focus 失败兜底
-  }
-}
-
 export async function listenWindowResize(onChange: () => void): Promise<() => void> {
   return getCurrentWindow().onResized(() => {
     onChange();

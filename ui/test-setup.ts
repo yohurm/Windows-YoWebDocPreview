@@ -12,3 +12,13 @@ vi.mock("@tauri-apps/api/event", () => ({
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: () => Promise.resolve(undefined),
 }));
+
+vi.mock("@tauri-apps/api/window", () => ({
+  getCurrentWindow: () => ({
+    minimize: () => Promise.resolve(),
+    toggleMaximize: () => Promise.resolve(),
+    close: () => Promise.resolve(),
+    isMaximized: () => Promise.resolve(false),
+    onResized: () => Promise.resolve(() => undefined),
+  }),
+}));

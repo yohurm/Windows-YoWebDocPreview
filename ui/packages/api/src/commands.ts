@@ -1,15 +1,8 @@
-/** invoke 命令封装：UI 唯一的后端调用入口（模块禁直连 @tauri-apps/*）。 */
+/** invoke 命令封装：UI 唯一的后端调用入口。模块禁直连 @tauri-apps/*。 */
 
 import { invoke } from "@tauri-apps/api/core";
 
-import type {
-  AppSettings,
-  CatalogNode,
-  DocMeta,
-  SystemInfo,
-} from "./types";
-
-// ── 文档域 ──
+import type { AppSettings, CatalogNode, DocMeta, SystemInfo } from "./types";
 
 export const docFetch = (url: string) => invoke<DocMeta>("doc.fetch", { url });
 export const docHtml = (url: string) => invoke<string>("doc.html", { url });
@@ -19,13 +12,9 @@ export const docHistory = () => invoke<DocMeta[]>("doc.history");
 export const docExport = (url: string, targetDir?: string) =>
   invoke<string>("doc.export", { url, targetDir: targetDir ?? null });
 
-// ── 设置域 ──
-
 export const settingsGet = () => invoke<AppSettings>("settings.get");
 export const settingsSet = (settings: AppSettings) =>
   invoke<AppSettings>("settings.set", { settings });
-
-// ── 系统域 ──
 
 export const systemInfo = () => invoke<SystemInfo>("system.info");
 export const systemOpenPath = (path: string) => invoke<void>("system.openPath", { path });
