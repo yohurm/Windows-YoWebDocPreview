@@ -15,24 +15,12 @@
 
 import type { DocMeta } from "@yohu/api";
 
+import { catalogDisplayName } from "../catalogPolicy";
+
 export interface RenderWebOptions {
   meta: DocMeta | null;
   rawHtml: string;
   sourceUrl: string;
-}
-
-/**
- * 格式化文档分类/专栏名称，转为人类可读的展示名
- */
-function formatCatalog(catalog?: string | null): string {
-  if (!catalog) return "官方技术文档";
-  const map: Record<string, string> = {
-    "harmonyos-guides": "HarmonyOS 开发者指南",
-    "harmonyos-guides-V5": "HarmonyOS NEXT 开发者指南 (API 12)",
-    "harmonyos-references": "HarmonyOS API 参考手册",
-    "harmonyos-references-V5": "HarmonyOS NEXT API 参考 (API 12)",
-  };
-  return map[catalog] || catalog;
 }
 
 /**
@@ -41,7 +29,7 @@ function formatCatalog(catalog?: string | null): string {
 export function buildWebDocument(options: RenderWebOptions): string {
   const { meta, rawHtml, sourceUrl } = options;
   const title = meta?.title || "在线文档网页原貌";
-  const catalog = formatCatalog(meta?.docRef?.catalog);
+  const catalog = meta?.docRef?.catalog ? catalogDisplayName(meta.docRef.catalog) : "";
   const updateTime = meta?.updateTime || "";
   const deviceTypes = meta?.deviceTypes || [];
   const isHuawei = meta?.docRef?.sourceId === "huawei-harmonyos";
@@ -54,10 +42,8 @@ export function buildWebDocument(options: RenderWebOptions): string {
     )
     .join("");
 
-  // 转义标题与分类以防止基础 XSS
+  const safeCatalog = catalog ? catalog.replace(/</g, "&lt;").replace(/>/g, "&gt;") : "开发指南";
   const safeTitle = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const safeCatalog = catalog.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>

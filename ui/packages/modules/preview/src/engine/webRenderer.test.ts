@@ -30,7 +30,7 @@ describe("buildWebDocument", () => {
 
     expect(result).toContain("<!DOCTYPE html>");
     expect(result).toContain("资源分类与访问指南");
-    expect(result).toContain("HarmonyOS NEXT 开发者指南 (API 12)");
+    expect(result).toContain("HarmonyOS NEXT 开发指南");
     expect(result).toContain("phone");
     expect(result).toContain("tablet");
     expect(result).toContain("资源目录分类");
