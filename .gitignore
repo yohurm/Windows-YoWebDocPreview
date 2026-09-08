@@ -1,0 +1,49 @@
+# 本仓库：templates/gitignore/common + rust + node + tauri
+
+# ── 通用（对齐 YoAgentDocs）──
+.*/
+!.github/
+!.github/**
+
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*~
+
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.pem
+*.p12
+*.pfx
+
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+*.local.md
+
+# ── Rust ──
+/target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# ── Node / 前端 ──
+node_modules/
+dist/
+*.tsbuildinfo
+.pnpm-store/
+
+# ── Tauri ──
+app/*/icons/*.ico.orig
+app/*/gen/
+
+# ── 运行产物 / 本地数据 ──
+/runs/
+/cache/
