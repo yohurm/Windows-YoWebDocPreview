@@ -76,8 +76,32 @@ export function PreviewHeader(props: { store: PreviewStore }) {
           </YoButton>
         </div>
 
-        {/* 主模式切换器：网页原貌 vs Markdown 视图 */}
+        {/* 主模式切换器：网页原貌 vs Markdown 视图 + 侧边栏整体折叠开关 */}
         <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
+          {/* 左侧专栏目录栏折叠/展开开关（仅当存在专栏目录节点时提供） */}
+          <Show when={store.catalogNodes().length > 0}>
+            <button
+              type="button"
+              class="yo-btn yo-btn--ghost"
+              style={{
+                height: "30px",
+                padding: "0 8px",
+                color: store.showCatalog() ? "var(--yo-accent)" : "var(--yo-text-muted)",
+                background: store.showCatalog() ? "var(--yo-accent-weak)" : "transparent",
+                border: "1px solid var(--yo-line)",
+                display: "inline-flex",
+                "align-items": "center",
+                gap: "4px",
+                "font-size": "11.5px",
+              }}
+              onClick={() => store.toggleCatalog()}
+              title={store.showCatalog() ? "收起左侧专栏目录" : "展开左侧专栏目录"}
+            >
+              <IconSidebar style={{ width: "14px", height: "14px" }} />
+              <span>专栏</span>
+            </button>
+          </Show>
+
           <YoTabs
             tabs={[
               {

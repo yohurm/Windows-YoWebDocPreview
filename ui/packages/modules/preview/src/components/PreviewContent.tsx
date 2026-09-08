@@ -6,8 +6,8 @@
  * 3. 右侧：本页文章大纲（TOC，支持折叠）
  */
 
-import { createMemo, For, Show } from "solid-js";
-import { IconCheck, IconDocument, IconGlobe, IconList, IconSidebar } from "@yohu/ui";
+import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
+import { IconCheck, IconDocument, IconGlobe, IconList, IconSidebar, IconSidebarRight } from "@yohu/ui";
 
 import { CatalogTree } from "./CatalogTree";
 import { buildWebDocument } from "../engine/webRenderer";
@@ -29,6 +29,75 @@ export function PreviewContent(props: {
       sourceUrl: store.activeUrl(),
     });
   });
+
+  // ─────────────────────────────────────────────────────────────────
+  // 卓越架构实践：双缓冲画布交换机制（Double Buffering Swap Engine）
+  // 彻底根除 <iframe> 重新写入 srcdoc 时的白屏黑洞与浏览器空隙撕裂。
+  // 两个 iframe 交替扮演“前台展示缓冲（Active Buffer）”与“后台预热缓冲（Pending Buffer）”，
+  // 新 HTML 写入离屏缓冲并监听到 onload 完成后，才以原子级交叉淡入置换到最上层。
+  // ─────────────────────────────────────────────────────────────────
+  const [activeBuffer, setActiveBuffer] = createSignal<0 | 1>(0);
+  const [html0, setHtml0] = createSignal("");
+  const [html1, setHtml1] = createSignal("");
+  const [isSwapping, setIsSwapping] = createSignal(false);
+
+  let swapTimeout: any = null;
+
+  createEffect(() => {
+    const nextHtml = webDocHtml();
+    if (!nextHtml) return;
+
+    const currentActive = activeBuffer();
+    const currentDisplayedHtml = currentActive === 0 ? html0() : html1();
+
+    // 首次载入直接写入当前主缓冲
+    if (!currentDisplayedHtml) {
+      if (currentActive === 0) {
+        setHtml0(nextHtml);
+      } else {
+        setHtml1(nextHtml);
+      }
+      return;
+    }
+
+    // 若 HTML 未发生实质性变化，不执行重复置换
+    if (nextHtml === currentDisplayedHtml) {
+      return;
+    }
+
+    // 准备后台缓冲
+    const nextTargetBuffer = currentActive === 0 ? 1 : 0;
+    setIsSwapping(true);
+
+    if (nextTargetBuffer === 1) {
+      setHtml1(nextHtml);
+    } else {
+      setHtml0(nextHtml);
+    }
+
+    // 超时保底防护（防止极其特殊的无 onload 触发情况）
+    if (swapTimeout) clearTimeout(swapTimeout);
+    swapTimeout = setTimeout(() => {
+      setActiveBuffer(nextTargetBuffer);
+      setIsSwapping(false);
+    }, 400);
+  });
+
+  onCleanup(() => {
+    if (swapTimeout) clearTimeout(swapTimeout);
+  });
+
+  const handleFrameLoad = (bufferIdx: 0 | 1) => {
+    // 当后台缓冲完全就绪时，原子切换前后台缓冲
+    if (isSwapping() && activeBuffer() !== bufferIdx) {
+      if (swapTimeout) clearTimeout(swapTimeout);
+      setActiveBuffer(bufferIdx);
+      // 微任务后恢复正常交互
+      setTimeout(() => {
+        setIsSwapping(false);
+      }, 50);
+    }
+  };
 
   const scrollToAnchor = (id: string) => {
     const el = document.getElementById(id);
@@ -92,9 +161,49 @@ export function PreviewContent(props: {
           <CatalogTree
             nodes={store.catalogNodes()}
             activeSlug={currentSlug()}
+            expandedKeys={store.expandedKeys()}
+            onToggleNode={(id) => store.toggleCatalogNode(id)}
+            onToggleAll={(expandAll) => store.toggleAllCatalogNodes(expandAll)}
             loading={store.catalogLoading()}
             onSelectDoc={(slug) => store.selectCatalogDoc(slug)}
+            onCloseSidebar={() => store.setShowCatalog(false)}
           />
+        </Show>
+
+        {/* 专栏目录树已收起时的边缘恢复浮动把手（Sash Floating Handle） */}
+        <Show when={!store.showCatalog() && store.catalogNodes().length > 0}>
+          <button
+            type="button"
+            style={{
+              position: "absolute",
+              top: "16px",
+              left: "0px",
+              "z-index": 15,
+              background: "var(--yo-bg-sidebar)",
+              border: "1px solid var(--yo-line)",
+              "border-left": "none",
+              "border-radius": "0 var(--yo-radius-xs) var(--yo-radius-xs) 0",
+              padding: "6px 4px",
+              cursor: "pointer",
+              color: "var(--yo-text-muted)",
+              display: "flex",
+              "align-items": "center",
+              "box-shadow": "0 2px 6px rgba(0,0,0,0.08)",
+              transition: "all var(--yo-transition-fast)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "var(--yo-accent)";
+              e.currentTarget.style.background = "var(--yo-bg-hover)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "var(--yo-text-muted)";
+              e.currentTarget.style.background = "var(--yo-bg-sidebar)";
+            }}
+            onClick={() => store.setShowCatalog(true)}
+            title="展开左侧专栏章节目录树"
+          >
+            <IconSidebar style={{ width: "14px", height: "14px" }} />
+          </button>
         </Show>
 
         {/* ── 中间区域：核心画板 ── */}
@@ -133,19 +242,49 @@ export function PreviewContent(props: {
                   </div>
                 }
               >
-                <iframe
-                  srcdoc={webDocHtml()}
-                  title="Web Original Preview"
-                  class="yo-web-view-frame"
-                  sandbox="allow-same-origin allow-scripts allow-popups"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    border: "none",
-                    display: "block",
-                    background: "#f8fafc",
-                  }}
-                />
+                {/* 双缓冲双 Iframe 容器 */}
+                <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                  <iframe
+                    srcdoc={html0()}
+                    title="Web Original Preview (Buffer 0)"
+                    class="yo-web-view-frame"
+                    sandbox="allow-same-origin allow-scripts allow-popups"
+                    onLoad={() => handleFrameLoad(0)}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      border: "none",
+                      background: "#f8fafc",
+                      opacity: activeBuffer() === 0 ? 1 : 0,
+                      "pointer-events": activeBuffer() === 0 ? "auto" : "none",
+                      "z-index": activeBuffer() === 0 ? 2 : 1,
+                      transition: "opacity 0.18s ease-in-out",
+                    }}
+                  />
+                  <iframe
+                    srcdoc={html1()}
+                    title="Web Original Preview (Buffer 1)"
+                    class="yo-web-view-frame"
+                    sandbox="allow-same-origin allow-scripts allow-popups"
+                    onLoad={() => handleFrameLoad(1)}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      border: "none",
+                      background: "#f8fafc",
+                      opacity: activeBuffer() === 1 ? 1 : 0,
+                      "pointer-events": activeBuffer() === 1 ? "auto" : "none",
+                      "z-index": activeBuffer() === 1 ? 2 : 1,
+                      transition: "opacity 0.18s ease-in-out",
+                    }}
+                  />
+                </div>
               </Show>
             </div>
           </Show>
@@ -161,6 +300,8 @@ export function PreviewContent(props: {
                     "overflow-y": "auto",
                     padding: "32px 48px",
                     background: "var(--yo-bg-card)",
+                    opacity: store.loading() ? 0.7 : 1,
+                    transition: "opacity var(--yo-transition-fast)",
                   }}
                 >
                   <article
@@ -215,17 +356,11 @@ export function PreviewContent(props: {
                       </span>
                       <button
                         type="button"
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                          cursor: "pointer",
-                          color: "var(--yo-text-muted)",
-                          padding: "2px",
-                        }}
-                        onClick={() => store.toggleToc()}
-                        title="折叠目录"
+                        class="yo-catalog-btn-icon"
+                        onClick={() => store.setShowToc(false)}
+                        title="收起右侧文档大纲"
                       >
-                        <IconSidebar style={{ width: "13px", height: "13px" }} />
+                        <IconSidebarRight style={{ width: "13px", height: "13px" }} />
                       </button>
                     </div>
 
@@ -266,6 +401,42 @@ export function PreviewContent(props: {
                       </For>
                     </div>
                   </aside>
+                </Show>
+
+                {/* 右侧大纲已收起时的边缘恢复浮动把手 */}
+                <Show when={!store.showToc() && tocList().length > 0}>
+                  <button
+                    type="button"
+                    style={{
+                      position: "absolute",
+                      top: "16px",
+                      right: "0px",
+                      "z-index": 15,
+                      background: "var(--yo-bg-sidebar)",
+                      border: "1px solid var(--yo-line)",
+                      "border-right": "none",
+                      "border-radius": "var(--yo-radius-xs) 0 0 var(--yo-radius-xs)",
+                      padding: "6px 4px",
+                      cursor: "pointer",
+                      color: "var(--yo-text-muted)",
+                      display: "flex",
+                      "align-items": "center",
+                      "box-shadow": "0 2px 6px rgba(0,0,0,0.08)",
+                      transition: "all var(--yo-transition-fast)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "var(--yo-accent)";
+                      e.currentTarget.style.background = "var(--yo-bg-hover)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "var(--yo-text-muted)";
+                      e.currentTarget.style.background = "var(--yo-bg-sidebar)";
+                    }}
+                    onClick={() => store.setShowToc(true)}
+                    title="展开右侧文档大纲"
+                  >
+                    <IconSidebarRight style={{ width: "14px", height: "14px" }} />
+                  </button>
                 </Show>
               </Show>
 

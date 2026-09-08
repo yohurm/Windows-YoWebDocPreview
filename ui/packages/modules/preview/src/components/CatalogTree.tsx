@@ -1,60 +1,61 @@
 /**
  * 官方专栏文档分类导航树组件（Catalog Tree）。
- * 支持层级展开折叠、章节定位、文档点击无缝切换多网页。
- * 遵循 SRP：根据 activeSlug 自动展开所在路径并高亮。
+ * 深度参照 VS Code Tree / VitePress Sidebar 架构模型：
+ * 1. 受控/扁平化折叠展开状态管理器（支持点击箭头切换当前节点，点击整行定位切换文档）；
+ * 2. 区分用户显式操作折叠与路径自动探测展开（用户折叠的节点不被自动强制反复展开）；
+ * 3. 头部提供整栏快捷折叠操作，并支持加载中与空状态指示。
  */
 
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createEffect, createMemo, For, Show } from "solid-js";
+import { IconSidebar } from "@yohu/ui";
 import type { CatalogNode } from "@yohu/api";
 
 export interface CatalogTreeProps {
   nodes: CatalogNode[];
   activeSlug?: string;
+  expandedKeys: Set<string>;
+  onToggleNode: (id: string) => void;
+  onToggleAll?: (expandAll: boolean) => void;
   onSelectDoc: (slug: string) => void;
+  onCloseSidebar?: () => void;
   loading?: boolean;
-}
-
-/**
- * 辅助检查某个节点及其子树是否包含指定的 slug
- */
-function nodeContainsSlug(node: CatalogNode, slug?: string): boolean {
-  if (!slug) return false;
-  if (node.slug === slug) return true;
-  if (!node.children || node.children.length === 0) return false;
-  return node.children.some((child) => nodeContainsSlug(child, slug));
 }
 
 function CatalogItem(props: {
   node: CatalogNode;
   level: number;
   activeSlug?: string;
+  expandedKeys: Set<string>;
+  onToggleNode: (id: string) => void;
   onSelectDoc: (slug: string) => void;
 }) {
   const hasChildren = () => (props.node.children?.length ?? 0) > 0;
-  
-  // 默认展开前两层，或者当子节点包含当前激活的文档时自动展开
-  const initialOpen = () => props.level < 2 || nodeContainsSlug(props.node, props.activeSlug);
-  const [open, setOpen] = createSignal(initialOpen());
-
-  // 监听 activeSlug 变化：若子树中包含新激活的文档，自动展开本节点
-  createEffect(() => {
-    if (nodeContainsSlug(props.node, props.activeSlug)) {
-      setOpen(true);
-    }
-  });
+  const isExpanded = () => props.expandedKeys.has(props.node.id);
 
   const isCurrentActive = () => {
     if (!props.activeSlug) return false;
     return props.node.slug === props.activeSlug;
   };
 
-  const handleClick = (e: MouseEvent) => {
+  const handleTwistieClick = (e: MouseEvent) => {
     e.stopPropagation();
     if (hasChildren()) {
-      setOpen(!open());
+      props.onToggleNode(props.node.id);
     }
+  };
+
+  const handleRowClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    // 参照 VS Code 与 VitePress 规范：
+    // 若叶子节点或具有独立文档 slug 的节点，优先触发文档跳转联动
     if (props.node.slug) {
       props.onSelectDoc(props.node.slug);
+    }
+    // 若同时包含子章节且用户点击行（非外链），顺带联动展开以提升连贯交互感
+    if (hasChildren()) {
+      if (!isExpanded()) {
+        props.onToggleNode(props.node.id);
+      }
     }
   };
 
@@ -62,11 +63,18 @@ function CatalogItem(props: {
     <div class="yo-catalog-node" style={{ "margin-left": `${props.level * 10}px` }}>
       <div
         class={`yo-catalog-row ${isCurrentActive() ? "yo-catalog-row--active" : ""}`}
-        onClick={handleClick}
+        onClick={handleRowClick}
         title={props.node.name}
       >
-        <Show when={hasChildren()} fallback={<span class="yo-catalog-leaf-dot" />}>
-          <span class={`yo-catalog-arrow ${open() ? "yo-catalog-arrow--open" : ""}`}>
+        <Show
+          when={hasChildren()}
+          fallback={<span class="yo-catalog-leaf-dot" />}
+        >
+          <span
+            class={`yo-catalog-arrow ${isExpanded() ? "yo-catalog-arrow--open" : ""}`}
+            onClick={handleTwistieClick}
+            title={isExpanded() ? "折叠本组" : "展开本组"}
+          >
             ▶
           </span>
         </Show>
@@ -74,7 +82,7 @@ function CatalogItem(props: {
         <span class="yo-catalog-name">{props.node.name}</span>
       </div>
 
-      <Show when={hasChildren() && open()}>
+      <Show when={hasChildren() && isExpanded()}>
         <div class="yo-catalog-children">
           <For each={props.node.children}>
             {(child) => (
@@ -82,6 +90,8 @@ function CatalogItem(props: {
                 node={child}
                 level={props.level + 1}
                 activeSlug={props.activeSlug}
+                expandedKeys={props.expandedKeys}
+                onToggleNode={props.onToggleNode}
                 onSelectDoc={props.onSelectDoc}
               />
             )}
@@ -96,10 +106,44 @@ export function CatalogTree(props: CatalogTreeProps) {
   return (
     <aside class="yo-catalog-sidebar">
       <div class="yo-catalog-header">
-        <span class="yo-catalog-title">专栏章节目录</span>
-        <Show when={props.loading}>
-          <span class="yo-catalog-loading-badge">加载中…</span>
-        </Show>
+        <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
+          <span class="yo-catalog-title">专栏章节目录</span>
+          <Show when={props.loading}>
+            <span class="yo-catalog-loading-badge">加载中…</span>
+          </Show>
+        </div>
+
+        <div style={{ display: "flex", "align-items": "center", gap: "4px" }}>
+          <Show when={props.onToggleAll}>
+            <button
+              type="button"
+              class="yo-catalog-btn-icon"
+              onClick={() => props.onToggleAll?.(true)}
+              title="全部展开"
+            >
+              <span style={{ "font-size": "13px", "font-weight": "700", "line-height": 1 }}>+</span>
+            </button>
+            <button
+              type="button"
+              class="yo-catalog-btn-icon"
+              onClick={() => props.onToggleAll?.(false)}
+              title="全部折叠"
+            >
+              <span style={{ "font-size": "13px", "font-weight": "700", "line-height": 1 }}>−</span>
+            </button>
+          </Show>
+
+          <Show when={props.onCloseSidebar}>
+            <button
+              type="button"
+              class="yo-catalog-btn-icon"
+              onClick={props.onCloseSidebar}
+              title="收起左侧专栏目录栏"
+            >
+              <IconSidebar style={{ width: "14px", height: "14px" }} />
+            </button>
+          </Show>
+        </div>
       </div>
 
       <div class="yo-catalog-scroll">
@@ -117,6 +161,8 @@ export function CatalogTree(props: CatalogTreeProps) {
                 node={node}
                 level={0}
                 activeSlug={props.activeSlug}
+                expandedKeys={props.expandedKeys}
+                onToggleNode={props.onToggleNode}
                 onSelectDoc={props.onSelectDoc}
               />
             )}
