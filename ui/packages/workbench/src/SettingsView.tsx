@@ -2,6 +2,7 @@ import { createSignal, onMount, Show } from "solid-js";
 
 import {
   dialogPickFolder,
+  DISPLAY_NAME,
   settingsGet,
   settingsSet,
   type AppSettings,
@@ -9,6 +10,7 @@ import {
 import {
   IconCheck,
   IconFolder,
+  YoAppNameButton,
   YoButton,
   YoCard,
   YoChromeButton,
@@ -31,7 +33,7 @@ export function SettingsPage(props: {
           </YoChromeButton>
         }
       >
-        <span class="yo-titlebar__title">设置</span>
+        <YoAppNameButton name={DISPLAY_NAME} onClick={props.onBack} />
       </YoTitleBar>
       <SettingsForm />
       <footer class="yo-statusbar">
