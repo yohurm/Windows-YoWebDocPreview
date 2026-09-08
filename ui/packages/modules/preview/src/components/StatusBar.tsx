@@ -23,7 +23,15 @@ export function StatusBar(props: { store: PreviewStore }) {
         </Show>
       </div>
       <div class="yo-statusbar__side">
-        <span>{store.hasDoc() ? "在线预览" : "就绪"}</span>
+        <span>
+          {store.hasDoc()
+            ? store.readingSurface() === "web"
+              ? "网页阅读"
+              : store.markdownReveal() === "source"
+                ? "Markdown 源码"
+                : "Markdown 渲染"
+            : "就绪"}
+        </span>
       </div>
     </footer>
   );

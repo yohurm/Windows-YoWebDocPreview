@@ -1,12 +1,12 @@
 import "./preview.css";
 
 import { Show } from "solid-js";
-
+import { DISPLAY_NAME } from "@yohu/api";
 import type { WindowCaptionButtonsProps } from "@yohu/ui";
 
 import { CanvasDock } from "./components/CanvasDock";
-import { HeroWelcomeView } from "./components/HeroWelcomeView";
-import { PreviewChrome } from "./components/PreviewChrome";
+import { HomeStage } from "./components/HomeStage";
+import { PreviewTitleBar } from "./components/PreviewTitleBar";
 import { PrimarySidebar } from "./components/PrimarySidebar";
 import { StatusBar } from "./components/StatusBar";
 import { createPreviewStore } from "./store";
@@ -19,14 +19,15 @@ export function PreviewView(props: {
 
   return (
     <div class="yo-app">
-      <PreviewChrome store={store} window={props.window} onOpenSettings={props.onOpenSettings} />
-      <Show when={store.session().error && !store.hasDoc()}>
-        <div class="yo-notice yo-notice--danger">{store.session().error}</div>
-      </Show>
+      <PreviewTitleBar
+        store={store}
+        window={props.window}
+        onOpenSettings={props.onOpenSettings}
+      />
       <div class="yo-app__body">
         <Show
           when={store.hasDoc()}
-          fallback={<HeroWelcomeView onSelectUrl={(url) => void store.fetchDoc(url)} />}
+          fallback={<HomeStage store={store} />}
         >
           <div class="yo-workspace">
             <PrimarySidebar store={store} />
@@ -41,7 +42,7 @@ export function PreviewView(props: {
 
 export const descriptor = {
   id: "preview",
-  title: "在线预览",
+  title: DISPLAY_NAME,
   Component: PreviewView,
 };
 

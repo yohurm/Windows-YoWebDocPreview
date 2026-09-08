@@ -46,10 +46,18 @@ export function resolveCatalogDocUrl(slugOrUrl: string, currentSourceUrl: string
   return url.toString();
 }
 
+/** 与 yohu-domain::HUAWEI_CATALOGS 对齐的展示名；未知 id 原样返回。 */
+const CATALOG_LABELS: Record<string, string> = {
+  "design-guides": "设计指南",
+  "harmonyos-guides": "HarmonyOS 开发指南",
+  "harmonyos-guides-V5": "HarmonyOS NEXT 开发指南",
+  "harmonyos-references": "HarmonyOS API 参考",
+  "harmonyos-references-V5": "HarmonyOS NEXT API 参考",
+  "harmonyos-faqs": "常见问题",
+  "best-practices": "最佳实践",
+  "harmonyos-releases": "版本说明",
+};
+
 export function catalogDisplayName(catalogId: string): string {
-  if (catalogId === "harmonyos-guides") return "HarmonyOS 开发指南";
-  if (catalogId === "harmonyos-guides-V5") return "HarmonyOS NEXT 开发指南";
-  if (catalogId === "harmonyos-references") return "HarmonyOS API 参考";
-  if (catalogId === "harmonyos-references-V5") return "HarmonyOS NEXT API 参考";
-  return catalogId;
+  return CATALOG_LABELS[catalogId] ?? catalogId;
 }

@@ -3,7 +3,6 @@ import { batch, createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import {
   docCatalog,
   docConvert,
-  docExport,
   docFetch,
   docHtml,
   errorMessage,
@@ -11,30 +10,31 @@ import {
 } from "@yohu/api";
 
 import { catalogDisplayName, collectExpandableIds, findAncestorIds, resolveCatalogDocUrl } from "./catalogPolicy";
-import { createEmptyDocSession, type PreviewViewMode, type UnifiedDocSession } from "./model";
+import {
+  createEmptyDocSession,
+  type MarkdownReveal,
+  type ReadingSurface,
+  type UnifiedDocSession,
+} from "./model";
 import { extractTocFromMarkdown, renderMarkdownToSafeHtml } from "./toc";
 
 export function createPreviewStore() {
   const [session, setSession] = createSignal<UnifiedDocSession>(createEmptyDocSession());
   const [urlInput, setUrlInput] = createSignal("");
-  const [viewMode, setViewMode] = createSignal<PreviewViewMode>("markdown-rendered");
+  const [readingSurface, setReadingSurface] = createSignal<ReadingSurface>("markdown");
+  const [markdownReveal, setMarkdownReveal] = createSignal<MarkdownReveal>("rendered");
   const [sidebarOpen, setSidebarOpen] = createSignal(true);
   const [inspectorOpen, setInspectorOpen] = createSignal(true);
-  const [exporting, setExporting] = createSignal(false);
-  const [exportedPath, setExportedPath] = createSignal("");
-  const [copied, setCopied] = createSignal(false);
   const [expandedKeys, setExpandedKeys] = createSignal<Set<string>>(new Set());
   const [userCollapsedKeys, setUserCollapsedKeys] = createSignal<Set<string>>(new Set());
 
   const catalogCache = new Map<string, CatalogNode[]>();
-  let copiedTimer: ReturnType<typeof setTimeout> | undefined;
 
   const hasDoc = createMemo(
     () => Boolean(session().url && (session().rawHtml || session().markdownText))
   );
   const title = createMemo(() => session().meta?.title || "未命名文档");
   const currentSlug = createMemo(() => session().meta?.docRef?.slug);
-  const sourceUrl = createMemo(() => session().meta?.sourceUrl || session().url);
   const catalogLabel = createMemo(() =>
     session().catalogId ? catalogDisplayName(session().catalogId) : ""
   );
@@ -88,7 +88,6 @@ export function createPreviewStore() {
     if (!rawUrl || session().status === "loading") return;
 
     setSession((prev) => ({ ...prev, status: "loading", error: "" }));
-    setExportedPath("");
     const started = performance.now();
 
     try {
@@ -171,34 +170,12 @@ export function createPreviewStore() {
     }
   };
 
-  const exportCurrentDoc = async () => {
-    const meta = session().meta;
-    if (!meta || exporting()) return;
-    setExporting(true);
-    setSession((prev) => ({ ...prev, error: "" }));
-    try {
-      setExportedPath(await docExport(meta.sourceUrl));
-    } catch (cause) {
-      setSession((prev) => ({ ...prev, error: errorMessage(cause) }));
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const copyMarkdownToClipboard = async () => {
-    const text = session().markdownText;
-    if (!text) return;
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    if (copiedTimer) clearTimeout(copiedTimer);
-    copiedTimer = setTimeout(() => setCopied(false), 2000);
-  };
-
   const resetToHome = () => {
     batch(() => {
       setUrlInput("");
       setSession(createEmptyDocSession());
-      setExportedPath("");
+      setReadingSurface("markdown");
+      setMarkdownReveal("rendered");
     });
   };
 
@@ -213,19 +190,19 @@ export function createPreviewStore() {
         setInspectorOpen((open) => !open);
       } else if (event.key === "1") {
         event.preventDefault();
-        setViewMode("web");
+        setReadingSurface("web");
       } else if (event.key === "2") {
         event.preventDefault();
-        setViewMode("markdown-rendered");
+        setReadingSurface("markdown");
       } else if (event.key === "3") {
         event.preventDefault();
-        setViewMode("markdown-source");
+        setReadingSurface("markdown");
+        setMarkdownReveal((current) => (current === "rendered" ? "source" : "rendered"));
       }
     };
     window.addEventListener("keydown", onKey);
     onCleanup(() => {
       window.removeEventListener("keydown", onKey);
-      if (copiedTimer) clearTimeout(copiedTimer);
     });
   });
 
@@ -233,28 +210,24 @@ export function createPreviewStore() {
     session,
     urlInput,
     setUrlInput,
-    viewMode,
-    setViewMode,
+    readingSurface,
+    setReadingSurface,
+    markdownReveal,
+    setMarkdownReveal,
     sidebarOpen,
     toggleSidebar: () => setSidebarOpen((open) => !open),
     inspectorOpen,
     toggleInspector: () => setInspectorOpen((open) => !open),
-    exporting,
-    exportedPath,
-    copied,
     expandedKeys,
     hasDoc,
     title,
     currentSlug,
-    sourceUrl,
     catalogLabel,
     resetToHome,
     fetchDoc,
     selectCatalogDoc,
     toggleCatalogNode,
     toggleAllCatalogNodes,
-    exportCurrentDoc,
-    copyMarkdownToClipboard,
   };
 }
 

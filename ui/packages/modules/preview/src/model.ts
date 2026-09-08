@@ -6,7 +6,11 @@ export interface TocNode {
   level: number;
 }
 
-export type PreviewViewMode = "web" | "markdown-rendered" | "markdown-source";
+/** 一级阅读体验：站点原文，或解析后的 Markdown。 */
+export type ReadingSurface = "web" | "markdown";
+
+/** Markdown 阅读下的呈现：排版渲染，或源码。 */
+export type MarkdownReveal = "rendered" | "source";
 
 export type SessionStatus = "idle" | "loading" | "ready" | "error";
 

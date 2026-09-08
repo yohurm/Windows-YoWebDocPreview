@@ -46,6 +46,7 @@ describe("catalogPolicy", () => {
 
   it("maps known catalog ids to a single display name", () => {
     expect(catalogDisplayName("harmonyos-guides-V5")).toBe("HarmonyOS NEXT 开发指南");
+    expect(catalogDisplayName("design-guides")).toBe("设计指南");
     expect(catalogDisplayName("unknown-catalog")).toBe("unknown-catalog");
   });
 });

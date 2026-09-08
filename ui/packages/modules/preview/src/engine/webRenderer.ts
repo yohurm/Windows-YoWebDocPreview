@@ -29,8 +29,7 @@ export interface RenderWebOptions {
 export function buildWebDocument(options: RenderWebOptions): string {
   const { meta, rawHtml, sourceUrl } = options;
   const title = meta?.title || "在线文档网页原貌";
-  const catalog = meta?.docRef?.catalog ? catalogDisplayName(meta.docRef.catalog) : "";
-  const updateTime = meta?.updateTime || "";
+  const catalogLabel = meta?.docRef?.catalog ? catalogDisplayName(meta.docRef.catalog) : "";
   const deviceTypes = meta?.deviceTypes || [];
   const isHuawei = meta?.docRef?.sourceId === "huawei-harmonyos";
 
@@ -42,7 +41,10 @@ export function buildWebDocument(options: RenderWebOptions): string {
     )
     .join("");
 
-  const safeCatalog = catalog ? catalog.replace(/</g, "&lt;").replace(/>/g, "&gt;") : "开发指南";
+  const safeCatalog = catalogLabel.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const catalogCrumb = safeCatalog
+    ? `<span>${safeCatalog}</span><span class="y-breadcrumb-sep">/</span>`
+    : "";
   const safeTitle = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -434,8 +436,7 @@ export function buildWebDocument(options: RenderWebOptions): string {
         <span>${isHuawei ? "HarmonyOS Developer" : "Web Preview"}</span>
       </div>
       <div class="y-breadcrumb">
-        <span>${safeCatalog}</span>
-        <span class="y-breadcrumb-sep">/</span>
+        ${catalogCrumb}
         <span class="y-breadcrumb-curr" title="${safeTitle}">${safeTitle}</span>
       </div>
     </div>

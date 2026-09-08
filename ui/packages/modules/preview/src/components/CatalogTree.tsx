@@ -34,24 +34,20 @@ function CatalogItem(props: {
   };
 
   return (
-    <div class="yo-tree-node">
+    <div class="yo-catalog-node">
       <div
         classList={{
-          "yo-tree-row": true,
           "yo-catalog-row": true,
-          "yo-tree-row--active": isCurrentActive(),
           "yo-catalog-row--active": isCurrentActive(),
         }}
         data-depth={props.level}
         onClick={handleRowClick}
         title={props.node.name}
       >
-        <Show when={hasChildren()} fallback={<span class="yo-tree-dot yo-catalog-leaf-dot" />}>
+        <Show when={hasChildren()} fallback={<span class="yo-catalog-leaf-dot" />}>
           <span
             classList={{
-              "yo-tree-arrow": true,
               "yo-catalog-arrow": true,
-              "yo-tree-arrow--open": isExpanded(),
               "yo-catalog-arrow--open": isExpanded(),
             }}
             onClick={handleTwistieClick}
@@ -60,10 +56,10 @@ function CatalogItem(props: {
             ▶
           </span>
         </Show>
-        <span class="yo-tree-name yo-catalog-name">{props.node.name}</span>
+        <span class="yo-catalog-name">{props.node.name}</span>
       </div>
       <Show when={hasChildren() && isExpanded()}>
-        <div class="yo-tree-children">
+        <div class="yo-catalog-children">
           <For each={props.node.children}>
             {(child) => (
               <CatalogItem
@@ -84,7 +80,7 @@ function CatalogItem(props: {
 
 export function CatalogTree(props: CatalogTreeProps) {
   return (
-    <div class="yo-tree-container">
+    <div class="yo-catalog-tree">
       <For each={props.nodes}>
         {(node) => (
           <CatalogItem

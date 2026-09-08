@@ -1,6 +1,6 @@
 import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-js";
 
-import { IconCheck, IconCopy, IconDownload, IconExternal, IconGlobe } from "@yohu/ui";
+import { IconCode, IconDocument, IconGlobe } from "@yohu/ui";
 
 import { buildWebDocument } from "../engine/webRenderer";
 import type { PreviewStore } from "../store";
@@ -45,6 +45,8 @@ export function CanvasDock(props: { store: PreviewStore }) {
     setHtml1("");
   });
 
+  const onMarkdown = () => store.readingSurface() === "markdown";
+
   return (
     <div class="yo-canvas">
       <div class="yo-canvas__header">
@@ -55,64 +57,70 @@ export function CanvasDock(props: { store: PreviewStore }) {
           </Show>
           <span class="yo-canvas__breadcrumb-title">{store.title()}</span>
         </div>
-        <div class="yo-canvas__actions">
-          <button
-            type="button"
-            class="yo-btn yo-canvas__action-btn"
-            onClick={() => void store.exportCurrentDoc()}
-            disabled={store.exporting() || !store.session().markdownText}
-            title="导出当前文档为 Markdown 文件"
-          >
-            <IconDownload class="yo-icon-sm" />
-            <span>{store.exporting() ? "导出中…" : "导出"}</span>
-          </button>
-          <button
-            type="button"
-            class="yo-btn yo-btn--secondary yo-canvas__action-btn"
-            onClick={() => void store.copyMarkdownToClipboard()}
-            disabled={!store.session().markdownText}
-            title="复制 Markdown 全文"
-          >
-            <Show when={store.copied()} fallback={<IconCopy class="yo-icon-sm" />}>
-              <IconCheck class="yo-icon-sm yo-text-ok" />
-            </Show>
-            <span>{store.copied() ? "已复制" : "复制"}</span>
-          </button>
-          <Show when={store.sourceUrl()}>
-            <a
-              href={store.sourceUrl()}
-              target="_blank"
-              rel="noreferrer"
-              class="yo-btn yo-btn--ghost yo-canvas__action-btn"
-              title="在默认浏览器中打开源网页"
+        <div class="yo-reader-switch">
+          <div class="yo-segmented" role="tablist" aria-label="阅读体验">
+            <button
+              type="button"
+              classList={{ "yo-segmented__btn": true, "is-on": store.readingSurface() === "web" }}
+              onClick={() => store.setReadingSurface("web")}
+              title="Web 原始阅读"
             >
-              <IconExternal class="yo-icon-sm" />
-              <span>外部打开</span>
-            </a>
+              <IconGlobe class="yo-icon-sm" />
+              网页
+            </button>
+            <button
+              type="button"
+              classList={{ "yo-segmented__btn": true, "is-on": onMarkdown() }}
+              onClick={() => store.setReadingSurface("markdown")}
+              title="解析为 Markdown 阅读"
+            >
+              <IconDocument class="yo-icon-sm" />
+              Markdown
+            </button>
+          </div>
+          <Show when={onMarkdown()}>
+            <div class="yo-segmented" role="tablist" aria-label="Markdown 呈现">
+              <button
+                type="button"
+                classList={{
+                  "yo-segmented__btn": true,
+                  "is-on": store.markdownReveal() === "rendered",
+                }}
+                onClick={() => store.setMarkdownReveal("rendered")}
+                title="Markdown 渲染"
+              >
+                渲染
+              </button>
+              <button
+                type="button"
+                classList={{
+                  "yo-segmented__btn": true,
+                  "is-on": store.markdownReveal() === "source",
+                }}
+                onClick={() => store.setMarkdownReveal("source")}
+                title="Markdown 源码"
+              >
+                <IconCode class="yo-icon-sm" />
+                源码
+              </button>
+            </div>
           </Show>
         </div>
       </div>
 
-      <Show when={store.exportedPath()}>
-        <div class="yo-notice yo-notice--ok">
-          <IconCheck class="yo-icon-md" />
-          <span>文件已导出至</span>
-          <code class="yo-notice__code">{store.exportedPath()}</code>
-        </div>
-      </Show>
       <Show when={store.session().error}>
         <div class="yo-notice yo-notice--danger">{store.session().error}</div>
       </Show>
 
       <div class="yo-canvas__content">
-        <Show when={store.viewMode() === "web"}>
+        <Show when={store.readingSurface() === "web"}>
           <div class="yo-web">
             <Show
               when={store.session().rawHtml || store.session().meta}
               fallback={
                 <div class="yo-web__placeholder">
                   <IconGlobe class="yo-icon-lg" />
-                  <span>载入文档后由解析内核呈现原貌</span>
+                  <span>载入文档后呈现网页原文</span>
                 </div>
               }
             >
@@ -140,18 +148,17 @@ export function CanvasDock(props: { store: PreviewStore }) {
           </div>
         </Show>
 
-        <Show when={store.viewMode() === "markdown-rendered"}>
+        <Show when={onMarkdown() && store.markdownReveal() === "rendered"}>
           <div class="yo-canvas__scroll">
             <article class="yo-md yo-canvas__article" innerHTML={store.session().renderedHtml} />
           </div>
         </Show>
 
-        <Show when={store.viewMode() === "markdown-source"}>
+        <Show when={onMarkdown() && store.markdownReveal() === "source"}>
           <div class="yo-canvas__source">
             <textarea readOnly value={store.session().markdownText} class="yo-canvas__source-text" />
           </div>
         </Show>
-
         <TocAside store={store} />
       </div>
     </div>
