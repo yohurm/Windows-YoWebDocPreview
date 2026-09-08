@@ -49,7 +49,7 @@ export function App() {
     try {
       await windowMinimize();
     } catch (e) {
-      console.warn("window minimize failed:", e);
+      console.error("window minimize failed:", e);
     }
   };
 
@@ -59,7 +59,7 @@ export function App() {
       const m = await windowIsMaximized();
       setMaximized(m);
     } catch (e) {
-      console.warn("window toggle maximize failed:", e);
+      console.error("window toggle maximize failed:", e);
     }
   };
 
@@ -67,7 +67,7 @@ export function App() {
     try {
       await windowClose();
     } catch (e) {
-      console.warn("window close failed:", e);
+      console.error("window close failed:", e);
     }
   };
 

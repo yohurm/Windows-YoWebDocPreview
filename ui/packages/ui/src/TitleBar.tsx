@@ -99,13 +99,16 @@ export function YoTitleBar(props: YoTitleBarProps): JSX.Element {
           <div class="yo-titlebar__actions">{props.actions}</div>
         </Show>
 
-        <div class="yo-titlebar__controls">
+        <div class="yo-titlebar__controls" data-tauri-drag-region={false}>
           <button
             type="button"
             class="yo-titlebar__btn"
             title="最小化"
             aria-label="最小化"
-            onClick={() => props.onMinimize?.()}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onMinimize?.();
+            }}
           >
             <IconMinimize />
           </button>
@@ -114,7 +117,10 @@ export function YoTitleBar(props: YoTitleBarProps): JSX.Element {
             class="yo-titlebar__btn"
             title={props.maximized ? "还原" : "最大化"}
             aria-label={props.maximized ? "还原" : "最大化"}
-            onClick={() => props.onToggleMaximize?.()}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onToggleMaximize?.();
+            }}
           >
             <Show when={props.maximized} fallback={<IconMaximize />}>
               <IconRestore />
@@ -125,7 +131,10 @@ export function YoTitleBar(props: YoTitleBarProps): JSX.Element {
             class="yo-titlebar__btn yo-titlebar__btn--close"
             title="关闭"
             aria-label="关闭"
-            onClick={() => props.onClose?.()}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onClose?.();
+            }}
           >
             <IconClose />
           </button>

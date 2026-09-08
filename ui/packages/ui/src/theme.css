@@ -713,6 +713,7 @@ body {
   height: 100%;
   -webkit-app-region: no-drag;
   app-region: no-drag;
+  z-index: 10;
 }
 
 .yo-titlebar__actions {
@@ -725,6 +726,8 @@ body {
 .yo-titlebar__controls {
   display: flex;
   height: 100%;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .yo-titlebar__btn {
@@ -738,6 +741,8 @@ body {
   color: var(--yo-text-muted);
   cursor: pointer;
   outline: none;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
   transition: background-color var(--yo-transition-fast), color var(--yo-transition-fast);
 }
 
@@ -907,5 +912,24 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.yo-catalog-btn-icon {
+  border: none;
+  background: transparent;
+  color: var(--yo-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--yo-radius-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--yo-transition-fast);
+}
+
+.yo-catalog-btn-icon:hover {
+  background: var(--yo-bg-hover);
+  color: var(--yo-text);
+}
+
 
 
