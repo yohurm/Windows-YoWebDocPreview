@@ -2,89 +2,85 @@
 //!
 //! 规则（ADR-W4）：URL 命中专用适配器模式则解析出 catalog/slug；
 //! 未命中回退 generic-web（catalog=None，slug=域名+路径派生）。
+//!
+//! 华为专栏族表与 UI 镜像共用 testdata/huawei-catalogs.json。
 
+use std::sync::OnceLock;
+
+use serde::Deserialize;
 use yohu_protocol::DocRef;
 
-/// 华为开发者文档站 URL 前缀
-pub const HUAWEI_DOC_PREFIX: &str = "https://developer.huawei.com/consumer/cn/doc/";
+const HUAWEI_CATALOGS_JSON: &str = include_str!("../../../testdata/huawei-catalogs.json");
 
-/// 华为文档 catalog 路径段（含 NEXT/V5、变更预告）。
-pub const HUAWEI_CATALOGS: &[&str] = &[
-    "design-guides",
-    "harmonyos-guides-V5",
-    "harmonyos-guides",
-    "harmonyos-references-V5",
-    "harmonyos-references",
-    "harmonyos-faqs",
-    "best-practices",
-    "harmonyos-releases",
-    "harmonyos-roadmap",
-];
+static HUAWEI_CATALOG_TABLE: OnceLock<HuaweiCatalogTable> = OnceLock::new();
 
-/// 顶栏专栏族：一组 catalog 共用一个落地文档。
-pub struct HuaweiChannel {
-    pub key: &'static str,
-    pub catalogs: &'static [&'static str],
-    pub landing_catalog: &'static str,
-    pub landing_slug: &'static str,
+#[derive(Debug, Deserialize)]
+struct HuaweiCatalogTable {
+    prefix: String,
+    catalogs: Vec<HuaweiCatalog>,
+    channels: Vec<HuaweiChannel>,
 }
 
-pub const HUAWEI_CHANNELS: &[HuaweiChannel] = &[
-    HuaweiChannel {
-        key: "releases",
-        catalogs: &["harmonyos-releases"],
-        landing_catalog: "harmonyos-releases",
-        landing_slug: "2600",
-    },
-    HuaweiChannel {
-        key: "guides",
-        catalogs: &["harmonyos-guides", "harmonyos-guides-V5"],
-        landing_catalog: "harmonyos-guides",
-        landing_slug: "application-dev-guide",
-    },
-    HuaweiChannel {
-        key: "references",
-        catalogs: &["harmonyos-references", "harmonyos-references-V5"],
-        landing_catalog: "harmonyos-references",
-        landing_slug: "development-intro-api",
-    },
-    HuaweiChannel {
-        key: "practices",
-        catalogs: &["best-practices"],
-        landing_catalog: "best-practices",
-        landing_slug: "bpta-best-practices-overview",
-    },
-    HuaweiChannel {
-        key: "faqs",
-        catalogs: &["harmonyos-faqs"],
-        landing_catalog: "harmonyos-faqs",
-        landing_slug: "faqs-ability-kit",
-    },
-    HuaweiChannel {
-        key: "roadmap",
-        catalogs: &["harmonyos-roadmap"],
-        landing_catalog: "harmonyos-roadmap",
-        landing_slug: "changelogs-overview-pre",
-    },
-];
+#[derive(Debug, Deserialize)]
+pub struct HuaweiCatalog {
+    pub id: String,
+    #[serde(rename = "displayName")]
+    pub display_name: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct HuaweiChannel {
+    pub key: String,
+    pub label: String,
+    pub catalogs: Vec<String>,
+    #[serde(rename = "landingCatalog")]
+    pub landing_catalog: String,
+    #[serde(rename = "landingSlug")]
+    pub landing_slug: String,
+}
+
+fn catalog_table() -> &'static HuaweiCatalogTable {
+    HUAWEI_CATALOG_TABLE.get_or_init(|| {
+        serde_json::from_str(HUAWEI_CATALOGS_JSON)
+            .expect("testdata/huawei-catalogs.json must parse")
+    })
+}
+
+pub fn huawei_doc_prefix() -> &'static str {
+    catalog_table().prefix.as_str()
+}
+
+pub fn huawei_catalogs() -> &'static [HuaweiCatalog] {
+    &catalog_table().catalogs
+}
+
+pub fn huawei_channels() -> &'static [HuaweiChannel] {
+    &catalog_table().channels
+}
+
+pub fn is_huawei_catalog(id: &str) -> bool {
+    huawei_catalogs().iter().any(|c| c.id == id)
+}
 
 pub fn huawei_doc_url(catalog: &str, slug: &str) -> String {
-    format!("{HUAWEI_DOC_PREFIX}{catalog}/{slug}")
+    format!("{}{catalog}/{slug}", huawei_doc_prefix())
 }
 
 pub fn huawei_channel_for_catalog(catalog: &str) -> Option<&'static HuaweiChannel> {
-    HUAWEI_CHANNELS.iter().find(|ch| ch.catalogs.contains(&catalog))
+    huawei_channels()
+        .iter()
+        .find(|ch| ch.catalogs.iter().any(|id| id == catalog))
 }
 
 pub fn huawei_channel_landing_url(channel: &HuaweiChannel) -> String {
-    huawei_doc_url(channel.landing_catalog, channel.landing_slug)
+    huawei_doc_url(&channel.landing_catalog, &channel.landing_slug)
 }
 
 /// 尝试按华为文档 URL 模式解析：`.../doc/<catalog>/<slug>`。
 pub fn match_huawei(url: &str) -> Option<DocRef> {
-    let rest = url.strip_prefix(HUAWEI_DOC_PREFIX)?;
+    let rest = url.strip_prefix(huawei_doc_prefix())?;
     let (catalog, slug_full) = rest.split_once('/')?;
-    if !HUAWEI_CATALOGS.contains(&catalog) {
+    if !is_huawei_catalog(catalog) {
         return None;
     }
     // 去掉锚点/查询/尾部斜杠/.md 后缀
@@ -193,11 +189,11 @@ mod tests {
 
     #[test]
     fn channel_landings_parse_as_huawei_adapter() {
-        for ch in HUAWEI_CHANNELS {
+        for ch in huawei_channels() {
             let url = huawei_channel_landing_url(ch);
             let r = parse_url(&url);
             assert_eq!(r.source_id, "huawei-harmonyos", "{url}");
-            assert_eq!(r.catalog.as_deref(), Some(ch.landing_catalog), "{url}");
+            assert_eq!(r.catalog.as_deref(), Some(ch.landing_catalog.as_str()), "{url}");
             assert_eq!(r.slug, ch.landing_slug, "{url}");
         }
     }
@@ -213,20 +209,32 @@ mod tests {
 
     #[test]
     fn channel_table_catalogs_are_registered() {
-        for ch in HUAWEI_CHANNELS {
-            for id in ch.catalogs {
+        for catalog in huawei_catalogs() {
+            assert!(!catalog.display_name.is_empty(), "{}", catalog.id);
+        }
+        for ch in huawei_channels() {
+            assert!(!ch.label.is_empty(), "{}", ch.key);
+            for id in &ch.catalogs {
                 assert!(
-                    HUAWEI_CATALOGS.contains(id),
-                    "channel {} catalog {id} missing from HUAWEI_CATALOGS",
+                    is_huawei_catalog(id),
+                    "channel {} catalog {id} missing from catalogs",
                     ch.key
                 );
             }
             assert!(
-                ch.catalogs.contains(&ch.landing_catalog),
+                ch.catalogs.iter().any(|id| id == &ch.landing_catalog),
                 "landing catalog {} not in channel {}",
                 ch.landing_catalog,
                 ch.key
             );
         }
+    }
+
+    #[test]
+    fn catalog_table_prefix_is_the_doc_host() {
+        assert_eq!(
+            huawei_doc_prefix(),
+            "https://developer.huawei.com/consumer/cn/doc/"
+        );
     }
 }

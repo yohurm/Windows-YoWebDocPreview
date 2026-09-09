@@ -9,11 +9,12 @@ use async_trait::async_trait;
 use serde_json::json;
 use yohu_protocol::{CatalogNode, DocRef, RawDoc};
 
+use yohu_domain::{huawei_doc_prefix, huawei_doc_url};
+
 use crate::adapter::SourceAdapter;
 use crate::error::SourceError;
 use crate::http::HttpClient;
 
-pub const HUAWEI_DOC_PREFIX: &str = "https://developer.huawei.com/consumer/cn/doc/";
 const DEFAULT_SVC_HOST: &str = "https://svc-drcn.developer.huawei.com";
 const DOC_ENDPOINT: &str = "/community/servlet/consumer/cn/documentPortal/getDocumentById";
 const CATALOG_ENDPOINT: &str = "/community/servlet/consumer/cn/documentPortal/getCatalogTree";
@@ -42,10 +43,7 @@ fn post_document<'a>(
         .post(&url)
         .header("Content-Type", "application/json; charset=UTF-8")
         .header("Origin", "https://developer.huawei.com")
-        .header(
-            "Referer",
-            format!("https://developer.huawei.com/consumer/cn/doc/{catalog}/{slug}"),
-        )
+        .header("Referer", huawei_doc_url(catalog, slug))
         .json(&body)
 }
 
@@ -62,10 +60,7 @@ fn post_catalog_tree<'a>(
         .post(&url)
         .header("Content-Type", "application/json; charset=UTF-8")
         .header("Origin", "https://developer.huawei.com")
-        .header(
-            "Referer",
-            format!("https://developer.huawei.com/consumer/cn/doc/{catalog}/"),
-        )
+        .header("Referer", format!("{}{catalog}/", huawei_doc_prefix()))
         .json(&body)
 }
 
@@ -215,9 +210,6 @@ pub async fn probe_meta(
         _ => Err(SourceError::NotFound(slug.to_string())),
     }
 }
-
-/// 华为文档 URL 前缀（re-export 供测试）
-pub const DOC_PREFIX: &str = HUAWEI_DOC_PREFIX;
 
 #[cfg(test)]
 mod tests {

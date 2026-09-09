@@ -1,0 +1,58 @@
+{
+  "prefix": "https://developer.huawei.com/consumer/cn/doc/",
+  "catalogs": [
+    { "id": "design-guides", "displayName": "设计指南" },
+    { "id": "harmonyos-guides-V5", "displayName": "HarmonyOS NEXT 开发指南" },
+    { "id": "harmonyos-guides", "displayName": "HarmonyOS 开发指南" },
+    { "id": "harmonyos-references-V5", "displayName": "HarmonyOS NEXT API 参考" },
+    { "id": "harmonyos-references", "displayName": "HarmonyOS API 参考" },
+    { "id": "harmonyos-faqs", "displayName": "常见问题" },
+    { "id": "best-practices", "displayName": "最佳实践" },
+    { "id": "harmonyos-releases", "displayName": "版本说明" },
+    { "id": "harmonyos-roadmap", "displayName": "变更预告" }
+  ],
+  "channels": [
+    {
+      "key": "releases",
+      "label": "版本说明",
+      "catalogs": ["harmonyos-releases"],
+      "landingCatalog": "harmonyos-releases",
+      "landingSlug": "2600"
+    },
+    {
+      "key": "guides",
+      "label": "指南",
+      "catalogs": ["harmonyos-guides", "harmonyos-guides-V5"],
+      "landingCatalog": "harmonyos-guides",
+      "landingSlug": "application-dev-guide"
+    },
+    {
+      "key": "references",
+      "label": "API参考",
+      "catalogs": ["harmonyos-references", "harmonyos-references-V5"],
+      "landingCatalog": "harmonyos-references",
+      "landingSlug": "development-intro-api"
+    },
+    {
+      "key": "practices",
+      "label": "最佳实践",
+      "catalogs": ["best-practices"],
+      "landingCatalog": "best-practices",
+      "landingSlug": "bpta-best-practices-overview"
+    },
+    {
+      "key": "faqs",
+      "label": "FAQ",
+      "catalogs": ["harmonyos-faqs"],
+      "landingCatalog": "harmonyos-faqs",
+      "landingSlug": "faqs-ability-kit"
+    },
+    {
+      "key": "roadmap",
+      "label": "变更预告",
+      "catalogs": ["harmonyos-roadmap"],
+      "landingCatalog": "harmonyos-roadmap",
+      "landingSlug": "changelogs-overview-pre"
+    }
+  ]
+}
