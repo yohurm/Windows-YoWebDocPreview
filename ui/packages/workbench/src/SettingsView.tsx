@@ -19,6 +19,7 @@ import {
   YoThemeCards,
   YoThemeChromeButton,
   YoTitleBar,
+  YoStage,
 } from "@yohu/ui";
 import type { WindowCaptionButtonsProps } from "@yohu/ui";
 
@@ -167,7 +168,8 @@ function SettingsForm(props: { session: SettingsSession }) {
           </Show>
           <Show when={props.session.settings()}>
             {(settings) => (
-              <>
+              <YoStage keys={section()} recipe="fade-local">
+                <>
                 <Show when={section() === "appearance"}>
                   <div class="yo-settings__page-head">
                     <h2 class="yo-settings__title">外观</h2>
@@ -304,7 +306,8 @@ function SettingsForm(props: { session: SettingsSession }) {
                     </dl>
                   </section>
                 </Show>
-              </>
+                </>
+              </YoStage>
             )}
           </Show>
         </div>

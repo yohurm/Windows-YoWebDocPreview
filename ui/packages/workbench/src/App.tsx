@@ -1,4 +1,5 @@
 import { createSignal, For, Show } from "solid-js";
+import { YoStage } from "@yohu/ui";
 
 import { modules } from "./registry";
 import { createSettingsSession } from "./settingsSession";
@@ -14,27 +15,29 @@ export function App() {
   const appearance = () => settingsSession.resolved();
 
   return (
-    <Show
-      when={!settingsOpen()}
-      fallback={
-        <SettingsPage
-          window={windowSession.caption()}
-          session={settingsSession}
-          onBack={() => setSettingsOpen(false)}
-        />
-      }
-    >
-      <For each={registered}>
-        {(mod) => (
-          <mod.Component
+    <YoStage keys={settingsOpen() ? "settings" : "workbench"}>
+      <Show
+        when={!settingsOpen()}
+        fallback={
+          <SettingsPage
             window={windowSession.caption()}
-            appearance={appearance()}
-            onSetTheme={settingsSession.setTheme}
-            onOpenSettings={() => setSettingsOpen(true)}
+            session={settingsSession}
+            onBack={() => setSettingsOpen(false)}
           />
-        )}
-      </For>
-    </Show>
+        }
+      >
+        <For each={registered}>
+          {(mod) => (
+            <mod.Component
+              window={windowSession.caption()}
+              appearance={appearance()}
+              onSetTheme={settingsSession.setTheme}
+              onOpenSettings={() => setSettingsOpen(true)}
+            />
+          )}
+        </For>
+      </Show>
+    </YoStage>
   );
 }
 
