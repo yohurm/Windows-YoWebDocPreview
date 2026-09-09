@@ -19,7 +19,8 @@
         "center": true,
         "decorations": false,
         "shadow": true,
-        "backgroundColor": "#090D16"
+        "visible": false,
+        "backgroundColor": "#F8FAFC"
       }
     ],
     "security": {

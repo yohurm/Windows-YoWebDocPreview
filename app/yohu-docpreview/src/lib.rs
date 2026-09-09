@@ -6,6 +6,7 @@
 //! - 所有业务能力在 core crates（protocol/runtime/domain/source/md-convert）；
 //! - 事件唯一出口是 `events.rs` 总线；命令与后台只 `tx.send(AppEvent)`。
 
+mod appearance;
 mod commands;
 mod events;
 mod panic_hook;
@@ -66,6 +67,11 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
             cache: Mutex::new(Cache::new()),
         });
 
+        if let Some(window) = app.get_webview_window("main") {
+            appearance::apply_to_window(&window, snapshot.theme);
+            let _ = window.show();
+        }
+
         Ok(())
     });
 
@@ -90,13 +96,24 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     // 6) 退出序列（RunEvent::Exit）：根 token cancel → 设置 flush
     app.run(move |app_handle, event| {
-        if let RunEvent::Exit = event {
-            if let Some(state) = app_handle.try_state::<AppState>() {
-                state.root_cancel.cancel();
-                if let Err(e) = state.settings.save_atomic() {
-                    eprintln!("flush settings on exit: {e}");
+        match event {
+            RunEvent::Ready => {
+                if let Some(window) = app_handle.get_webview_window("main") {
+                    if let Some(state) = app_handle.try_state::<AppState>() {
+                        appearance::apply_to_window(&window, state.settings.snapshot().theme);
+                    }
+                    let _ = window.show();
                 }
             }
+            RunEvent::Exit => {
+                if let Some(state) = app_handle.try_state::<AppState>() {
+                    state.root_cancel.cancel();
+                    if let Err(e) = state.settings.save_atomic() {
+                        eprintln!("flush settings on exit: {e}");
+                    }
+                }
+            }
+            _ => {}
         }
     });
 

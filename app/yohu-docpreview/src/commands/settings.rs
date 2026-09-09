@@ -1,8 +1,9 @@
 //! 设置命令：get / set（set 后必发 `settings/changed` 全量快照）。
 
-use tauri::State;
+use tauri::{AppHandle, State};
 use yohu_protocol::{AppEvent, AppSettings, IpcError, IpcErrorCode};
 
+use crate::appearance;
 use crate::commands::ipc_code;
 use crate::state::AppState;
 
@@ -18,6 +19,7 @@ pub fn settings_get(state: State<'_, AppState>) -> AppSettings {
 /// concurrency / imageDownload 下一任务生效，requestTimeoutSec / theme 立即生效（前端自应用）。
 #[tauri::command(rename = "settings.set")]
 pub async fn settings_set(
+    app: AppHandle,
     state: State<'_, AppState>,
     settings: AppSettings,
 ) -> Result<AppSettings, IpcError> {
@@ -25,6 +27,7 @@ pub async fn settings_set(
         .settings
         .set_all(settings)
         .map_err(|e| ipc_code(IpcErrorCode::Io, e))?;
+    appearance::apply_to_app(&app, updated.theme);
     let _ = state
         .event_tx
         .send(AppEvent::SettingsChanged { key: None, settings: updated.clone() })
