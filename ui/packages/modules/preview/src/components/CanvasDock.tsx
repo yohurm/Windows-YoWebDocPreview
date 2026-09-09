@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 
 import { IconGlobe, YoStage, type Appearance } from "@yohu/ui";
 
@@ -8,9 +8,11 @@ import { CanvasOpBar } from "./CanvasOpBar";
 import { ChannelBar } from "./ChannelBar";
 import { DocumentPath } from "./DocumentPath";
 import { TocAside } from "./TocAside";
+import { WebReadingFrame } from "./WebReadingFrame";
 
 export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance }) {
   const { store } = props;
+  const [webTick, setWebTick] = createSignal(0);
 
   const webDocHtml = createMemo(() =>
     buildWebDocument({
@@ -18,39 +20,8 @@ export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance
       rawHtml: store.session().rawHtml,
       sourceUrl: store.session().url,
       catalogNodes: store.session().catalogNodes,
-      appearance: props.appearance ?? "light",
     })
   );
-
-  const [activeBuffer, setActiveBuffer] = createSignal<0 | 1>(0);
-  const [html0, setHtml0] = createSignal("");
-  const [html1, setHtml1] = createSignal("");
-  const [webTick, setWebTick] = createSignal(0);
-
-  createEffect(() => {
-    const nextHtml = webDocHtml();
-    if (!nextHtml) return;
-    const current = activeBuffer() === 0 ? html0() : html1();
-    if (!current) {
-      if (activeBuffer() === 0) setHtml0(nextHtml);
-      else setHtml1(nextHtml);
-      return;
-    }
-    if (nextHtml === current) return;
-    const nextBuffer = activeBuffer() === 0 ? 1 : 0;
-    if (nextBuffer === 1) setHtml1(nextHtml);
-    else setHtml0(nextHtml);
-  });
-
-  const handleFrameLoad = (bufferIdx: 0 | 1) => {
-    if (activeBuffer() !== bufferIdx) setActiveBuffer(bufferIdx);
-    setWebTick((n) => n + 1);
-  };
-
-  onCleanup(() => {
-    setHtml0("");
-    setHtml1("");
-  });
 
   const onMarkdown = () => store.readingSurface() === "markdown";
 
@@ -81,23 +52,10 @@ export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance
                   </div>
                 }
               >
-                <iframe
-                  srcdoc={html0()}
-                  title="Web Buffer 0"
-                  data-yo-read="web"
-                  class="yo-web__frame yohu-recipe-crossfade"
-                  data-active={activeBuffer() === 0 ? "" : undefined}
-                  sandbox="allow-same-origin allow-scripts allow-popups"
-                  onLoad={() => handleFrameLoad(0)}
-                />
-                <iframe
-                  srcdoc={html1()}
-                  title="Web Buffer 1"
-                  data-yo-read="web"
-                  class="yo-web__frame yohu-recipe-crossfade"
-                  data-active={activeBuffer() === 1 ? "" : undefined}
-                  sandbox="allow-same-origin allow-scripts allow-popups"
-                  onLoad={() => handleFrameLoad(1)}
+                <WebReadingFrame
+                  html={webDocHtml()}
+                  appearance={props.appearance ?? "light"}
+                  onReady={() => setWebTick((n) => n + 1)}
                 />
               </Show>
             </div>
