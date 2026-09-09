@@ -1,5 +1,4 @@
-import { IconCode, IconDocument, IconGlobe } from "@yohu/ui";
-import { Show } from "solid-js";
+import { IconCode, IconDocument, IconGlobe, YoIndicator, YoPresence } from "@yohu/ui";
 
 import type { PreviewStore } from "../store";
 
@@ -11,6 +10,11 @@ export function CanvasOpBar(props: { store: PreviewStore }) {
     <div class="yo-canvas__opbar" role="toolbar" aria-label="操作栏">
       <div class="yo-reader-switch">
         <div class="yo-segmented" role="tablist" aria-label="阅读体验">
+          <YoIndicator
+            follow={store.readingSurface()}
+            variant="thumb"
+            selector=".yo-segmented__btn.is-on"
+          />
           <button
             type="button"
             classList={{ "yo-segmented__btn": true, "is-on": store.readingSurface() === "web" }}
@@ -30,8 +34,13 @@ export function CanvasOpBar(props: { store: PreviewStore }) {
             Markdown
           </button>
         </div>
-        <Show when={onMarkdown()}>
+        <YoPresence when={onMarkdown()} recipe="chip">
           <div class="yo-segmented" role="tablist" aria-label="Markdown 呈现">
+            <YoIndicator
+              follow={store.markdownReveal()}
+              variant="thumb"
+              selector=".yo-segmented__btn.is-on"
+            />
             <button
               type="button"
               classList={{
@@ -56,7 +65,7 @@ export function CanvasOpBar(props: { store: PreviewStore }) {
               源码
             </button>
           </div>
-        </Show>
+        </YoPresence>
       </div>
     </div>
   );

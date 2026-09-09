@@ -90,7 +90,7 @@ export function markdownScroller(): HTMLElement | null {
 }
 
 export function webScroller(): HTMLElement | null {
-  const frame = document.querySelector<HTMLIFrameElement>("iframe.yo-web__frame.is-active");
+  const frame = document.querySelector<HTMLIFrameElement>("iframe.yo-web__frame[data-active]");
   return frame?.contentDocument?.querySelector<HTMLElement>("[data-yo-read='article']") ?? null;
 }
 

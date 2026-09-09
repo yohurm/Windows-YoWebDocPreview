@@ -1,5 +1,7 @@
 import { createEffect, createSignal, onCleanup, Show } from "solid-js";
 
+import { IconPanelRight } from "@yohu/ui";
+
 import {
   bindScroller,
   createReadingNav,
@@ -14,6 +16,7 @@ export function TocAside(props: { store: PreviewStore; webTick?: number }) {
   const { store } = props;
   const [activeId, setActiveId] = createSignal<string | null>(null);
   const nav = createReadingNav();
+  const open = () => store.inspectorOpen();
 
   createEffect(() => {
     const surface = store.readingSurface();
@@ -45,40 +48,34 @@ export function TocAside(props: { store: PreviewStore; webTick?: number }) {
   };
 
   return (
-    <Show
-      when={store.inspectorOpen()}
-      fallback={
-        <button
-          type="button"
-          class="yo-pane-rail yo-pane-rail--end"
-          title="展开大纲 (Ctrl+O)"
-          onClick={() => store.toggleInspector()}
-        >
-          大纲
-        </button>
-      }
-    >
-      <aside class="yo-toc">
+    <aside class="yo-toc yohu-recipe-rail-pane" data-collapsed={open() ? undefined : ""}>
+      <div class="yo-toc__inner">
         <div class="yo-toc__head">
           <span class="yo-toc__title">大纲</span>
           <button
             type="button"
-            class="yo-nav__btn"
-            title="收起大纲 (Ctrl+O)"
+            class="yo-nav__icon-btn"
+            title={open() ? "收起大纲 (Ctrl+O)" : "展开大纲 (Ctrl+O)"}
+            aria-expanded={open()}
             onClick={() => store.toggleInspector()}
           >
-            收起
+            <IconPanelRight />
           </button>
         </div>
-        <div class="yo-toc__body">
-          <Show
-            when={store.tocItems().length > 0}
-            fallback={<div class="yo-toc__empty">打开文档后显示本节目录</div>}
-          >
-            <TocList items={store.tocItems()} activeId={activeId()} onOpen={openHeading} onReveal={revealActive} />
-          </Show>
+        <div class="yo-toc__rest" inert={!open() ? true : undefined} aria-hidden={!open() || undefined}>
+          <div class="yo-toc__body">
+            <Show
+              when={store.tocItems().length > 0}
+              fallback={<div class="yo-toc__empty">打开文档后显示本节目录</div>}
+            >
+              <TocList items={store.tocItems()} activeId={activeId()} onOpen={openHeading} onReveal={revealActive} />
+            </Show>
+          </div>
         </div>
-      </aside>
-    </Show>
+        <span class="yo-toc__rail-label" aria-hidden="true">
+          大纲
+        </span>
+      </div>
+    </aside>
   );
 }

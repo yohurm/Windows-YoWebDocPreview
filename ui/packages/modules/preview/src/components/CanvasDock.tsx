@@ -1,6 +1,6 @@
 import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-js";
 
-import { IconGlobe, type Appearance } from "@yohu/ui";
+import { IconGlobe, YoStage, type Appearance } from "@yohu/ui";
 
 import { buildWebDocument } from "../engine/web";
 import type { PreviewStore } from "../store";
@@ -63,58 +63,65 @@ export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance
         <div class="yo-notice yo-notice--danger">{store.session().error}</div>
       </Show>
 
-      <div class="yo-canvas__content">
-        <Show when={store.readingSurface() === "web"}>
-          <div class="yo-web">
-            <Show
-              when={store.session().rawHtml || store.session().meta}
-              fallback={
-                <div class="yo-web__placeholder">
-                  <IconGlobe class="yo-icon-lg" />
-                  <span>载入文档后呈现网页原文</span>
-                </div>
-              }
-            >
-              <iframe
-                srcdoc={html0()}
-                title="Web Buffer 0"
-                data-yo-read="web"
-                classList={{
-                  "yo-web__frame": true,
-                  "is-active": activeBuffer() === 0,
-                }}
-                sandbox="allow-same-origin allow-scripts allow-popups"
-                onLoad={() => handleFrameLoad(0)}
-              />
-              <iframe
-                srcdoc={html1()}
-                title="Web Buffer 1"
-                data-yo-read="web"
-                classList={{
-                  "yo-web__frame": true,
-                  "is-active": activeBuffer() === 1,
-                }}
-                sandbox="allow-same-origin allow-scripts allow-popups"
-                onLoad={() => handleFrameLoad(1)}
-              />
-            </Show>
-          </div>
-        </Show>
-
-        <Show when={onMarkdown() && store.markdownReveal() === "rendered"}>
-          <div class="yo-canvas__scroll" data-yo-read="md">
-            <div class="yo-canvas__article">
-              <DocumentPath crumbs={store.docCrumbs()} />
-              <article class="yo-md" innerHTML={store.session().renderedHtml} />
+      <div
+        class="yo-canvas__content yohu-recipe-rail"
+        classList={{ "is-toc-collapsed": !store.inspectorOpen() }}
+      >
+        <YoStage
+          keys={`${store.readingSurface()}:${onMarkdown() ? store.markdownReveal() : "web"}`}
+        >
+          <Show when={store.readingSurface() === "web"}>
+            <div class="yo-web">
+              <Show
+                when={store.session().rawHtml || store.session().meta}
+                fallback={
+                  <div class="yo-web__placeholder">
+                    <IconGlobe class="yo-icon-lg" />
+                    <span>载入文档后呈现网页原文</span>
+                  </div>
+                }
+              >
+                <iframe
+                  srcdoc={html0()}
+                  title="Web Buffer 0"
+                  data-yo-read="web"
+                  class="yo-web__frame yohu-recipe-crossfade"
+                  data-active={activeBuffer() === 0 ? "" : undefined}
+                  sandbox="allow-same-origin allow-scripts allow-popups"
+                  onLoad={() => handleFrameLoad(0)}
+                />
+                <iframe
+                  srcdoc={html1()}
+                  title="Web Buffer 1"
+                  data-yo-read="web"
+                  class="yo-web__frame yohu-recipe-crossfade"
+                  data-active={activeBuffer() === 1 ? "" : undefined}
+                  sandbox="allow-same-origin allow-scripts allow-popups"
+                  onLoad={() => handleFrameLoad(1)}
+                />
+              </Show>
             </div>
-          </div>
-        </Show>
+          </Show>
 
-        <Show when={onMarkdown() && store.markdownReveal() === "source"}>
-          <div class="yo-canvas__source">
-            <textarea readOnly value={store.session().markdownText} class="yo-canvas__source-text" />
-          </div>
-        </Show>
+          <Show when={onMarkdown() && store.markdownReveal() === "rendered"}>
+            <YoStage keys={store.session().url}>
+              <div class="yo-canvas__scroll" data-yo-read="md">
+                <div class="yo-canvas__article">
+                  <DocumentPath crumbs={store.docCrumbs()} />
+                  <article class="yo-md" innerHTML={store.session().renderedHtml} />
+                </div>
+              </div>
+            </YoStage>
+          </Show>
+
+          <Show when={onMarkdown() && store.markdownReveal() === "source"}>
+            <YoStage keys={store.session().url}>
+              <div class="yo-canvas__source">
+                <textarea readOnly value={store.session().markdownText} class="yo-canvas__source-text" />
+              </div>
+            </YoStage>
+          </Show>
+        </YoStage>
         <TocAside store={store} webTick={webTick()} />
       </div>
     </div>

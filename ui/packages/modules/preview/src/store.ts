@@ -30,7 +30,6 @@ export function createPreviewStore() {
   const [inspectorOpen, setInspectorOpen] = createSignal(true);
   const [expandedKeys, setExpandedKeys] = createSignal<Set<string>>(new Set());
   const [userCollapsedKeys, setUserCollapsedKeys] = createSignal<Set<string>>(new Set());
-
   const catalogCache = new Map<string, CatalogNode[]>();
   let openGen = 0;
 
@@ -214,10 +213,10 @@ export function createPreviewStore() {
     if (expandAll) {
       setExpandedKeys(new Set<string>(allIds));
       setUserCollapsedKeys(new Set<string>());
-    } else {
-      setExpandedKeys(new Set<string>());
-      setUserCollapsedKeys(new Set<string>(allIds));
+      return;
     }
+    setExpandedKeys(new Set<string>());
+    setUserCollapsedKeys(new Set<string>(allIds));
   };
 
   const resetToHome = () => {

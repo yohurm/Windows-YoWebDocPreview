@@ -3,7 +3,7 @@ import "./engine/markdown/skin.css";
 
 import { Show } from "solid-js";
 import { DISPLAY_NAME, type Theme } from "@yohu/api";
-import type { Appearance, WindowCaptionButtonsProps } from "@yohu/ui";
+import { YoStage, type Appearance, type WindowCaptionButtonsProps } from "@yohu/ui";
 
 import { CanvasDock } from "./components/CanvasDock";
 import { HomeStage } from "./components/HomeStage";
@@ -30,15 +30,20 @@ export function PreviewView(props: {
         onOpenSettings={props.onOpenSettings}
       />
       <div class="yo-app__body">
-        <Show
-          when={store.hasDoc()}
-          fallback={<HomeStage store={store} />}
-        >
-          <div class="yo-workspace">
-            <PrimarySidebar store={store} />
-            <CanvasDock store={store} appearance={props.appearance} />
-          </div>
-        </Show>
+        <YoStage keys={store.hasDoc() ? "doc" : "home"}>
+          <Show
+            when={store.hasDoc()}
+            fallback={<HomeStage store={store} />}
+          >
+            <div
+              class="yo-workspace yohu-recipe-rail"
+              classList={{ "is-nav-collapsed": !store.sidebarOpen() }}
+            >
+              <PrimarySidebar store={store} />
+              <CanvasDock store={store} appearance={props.appearance} />
+            </div>
+          </Show>
+        </YoStage>
       </div>
       <StatusBar store={store} />
     </div>

@@ -39,7 +39,7 @@ describe("CatalogTree", () => {
     },
   ];
 
-  it("renders expanded groups and hides collapsed children", () => {
+  it("renders expanded groups and keeps collapsed children unmounted", () => {
     const { container, unmount } = render(() => (
       <CatalogTree
         nodes={sampleNodes}
@@ -54,6 +54,7 @@ describe("CatalogTree", () => {
     expect(screen.getByText("创建项目")).toBeTruthy();
     expect(screen.getByText("开发指南")).toBeTruthy();
     expect(screen.queryByText("架构设计")).toBeNull();
+    expect(container.querySelector(".yohu-recipe-tree-chevron--end")).toBeTruthy();
     expect(container.querySelector(".yo-tree__row.is-on")?.textContent).toContain("创建项目");
     unmount();
   });

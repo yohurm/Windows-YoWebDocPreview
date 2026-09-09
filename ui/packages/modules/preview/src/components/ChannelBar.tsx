@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js";
+import { YoIndicator, YoPresence } from "@yohu/ui";
 
 import { channelTabLabel, HUAWEI_CHANNELS } from "../huaweiCatalog";
 import type { PreviewStore } from "../store";
@@ -12,10 +13,11 @@ export function ChannelBar(props: { store: PreviewStore }) {
   const loading = () => props.store.session().status === "loading";
 
   return (
-    <Show when={visible()}>
+    <YoPresence when={visible()} recipe="fade-local">
       <div class="yo-channelbar" role="navigation" aria-label="文档频道">
         <span class="yo-channelbar__brand">HarmonyOS</span>
         <div class="yo-channelbar__nav">
+          <YoIndicator follow={active() || null} variant="fill" selector=".yo-channelbar__item.is-on" />
           <For each={HUAWEI_CHANNELS}>
             {(ch) => (
               <button
@@ -33,6 +35,6 @@ export function ChannelBar(props: { store: PreviewStore }) {
           <span class="yo-channelbar__status">正在打开…</span>
         </Show>
       </div>
-    </Show>
+    </YoPresence>
   );
 }

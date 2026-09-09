@@ -69,12 +69,20 @@ function CatalogItem(props: {
         >
           <button
             type="button"
-            classList={{ "yo-tree__twist": true, "is-open": isExpanded() }}
+            class="yo-tree__twist"
             title={isExpanded() ? "折叠此组" : "展开此组"}
             aria-expanded={isExpanded()}
             onClick={handleTwist}
           >
-            <IconChevron />
+            <span
+              classList={{
+                "yohu-recipe-tree-chevron": true,
+                "yohu-recipe-tree-chevron--end": true,
+                "yohu-recipe-tree-chevron--open": isExpanded(),
+              }}
+            >
+              <IconChevron />
+            </span>
           </button>
         </Show>
         <span class="yo-tree__label" data-root={props.level === 0 ? "" : undefined}>
