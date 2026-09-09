@@ -9,7 +9,13 @@ import {
   type CatalogNode,
 } from "@yohu/api";
 
-import { catalogDisplayName, collectExpandableIds, findAncestorIds, resolveCatalogDocUrl } from "./catalogPolicy";
+import {
+  catalogIdFromUrl,
+  collectExpandableIds,
+  documentPath,
+  findAncestorIds,
+  resolveCatalogDocUrl,
+} from "./catalogPolicy";
 import {
   createEmptyDocSession,
   type MarkdownReveal,
@@ -29,15 +35,13 @@ export function createPreviewStore() {
   const [userCollapsedKeys, setUserCollapsedKeys] = createSignal<Set<string>>(new Set());
 
   const catalogCache = new Map<string, CatalogNode[]>();
+  let openGen = 0;
 
   const hasDoc = createMemo(
     () => Boolean(session().url && (session().rawHtml || session().markdownText))
   );
-  const title = createMemo(() => session().meta?.title || "未命名文档");
   const currentSlug = createMemo(() => session().meta?.docRef?.slug);
-  const catalogLabel = createMemo(() =>
-    session().catalogId ? catalogDisplayName(session().catalogId) : ""
-  );
+  const docPath = createMemo(() => documentPath(session().meta));
 
   const applyExpandedForSlug = (tree: CatalogNode[], slug?: string) => {
     if (!slug) return;
@@ -56,9 +60,15 @@ export function createPreviewStore() {
     });
   };
 
-  const loadCatalog = async (targetUrl: string, catalogId: string, slug?: string) => {
+  const loadCatalog = async (
+    targetUrl: string,
+    catalogId: string,
+    slug: string | undefined,
+    gen: number
+  ) => {
     const cached = catalogCache.get(catalogId);
     if (cached) {
+      if (gen !== openGen) return;
       setSession((prev) => ({ ...prev, catalogNodes: cached, catalogId }));
       applyExpandedForSlug(cached, slug);
       return;
@@ -66,6 +76,7 @@ export function createPreviewStore() {
 
     try {
       const tree = (await docCatalog(targetUrl)) || [];
+      if (gen !== openGen) return;
       catalogCache.set(catalogId, tree);
       const nextExpanded = new Set(collectExpandableIds(tree, 2));
       if (slug) {
@@ -79,15 +90,44 @@ export function createPreviewStore() {
         setExpandedKeys(nextExpanded);
       });
     } catch (cause) {
+      if (gen !== openGen) return;
       setSession((prev) => ({ ...prev, catalogNodes: [], catalogId: "", error: errorMessage(cause) }));
     }
   };
 
   const fetchDoc = async (targetUrl?: string) => {
     const rawUrl = (targetUrl ?? urlInput()).trim();
-    if (!rawUrl || session().status === "loading") return;
+    if (!rawUrl) return;
+    const current = session();
+    if (
+      rawUrl === current.url &&
+      (current.status === "ready" || current.status === "loading")
+    ) {
+      return;
+    }
 
-    setSession((prev) => ({ ...prev, status: "loading", error: "" }));
+    const gen = ++openGen;
+    const nextCat = catalogIdFromUrl(rawUrl) ?? "";
+    const keepTree = Boolean(
+      nextCat && nextCat === current.catalogId && current.catalogNodes.length > 0
+    );
+
+    batch(() => {
+      setUrlInput(rawUrl);
+      setSession((prev) => ({
+        ...prev,
+        url: rawUrl,
+        status: "loading",
+        error: "",
+        catalogId: keepTree ? prev.catalogId : nextCat,
+        catalogNodes: keepTree ? prev.catalogNodes : [],
+      }));
+      if (!keepTree) {
+        setExpandedKeys(new Set<string>());
+        setUserCollapsedKeys(new Set<string>());
+      }
+    });
+
     const started = performance.now();
 
     try {
@@ -96,6 +136,15 @@ export function createPreviewStore() {
         docHtml(rawUrl),
         docConvert(rawUrl),
       ]);
+      if (gen !== openGen) return;
+
+      const targetCat = fetchedMeta.docRef?.catalog ?? "";
+      const targetSlug = fetchedMeta.docRef?.slug;
+      const treeReady =
+        Boolean(targetCat) &&
+        targetCat === session().catalogId &&
+        session().catalogNodes.length > 0;
+
       const nextSession: UnifiedDocSession = {
         url: rawUrl,
         status: "ready",
@@ -105,8 +154,8 @@ export function createPreviewStore() {
         markdownText: fetchedMd,
         renderedHtml: renderMarkdownToSafeHtml(fetchedMd),
         tocList: extractTocFromMarkdown(fetchedMd),
-        catalogNodes: session().catalogNodes,
-        catalogId: session().catalogId,
+        catalogNodes: treeReady ? session().catalogNodes : [],
+        catalogId: targetCat,
         durationMs: Math.round(performance.now() - started),
         charCount: fetchedMd.length,
       };
@@ -115,21 +164,18 @@ export function createPreviewStore() {
         setSession(nextSession);
       });
 
-      const targetCat = fetchedMeta.docRef?.catalog;
-      const targetSlug = fetchedMeta.docRef?.slug;
       if (targetCat) {
-        if (targetCat !== session().catalogId || session().catalogNodes.length === 0) {
-          void loadCatalog(rawUrl, targetCat, targetSlug);
+        if (!treeReady) {
+          void loadCatalog(rawUrl, targetCat, targetSlug, gen);
         } else {
           applyExpandedForSlug(session().catalogNodes, targetSlug);
         }
-      } else {
-        setSession((prev) => ({ ...prev, catalogNodes: [], catalogId: "" }));
       }
     } catch (cause) {
+      if (gen !== openGen) return;
       setSession((prev) => ({
         ...prev,
-        status: prev.url ? "ready" : "error",
+        status: prev.rawHtml || prev.markdownText ? "ready" : "error",
         error: errorMessage(cause),
       }));
     }
@@ -220,9 +266,8 @@ export function createPreviewStore() {
     toggleInspector: () => setInspectorOpen((open) => !open),
     expandedKeys,
     hasDoc,
-    title,
     currentSlug,
-    catalogLabel,
+    docPath,
     resetToHome,
     fetchDoc,
     selectCatalogDoc,

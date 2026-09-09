@@ -9,6 +9,9 @@ export function StatusBar(props: { store: PreviewStore }) {
   return (
     <footer class="yo-statusbar">
       <div class="yo-statusbar__metrics">
+        <Show when={session().status === "loading"}>
+          <span>正在打开</span>
+        </Show>
         <Show when={session().durationMs !== null}>
           <span>耗时 {session().durationMs}ms</span>
         </Show>

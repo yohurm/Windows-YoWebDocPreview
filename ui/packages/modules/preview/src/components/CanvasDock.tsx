@@ -4,7 +4,79 @@ import { IconCode, IconDocument, IconGlobe } from "@yohu/ui";
 
 import { buildWebDocument } from "../engine/webRenderer";
 import type { PreviewStore } from "../store";
+import { ChannelBar } from "./ChannelBar";
 import { TocAside } from "./TocAside";
+
+function CanvasOpBar(props: { store: PreviewStore }) {
+  const { store } = props;
+  const onMarkdown = () => store.readingSurface() === "markdown";
+
+  return (
+    <div class="yo-canvas__opbar" role="toolbar" aria-label="操作栏">
+      <div class="yo-reader-switch">
+        <div class="yo-segmented" role="tablist" aria-label="阅读体验">
+          <button
+            type="button"
+            classList={{ "yo-segmented__btn": true, "is-on": store.readingSurface() === "web" }}
+            onClick={() => store.setReadingSurface("web")}
+            title="Web 原始阅读"
+          >
+            <IconGlobe class="yo-icon-sm" />
+            网页
+          </button>
+          <button
+            type="button"
+            classList={{ "yo-segmented__btn": true, "is-on": onMarkdown() }}
+            onClick={() => store.setReadingSurface("markdown")}
+            title="解析为 Markdown 阅读"
+          >
+            <IconDocument class="yo-icon-sm" />
+            Markdown
+          </button>
+        </div>
+        <Show when={onMarkdown()}>
+          <div class="yo-segmented" role="tablist" aria-label="Markdown 呈现">
+            <button
+              type="button"
+              classList={{
+                "yo-segmented__btn": true,
+                "is-on": store.markdownReveal() === "rendered",
+              }}
+              onClick={() => store.setMarkdownReveal("rendered")}
+              title="Markdown 渲染"
+            >
+              渲染
+            </button>
+            <button
+              type="button"
+              classList={{
+                "yo-segmented__btn": true,
+                "is-on": store.markdownReveal() === "source",
+              }}
+              onClick={() => store.setMarkdownReveal("source")}
+              title="Markdown 源码"
+            >
+              <IconCode class="yo-icon-sm" />
+              源码
+            </button>
+          </div>
+        </Show>
+      </div>
+    </div>
+  );
+}
+
+function DocumentPath(props: { catalogLabel: string; title: string }) {
+  return (
+    <div class="yo-doc-path">
+      <Show when={props.catalogLabel}>
+        <span>{props.catalogLabel}</span>
+        <span class="yo-doc-path__sep">/</span>
+      </Show>
+      <span class="yo-doc-path__title">{props.title}</span>
+    </div>
+  );
+}
 
 export function CanvasDock(props: { store: PreviewStore }) {
   const { store } = props;
@@ -14,6 +86,7 @@ export function CanvasDock(props: { store: PreviewStore }) {
       meta: store.session().meta,
       rawHtml: store.session().rawHtml,
       sourceUrl: store.session().url,
+      catalogNodes: store.session().catalogNodes,
     })
   );
 
@@ -49,64 +122,8 @@ export function CanvasDock(props: { store: PreviewStore }) {
 
   return (
     <div class="yo-canvas">
-      <div class="yo-canvas__header">
-        <div class="yo-canvas__breadcrumb">
-          <Show when={store.catalogLabel()}>
-            <span>{store.catalogLabel()}</span>
-            <span>›</span>
-          </Show>
-          <span class="yo-canvas__breadcrumb-title">{store.title()}</span>
-        </div>
-        <div class="yo-reader-switch">
-          <div class="yo-segmented" role="tablist" aria-label="阅读体验">
-            <button
-              type="button"
-              classList={{ "yo-segmented__btn": true, "is-on": store.readingSurface() === "web" }}
-              onClick={() => store.setReadingSurface("web")}
-              title="Web 原始阅读"
-            >
-              <IconGlobe class="yo-icon-sm" />
-              网页
-            </button>
-            <button
-              type="button"
-              classList={{ "yo-segmented__btn": true, "is-on": onMarkdown() }}
-              onClick={() => store.setReadingSurface("markdown")}
-              title="解析为 Markdown 阅读"
-            >
-              <IconDocument class="yo-icon-sm" />
-              Markdown
-            </button>
-          </div>
-          <Show when={onMarkdown()}>
-            <div class="yo-segmented" role="tablist" aria-label="Markdown 呈现">
-              <button
-                type="button"
-                classList={{
-                  "yo-segmented__btn": true,
-                  "is-on": store.markdownReveal() === "rendered",
-                }}
-                onClick={() => store.setMarkdownReveal("rendered")}
-                title="Markdown 渲染"
-              >
-                渲染
-              </button>
-              <button
-                type="button"
-                classList={{
-                  "yo-segmented__btn": true,
-                  "is-on": store.markdownReveal() === "source",
-                }}
-                onClick={() => store.setMarkdownReveal("source")}
-                title="Markdown 源码"
-              >
-                <IconCode class="yo-icon-sm" />
-                源码
-              </button>
-            </div>
-          </Show>
-        </div>
-      </div>
+      <CanvasOpBar store={store} />
+      <ChannelBar store={store} />
 
       <Show when={store.session().error}>
         <div class="yo-notice yo-notice--danger">{store.session().error}</div>
@@ -150,7 +167,10 @@ export function CanvasDock(props: { store: PreviewStore }) {
 
         <Show when={onMarkdown() && store.markdownReveal() === "rendered"}>
           <div class="yo-canvas__scroll">
-            <article class="yo-md yo-canvas__article" innerHTML={store.session().renderedHtml} />
+            <div class="yo-canvas__article">
+              <DocumentPath catalogLabel={store.docPath().catalogLabel} title={store.docPath().title} />
+              <article class="yo-md" innerHTML={store.session().renderedHtml} />
+            </div>
           </div>
         </Show>
 

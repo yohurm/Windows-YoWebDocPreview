@@ -1,0 +1,53 @@
+{
+  "source": "file:///testdata/chrome-compare/ours-introduction-to-arkts.html",
+  "measuredAt": "2026-09-09",
+  "crumb": {
+    "fontSize": "14px",
+    "lineHeight": "20px",
+    "color": "rgba(0, 0, 0, 0.6)",
+    "text": "HarmonyOS 开发指南>ArkTS语言介绍"
+  },
+  "h1": {
+    "fontSize": "36px",
+    "fontWeight": "700",
+    "lineHeight": "48px",
+    "color": "rgb(0, 0, 0)",
+    "margin": "40px 0px 0px"
+  },
+  "h2": {
+    "text": "基本知识",
+    "fontSize": "24px",
+    "fontWeight": "700",
+    "lineHeight": "32px",
+    "color": "rgba(0, 0, 0, 0.9)",
+    "margin": "48px 0px 0px"
+  },
+  "h3": {
+    "className": "firsth2",
+    "text": "声明",
+    "fontSize": "20px",
+    "fontWeight": "700",
+    "lineHeight": "24px",
+    "margin": "32px 0px 12px"
+  },
+  "p": {
+    "fontSize": "16px",
+    "lineHeight": "24px",
+    "margin": "24px 0px 0px"
+  },
+  "a": {
+    "color": "rgb(10, 89, 247)"
+  },
+  "pre": {
+    "fontSize": "14px",
+    "lineHeight": "22px",
+    "padding": "0px 16px 54px"
+  },
+  "codeWrap": {
+    "background": "rgb(250, 250, 250)"
+  },
+  "th": {
+    "padding": "10px 12px",
+    "background": "rgb(241, 243, 245)"
+  }
+}

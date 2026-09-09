@@ -156,37 +156,71 @@
   background: var(--yo-bg-app);
 }
 
-.yo-canvas__header {
-  min-height: var(--yo-header-bar-h);
-  height: auto;
-  padding: 4px var(--yo-space-lg);
+.yo-canvas__opbar {
+  height: var(--yo-header-bar-h);
+  padding: 0 var(--yo-space-md);
   background: var(--yo-bg-card);
   border-bottom: 1px solid var(--yo-line);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  font-size: var(--yo-font-sm);
-  color: var(--yo-text-muted);
+  justify-content: flex-end;
   flex-shrink: 0;
-  gap: var(--yo-space-md);
-  flex-wrap: wrap;
 }
 
-.yo-canvas__breadcrumb {
+.yo-channelbar {
+  height: 48px;
+  padding: 0 24px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
-  gap: var(--yo-space-sm);
-  min-width: 0;
-  overflow: hidden;
-  flex: 1;
+  gap: 30px;
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.9);
 }
 
-.yo-canvas__breadcrumb-title {
-  color: var(--yo-text);
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.yo-channelbar__brand {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.yo-channelbar__nav {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.yo-channelbar__item {
+  flex-shrink: 0;
+  margin-left: 8px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 26px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 26px;
+  color: rgba(0, 0, 0, 0.9);
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.yo-channelbar__item:first-child { margin-left: 0; }
+.yo-channelbar__item:hover { background: rgba(0, 0, 0, 0.06); }
+.yo-channelbar__item.is-on,
+.yo-channelbar__item.is-on:hover {
+  background: #000;
+  color: #fff;
+}
+
+.yo-channelbar__status {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
 }
 
 .yo-reader-switch {
@@ -195,7 +229,29 @@
   justify-content: flex-end;
   gap: var(--yo-space-sm);
   flex-shrink: 0;
-  margin-inline-start: auto;
+}
+
+.yo-doc-path {
+  display: flex;
+  align-items: center;
+  gap: var(--yo-space-sm);
+  margin: 0 0 var(--yo-space-xl);
+  font-size: var(--yo-font-sm);
+  color: var(--yo-text-muted);
+  min-width: 0;
+}
+
+.yo-doc-path__sep {
+  color: var(--yo-text-muted);
+  opacity: 0.7;
+}
+
+.yo-doc-path__title {
+  color: var(--yo-text);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .yo-canvas__content {
