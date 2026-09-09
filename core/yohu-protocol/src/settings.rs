@@ -54,6 +54,28 @@ impl SettingsKey {
     }
 }
 
+impl Theme {
+    /// 工作台窗口 / html 底色（与 `--yo-bg-app` 对齐）。
+    pub const FILL_LIGHT: (u8, u8, u8) = (0xF8, 0xFA, 0xFC);
+    pub const FILL_DARK: (u8, u8, u8) = (0x09, 0x0D, 0x16);
+
+    pub fn resolves_dark(self, system_dark: bool) -> bool {
+        match self {
+            Theme::Dark => true,
+            Theme::Light => false,
+            Theme::System => system_dark,
+        }
+    }
+
+    pub fn window_fill_rgb(self, system_dark: bool) -> (u8, u8, u8) {
+        if self.resolves_dark(system_dark) {
+            Self::FILL_DARK
+        } else {
+            Self::FILL_LIGHT
+        }
+    }
+}
+
 /// 全量设置快照（默认值即需求 §4.8 表）
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
@@ -125,5 +147,15 @@ mod tests {
         assert_eq!(SettingsKey::LibraryRoot.effect(), Effect::Restart);
         assert_eq!(SettingsKey::Theme.effect(), Effect::Immediate);
         assert_eq!(SettingsKey::Concurrency.effect(), Effect::NextTask);
+    }
+
+    #[test]
+    fn theme_resolves_against_system() {
+        assert!(Theme::Dark.resolves_dark(false));
+        assert!(!Theme::Light.resolves_dark(true));
+        assert!(Theme::System.resolves_dark(true));
+        assert!(!Theme::System.resolves_dark(false));
+        assert_eq!(Theme::Dark.window_fill_rgb(false), Theme::FILL_DARK);
+        assert_eq!(Theme::Light.window_fill_rgb(true), Theme::FILL_LIGHT);
     }
 }
