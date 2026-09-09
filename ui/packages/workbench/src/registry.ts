@@ -1,9 +1,12 @@
 import type { Component } from "solid-js";
 
-import type { WindowCaptionButtonsProps } from "@yohu/ui";
+import type { Theme } from "@yohu/api";
+import type { Appearance, WindowCaptionButtonsProps } from "@yohu/ui";
 
 export interface ModuleViewProps {
   window: WindowCaptionButtonsProps;
+  appearance?: Appearance;
+  onSetTheme?: (theme: Theme) => void;
   onOpenSettings?: () => void;
 }
 
