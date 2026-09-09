@@ -1,6 +1,6 @@
 import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-js";
 
-import { IconGlobe } from "@yohu/ui";
+import { IconGlobe, type Appearance } from "@yohu/ui";
 
 import { buildWebDocument } from "../engine/webRenderer";
 import type { PreviewStore } from "../store";
@@ -9,7 +9,7 @@ import { ChannelBar } from "./ChannelBar";
 import { DocumentPath } from "./DocumentPath";
 import { TocAside } from "./TocAside";
 
-export function CanvasDock(props: { store: PreviewStore }) {
+export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance }) {
   const { store } = props;
 
   const webDocHtml = createMemo(() =>
@@ -18,6 +18,7 @@ export function CanvasDock(props: { store: PreviewStore }) {
       rawHtml: store.session().rawHtml,
       sourceUrl: store.session().url,
       catalogNodes: store.session().catalogNodes,
+      appearance: props.appearance ?? "light",
     })
   );
 

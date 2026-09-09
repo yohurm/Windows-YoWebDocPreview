@@ -172,4 +172,22 @@ describe("buildWebDocument", () => {
     expect(result).toContain("ArkTS语言介绍");
     expect(result).toContain("viewBox=\"0 0 5.726 11.817\"");
   });
+
+  it("stamps the workbench appearance onto the article document", () => {
+    const dark = buildWebDocument({
+      meta: null,
+      rawHtml: "<p>正文</p>",
+      sourceUrl: "https://example.com",
+      appearance: "dark",
+    });
+    const light = buildWebDocument({
+      meta: null,
+      rawHtml: "<p>正文</p>",
+      sourceUrl: "https://example.com",
+    });
+    expect(light).toContain('<html lang="zh-CN" data-theme="light">');
+    expect(light).toContain('<meta name="color-scheme" content="light">');
+    expect(dark).toContain('<html lang="zh-CN" data-theme="dark">');
+    expect(dark).toContain('<meta name="color-scheme" content="dark">');
+  });
 });

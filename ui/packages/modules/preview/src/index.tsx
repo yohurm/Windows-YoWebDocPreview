@@ -1,8 +1,8 @@
 import "./preview.css";
 
 import { Show } from "solid-js";
-import { DISPLAY_NAME } from "@yohu/api";
-import type { WindowCaptionButtonsProps } from "@yohu/ui";
+import { DISPLAY_NAME, type Theme } from "@yohu/api";
+import type { Appearance, WindowCaptionButtonsProps } from "@yohu/ui";
 
 import { CanvasDock } from "./components/CanvasDock";
 import { HomeStage } from "./components/HomeStage";
@@ -13,6 +13,8 @@ import { createPreviewStore } from "./store";
 
 export function PreviewView(props: {
   window: WindowCaptionButtonsProps;
+  appearance?: Appearance;
+  onSetTheme?: (theme: Theme) => void;
   onOpenSettings?: () => void;
 }) {
   const store = createPreviewStore();
@@ -22,6 +24,8 @@ export function PreviewView(props: {
       <PreviewTitleBar
         store={store}
         window={props.window}
+        appearance={props.appearance}
+        onSetTheme={props.onSetTheme}
         onOpenSettings={props.onOpenSettings}
       />
       <div class="yo-app__body">
@@ -31,7 +35,7 @@ export function PreviewView(props: {
         >
           <div class="yo-workspace">
             <PrimarySidebar store={store} />
-            <CanvasDock store={store} />
+            <CanvasDock store={store} appearance={props.appearance} />
           </div>
         </Show>
       </div>

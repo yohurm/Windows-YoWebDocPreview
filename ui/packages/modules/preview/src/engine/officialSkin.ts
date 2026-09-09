@@ -17,6 +17,28 @@ export const OFFICIAL_ARTICLE_CSS = `
   --note-bg: #f2f5fc;
   --caution-bg: #fff6e8;
   --danger-bg: #fff2f0;
+  --note-accent: #0a59f7;
+  --caution-accent: #c87d12;
+  --danger-accent: #d94838;
+  --title: #000000;
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  --text: rgba(248, 250, 252, 0.92);
+  --text-dim: rgba(148, 163, 184, 0.95);
+  --link: #7db0ff;
+  --line: rgba(255, 255, 255, 0.12);
+  --bg: #131926;
+  --code-bg: #0b0f19;
+  --th-bg: #182030;
+  --note-bg: rgba(10, 89, 247, 0.16);
+  --caution-bg: rgba(200, 125, 18, 0.16);
+  --danger-bg: rgba(217, 72, 56, 0.18);
+  --note-accent: #7db0ff;
+  --caution-accent: #e0a54a;
+  --danger-accent: #f07167;
+  --title: #f8fafc;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -67,7 +89,7 @@ html, body {
   font-size: 36px;
   font-weight: 700;
   line-height: 48px;
-  color: #000;
+  color: var(--title);
 }
 .y-meta {
   display: flex;
@@ -184,10 +206,10 @@ html, body {
   padding: 12px 16px 12px 14px;
   border-radius: 8px;
   background: var(--note-bg);
-  border-left: 3px solid #0a59f7;
+  border-left: 3px solid var(--note-accent);
 }
-.note--caution { background: var(--caution-bg); border-left-color: #c87d12; }
-.note--danger { background: var(--danger-bg); border-left-color: #d94838; }
+.note--caution { background: var(--caution-bg); border-left-color: var(--caution-accent); }
+.note--danger { background: var(--danger-bg); border-left-color: var(--danger-accent); }
 .note::before {
   content: attr(data-note);
   display: block;
@@ -196,10 +218,10 @@ html, body {
   margin-bottom: 6px;
   text-transform: capitalize;
 }
-.note[data-note="note"]::before { content: "说明"; color: #0a59f7; }
-.note[data-note="caution"]::before { content: "注意"; color: #c87d12; }
-.note[data-note="danger"]::before { content: "警告"; color: #d94838; }
-.note[data-note="tip"]::before { content: "提示"; color: #0a59f7; }
+.note[data-note="note"]::before { content: "说明"; color: var(--note-accent); }
+.note[data-note="caution"]::before { content: "注意"; color: var(--caution-accent); }
+.note[data-note="danger"]::before { content: "警告"; color: var(--danger-accent); }
+.note[data-note="tip"]::before { content: "提示"; color: var(--note-accent); }
 .note img { display: none; }
 .notetitle { display: none; }
 .notebody p { margin: 6px 0; }
