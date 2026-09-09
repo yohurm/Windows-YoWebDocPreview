@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "identifier": "com.yohu.docpreview",
   "build": {
-    "frontendDist": "../../ui/apps/shell/dist"
+    "frontendDist": "../../ui/apps/shell/dist",
+    "devUrl": "http://localhost:1420"
   },
   "app": {
     "withGlobalTauri": false,
