@@ -91,8 +91,11 @@
   --yo-bg-input: #ffffff;
   --yo-titlebar-h: 40px;
   --yo-statusbar-h: 22px;
-  --yo-sidebar-w: 260px;
+  --yo-nav-w: 280px;
   --yo-toc-w: 220px;
+  --yo-tree-row-h: 28px;
+  --yo-tree-indent: 12px;
+  --yo-tree-switcher: 16px;
   --yo-canvas-max-w: 45rem;
   --yo-header-bar-h: 32px;
   --yo-caption-btn-w: 46px;

@@ -64,6 +64,14 @@ export function IconList(props: { class?: string; style?: JSX.CSSProperties }) {
   );
 }
 
+export function IconChevron(props: { class?: string; style?: JSX.CSSProperties }) {
+  return (
+    <svg class={props.class} style={props.style} width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M4.2 2.2 8 6 4.2 9.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  );
+}
+
 export function IconFolder(props: { class?: string; style?: JSX.CSSProperties }) {
   return (
     <svg class={props.class} style={props.style} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
