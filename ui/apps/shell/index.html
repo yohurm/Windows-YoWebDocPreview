@@ -4,6 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>YoDocPreview</title>
+    <script>
+      (function () {
+        try {
+          var pref = localStorage.getItem("yo-theme");
+          var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          var appearance =
+            pref === "light" || pref === "dark" ? pref : dark ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", appearance);
+          document.documentElement.style.colorScheme = appearance;
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      html, body { background: #f8fafc; color: #0f172a; color-scheme: light; }
+      html[data-theme="dark"], html[data-theme="dark"] body {
+        background: #090d16;
+        color: #f8fafc;
+        color-scheme: dark;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
