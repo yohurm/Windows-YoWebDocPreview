@@ -1,0 +1,117 @@
+{
+  "comment": "Huawei API <pre> fields. codehub file extension is language identity. class TypeScript/prettyprint/linenums/hljs is highlighter chrome — never identity when a sample file is present. Identity does not inspect code text.",
+  "cases": [
+    {
+      "className": "TypeScript",
+      "codehub": "https://gitcode.com/HarmonyOS_Samples/guide-snippets/blob/x/pages/BasicKnowledge.ets#L23-L25",
+      "lang": "ArkTS",
+      "grammar": "typescript",
+      "file": "BasicKnowledge.ets"
+    },
+    {
+      "className": "TypeScript prettyprint linenums hljs language-TypeScript",
+      "codehub": "https://example.com/a.ets#L1",
+      "lang": "ArkTS",
+      "grammar": "typescript",
+      "file": "a.ets"
+    },
+    {
+      "className": "TypeScript",
+      "codehub": "",
+      "lang": "TypeScript",
+      "grammar": "typescript",
+      "file": null
+    },
+    {
+      "className": "typescript",
+      "codehub": "",
+      "lang": "TypeScript",
+      "grammar": "typescript",
+      "file": null
+    },
+    {
+      "className": "ts",
+      "codehub": "",
+      "lang": "TypeScript",
+      "grammar": "typescript",
+      "file": null
+    },
+    {
+      "className": "TypeScript",
+      "codehub": "https://example.com/Foo.ts#L1",
+      "lang": "TypeScript",
+      "grammar": "typescript",
+      "file": "Foo.ts"
+    },
+    {
+      "className": "TypeScript",
+      "codehub": "https://example.com/model/Thing.d.ts",
+      "lang": "TypeScript",
+      "grammar": "typescript",
+      "file": "Thing.d.ts"
+    },
+    {
+      "className": "typescript",
+      "codehub": "https://example.com/res/default_tasks.json",
+      "lang": "JSON",
+      "grammar": "json",
+      "file": "default_tasks.json"
+    },
+    {
+      "className": "prettyprint linenums",
+      "codehub": "",
+      "lang": "text",
+      "grammar": null,
+      "file": null
+    },
+    {
+      "className": "",
+      "codehub": "",
+      "lang": "text",
+      "grammar": null,
+      "file": null
+    },
+    {
+      "className": "json",
+      "codehub": "",
+      "lang": "JSON",
+      "grammar": "json",
+      "file": null
+    },
+    {
+      "className": "xml",
+      "codehub": "",
+      "lang": "XML",
+      "grammar": "xml",
+      "file": null
+    },
+    {
+      "className": "bash",
+      "codehub": "",
+      "lang": "Bash",
+      "grammar": "bash",
+      "file": null
+    },
+    {
+      "className": "cpp",
+      "codehub": "https://example.com/native.cpp#L1",
+      "lang": "C++",
+      "grammar": "cpp",
+      "file": "native.cpp"
+    },
+    {
+      "className": "javascript",
+      "codehub": "",
+      "lang": "JavaScript",
+      "grammar": "javascript",
+      "file": null
+    },
+    {
+      "className": "ArkTS",
+      "codehub": "",
+      "lang": "ArkTS",
+      "grammar": "typescript",
+      "file": null
+    }
+  ]
+}
