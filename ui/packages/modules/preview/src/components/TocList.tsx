@@ -1,7 +1,7 @@
 import { For, createEffect } from "solid-js";
 import type { JSX } from "solid-js";
 
-import type { TocItem } from "../toc";
+import type { TocItem } from "../model";
 
 export function TocList(props: {
   items: TocItem[];

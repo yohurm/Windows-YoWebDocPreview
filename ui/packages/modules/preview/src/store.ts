@@ -12,14 +12,14 @@ import {
 import { collectExpandableIds, findAncestorIds, resolveCatalogDocUrl } from "./catalogTree";
 import { documentCrumbs } from "./documentCrumbs";
 import { catalogIdFromUrl } from "./huaweiCatalog";
-import { normalizeArticleHtml } from "./engine/normalizeArticleHtml";
+import { parseWebArticle } from "./engine/web";
+import { parseMarkdown } from "./engine/markdown";
 import {
   createEmptyDocSession,
   type MarkdownReveal,
   type ReadingSurface,
   type UnifiedDocSession,
 } from "./model";
-import { extractTocFromArticleHtml, extractTocFromMarkdown, renderMarkdownToSafeHtml } from "./toc";
 
 export function createPreviewStore() {
   const [session, setSession] = createSignal<UnifiedDocSession>(createEmptyDocSession());
@@ -145,6 +145,9 @@ export function createPreviewStore() {
         targetCat === session().catalogId &&
         session().catalogNodes.length > 0;
 
+      const markdown = parseMarkdown(fetchedMd);
+      const web = parseWebArticle(fetchedHtml, fetchedMeta.title ?? "");
+
       const nextSession: UnifiedDocSession = {
         url: rawUrl,
         status: "ready",
@@ -152,11 +155,9 @@ export function createPreviewStore() {
         meta: fetchedMeta,
         rawHtml: fetchedHtml,
         markdownText: fetchedMd,
-        renderedHtml: renderMarkdownToSafeHtml(fetchedMd),
-        markdownToc: extractTocFromMarkdown(fetchedMd),
-        webToc: extractTocFromArticleHtml(
-          normalizeArticleHtml(fetchedHtml, fetchedMeta.title ?? "")
-        ),
+        renderedHtml: markdown.html,
+        markdownToc: markdown.toc,
+        webToc: web.toc,
         catalogNodes: treeReady ? session().catalogNodes : [],
         catalogId: targetCat,
         durationMs: Math.round(performance.now() - started),

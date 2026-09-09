@@ -2,7 +2,7 @@ import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-j
 
 import { IconGlobe, type Appearance } from "@yohu/ui";
 
-import { buildWebDocument } from "../engine/webRenderer";
+import { buildWebDocument } from "../engine/web";
 import type { PreviewStore } from "../store";
 import { CanvasOpBar } from "./CanvasOpBar";
 import { ChannelBar } from "./ChannelBar";

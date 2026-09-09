@@ -1,6 +1,10 @@
 import type { CatalogNode, DocMeta } from "@yohu/api";
 
-import type { TocItem } from "./toc";
+export interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
 
 /** 一级阅读体验：站点原文，或解析后的 Markdown。 */
 export type ReadingSurface = "web" | "markdown";

@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { buildWebDocument } from "../packages/modules/preview/src/engine/webRenderer.ts";
+import { buildWebDocument } from "../packages/modules/preview/src/engine/web/document.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = join(here, "../..");

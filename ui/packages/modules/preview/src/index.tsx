@@ -1,4 +1,5 @@
 import "./preview.css";
+import "./engine/markdown/skin.css";
 
 import { Show } from "solid-js";
 import { DISPLAY_NAME, type Theme } from "@yohu/api";
