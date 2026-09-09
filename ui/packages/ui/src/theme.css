@@ -8,6 +8,8 @@
  * 4. 丝滑的状态转换动画与现代高质感排版
  */
 
+@import "./tokens/motion.css";
+
 :root {
   /* 品牌色与强调色 (Linear 风格的现代蓝紫色相) */
   --yo-accent: #3b82f6;
@@ -84,15 +86,54 @@
   --yo-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --yo-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  /* 动效过渡 */
-  --yo-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  --yo-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  /* 动效 token（JS 侧 tokens/motion.ts 单一事实源；模块禁止再写时长/曲线） */
+  --yohu-dur-fast: 100ms;
+  --yohu-dur-small: 150ms;
+  --yohu-dur-normal: 160ms;
+  --yohu-dur-local: 200ms;
+  --yohu-dur-slow: 300ms;
+  --yohu-dur-enter: 350ms;
+  --yohu-dur-progress: 400ms;
+  --yohu-dur-loop: 800ms;
+  --yohu-dur-loop-slow: 1.2s;
+  --yohu-dur-toast: 3s;
+  --yohu-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --yohu-ease-decel: cubic-bezier(0, 0, 0.4, 1);
+  --yohu-ease-accel: cubic-bezier(0.4, 0, 1, 1);
+  --yohu-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --yohu-ease-loop: ease-in-out;
+  --yohu-ease-spring: linear(0, 0.0221 4.2%, 0.0788 8.3%, 0.1579 12.5%, 0.2499 16.7%, 0.3471 20.8%, 0.4441 25.0%, 0.5368 29.2%, 0.6226 33.3%, 0.6999 37.5%, 0.7678 41.7%, 0.8262 45.8%, 0.8753 50.0%, 0.9157 54.2%, 0.9481 58.3%, 0.9736 62.5%, 0.9929 66.7%, 1.0071 70.8%, 1.0169 75.0%, 1.0232 79.2%, 1.0268 83.3%, 1.0283 87.5%, 1.0281 91.7%, 1.0268 95.8%, 1);
+  --yohu-ease-spring-soft: linear(0, 0.0313 4.2%, 0.1112 8.3%, 0.2211 12.5%, 0.3461 16.7%, 0.4745 20.8%, 0.5976 25.0%, 0.7097 29.2%, 0.8072 33.3%, 0.8886 37.5%, 0.9534 41.7%, 1.0027 45.8%, 1.0378 50.0%, 1.0607 54.2%, 1.0736 58.3%, 1.0784 62.5%, 1.0772 66.7%, 1.0718 70.8%, 1.0636 75.0%, 1.0540 79.2%, 1.0439 83.3%, 1.0341 87.5%, 1.0250 91.7%, 1.0170 95.8%, 1);
+  --yohu-motion-effects-fast: var(--yohu-dur-fast) var(--yohu-ease-standard);
+  --yohu-motion-effects-enter: var(--yohu-dur-normal) var(--yohu-ease-decel);
+  --yohu-motion-effects-exit: var(--yohu-dur-local) var(--yohu-ease-accel);
+  --yohu-motion-spatial-small: var(--yohu-dur-small) var(--yohu-ease-spring);
+  --yohu-motion-spatial-stretch: var(--yohu-dur-local) var(--yohu-ease-spring-soft);
+  --yohu-motion-spatial-local: var(--yohu-dur-local) var(--yohu-ease-emphasized);
+  --yohu-motion-spatial-panel: var(--yohu-dur-slow) var(--yohu-ease-standard);
+  --yohu-motion-spatial-enter: var(--yohu-dur-enter) var(--yohu-ease-decel);
+  --yohu-motion-spatial-exit: var(--yohu-dur-local) var(--yohu-ease-accel);
+  --yohu-space-xs: var(--yo-space-xs);
+  --yohu-space-sm: var(--yo-space-sm);
+  --yohu-space-md: var(--yo-space-md);
+  --yohu-control-height: 32px;
+  --yohu-state-selected: var(--yo-accent);
+  --yohu-ripple-radius: var(--yo-radius-sm);
+  --yohu-accent: var(--yo-accent);
+  --yohu-accent-hover: var(--yo-accent-hover);
+  --yohu-accent-pressed: var(--yo-accent-active);
+  --yohu-stroke-accent: 2px;
+
+  /* 动效过渡：旧名映射到 MotionSpec，禁止再写裸时长 */
+  --yo-transition-fast: var(--yohu-motion-effects-fast);
+  --yo-transition: var(--yohu-motion-spatial-local);
   --yo-bg-titlebar: #f1f5f9;
   --yo-bg-input: #ffffff;
   --yo-titlebar-h: 40px;
   --yo-statusbar-h: 22px;
   --yo-nav-w: 280px;
   --yo-toc-w: 220px;
+  --yo-pane-rail-w: 36px;
   --yo-tree-row-h: 28px;
   --yo-tree-indent: 12px;
   --yo-tree-switcher: 16px;
@@ -117,7 +158,7 @@
   --yo-font-base: 13px;
   --yo-on-accent: #ffffff;
   --yo-font-md: 14px;
-  --yo-transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --yo-transition-base: var(--yohu-motion-spatial-local);
 
   color-scheme: light;
 }
@@ -205,12 +246,16 @@ html, body {
   line-height: 1.5;
   user-select: none;
   overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
-@keyframes yo-rotate {
-  to {
-    transform: rotate(360deg);
-  }
+#root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 /* 优雅滚动条 */
@@ -406,6 +451,8 @@ html, body {
 }
 
 .yo-segmented {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: stretch;
   background: var(--yo-bg-subtle);
@@ -416,6 +463,8 @@ html, body {
 }
 
 .yo-segmented__btn {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -430,15 +479,30 @@ html, body {
   cursor: pointer;
 }
 
+.yo-segmented .yohu-recipe-indicator--thumb {
+  z-index: 0;
+  background: var(--yo-bg-card);
+  border-radius: 4px;
+  box-shadow: var(--yo-shadow-xs);
+}
+
 .yo-segmented__btn:hover {
   color: var(--yo-text);
 }
 
 .yo-segmented__btn.is-on {
-  background: var(--yo-bg-card);
   color: var(--yo-accent);
   font-weight: 600;
+}
+
+.yo-segmented:not([data-indicator-ready]) .yo-segmented__btn.is-on {
+  background: var(--yo-bg-card);
   box-shadow: var(--yo-shadow-xs);
+}
+
+.yo-segmented[data-indicator-ready] .yo-segmented__btn.is-on {
+  background: transparent;
+  box-shadow: none;
 }
 
 .yo-titlebar {
@@ -1041,7 +1105,7 @@ html, body {
 }
 
 .yo-rotate {
-  animation: yo-rotate 0.8s linear infinite;
+  animation: yohu-spin var(--yohu-dur-loop) linear infinite;
 }
 
 .yo-text-muted {
