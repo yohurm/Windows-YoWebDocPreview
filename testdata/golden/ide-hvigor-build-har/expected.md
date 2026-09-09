@@ -11,13 +11,13 @@
 从DevEco Studio NEXT Beta1（5.0.3.800）版本开始，默认构建字节码HAR，用于提升发布产物的安全性。
 
 
-#### 使用约束
+## 使用约束
 
 HAR自身的构建不建议引用本地模块，可能导致其他模块依赖该HAR包时安装失败，如果安装失败，需要在工程级oh-package.json5中配置[overrides](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-oh-package-json5#zh-cn_topic_0000001792256137_overrides)。
 
 
 
-#### 创建模块
+## 创建模块
 1. 新建工程时选择API 10及以上的Stage模型，工程创建完成后，新建“Static Library”模块。模块创建方法可参考[在工程中添加Module](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-add-new-module)。
 
   
@@ -63,7 +63,7 @@ library  // HAR根目录
 
 
 
-#### 字节码HAR
+## 字节码HAR
 
 默认产物是包含字节码的HAR包，其中包含abc字节码、资源文件、配置文件、readme、changelog声明文件、license证书文件，提升发布到ohpm中心仓产物的安全性。
 
@@ -75,7 +75,7 @@ library  // HAR根目录
 
 
 
-#### 收益
+### 收益
 
  - 字节码HAR可以降低代码泄露的风险，增加反编译获取代码逻辑的难度。
 
@@ -87,7 +87,7 @@ library  // HAR根目录
 
 
 
-#### 使用场景
+### 使用场景
 
 从功能上来说所有的源码HAR包都可以按照任意顺序切换成字节码HAR。但是由于字节码HAR编译和集成的特点，按照推荐场景或顺序来逐步切换字节码HAR可能会获得比较好的性能、内存收益。以下场景中推荐切换使用字节码HAR：
 
@@ -100,7 +100,7 @@ library  // HAR根目录
 
 
 
-#### 约束条件
+### 约束条件
 
  - 字节码HAR使用的依赖需要配置在本模块的oh-package.json5的dependencies或dynamicDependencies中，如果不配置，后续字节码HAR被集成时可能会出现运行时异常。如果出现异常，部分场景可通过在hvigor-config.json5中配置ohos.byteCodeHar.integratedOptimization后重新编译，具体请参考[编译行为差异说明](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-hvigor-dependencies#section957371853712)。
  - 字节码HAR的oh-package.json5中配置的依赖名和依赖包的包名（即包内oh-package.json5中的name）需要保持一致。
@@ -112,7 +112,7 @@ library  // HAR根目录
 
 
 
-#### 操作步骤
+### 操作步骤
 1. 将工程级build-profile.json5的useNormalizedOHMUrl设置为true。
 
   
@@ -237,11 +237,11 @@ library  // HAR根目录
 
 
 
-#### 源码HAR
+## 源码HAR
 
 
 
-#### 以debug模式构建
+### 以debug模式构建
 
 产物是包含源码的HAR包，其中包含源码、资源文件以及配置文件等，方便开发者进行本地调测，不包含build、node_modules、oh_modules、.cxx、.preview、.hvigor、.gitignore、.ohpmignore、.gitignore/.ohpmignore中配置的文件、cpp工程的CMakeLists.txt。
 
@@ -318,7 +318,7 @@ library  // HAR根目录
 
 
 
-#### 以release模式构建
+### 以release模式构建
 
 从DevEco Studio NEXT Developer Beta3（5.0.3.600）版本开始，默认不开启混淆，构建产物和debug模式相同，请参考[以debug模式构建](#section197792874110)。
 
@@ -426,7 +426,7 @@ library  // HAR根目录
 
 
 
-#### 对HAR进行签名
+## 对HAR进行签名
 
 DevEco Studio在构建HAR流程的基础上，支持对HAR进行签名。签名后的HAR包后续可用于接入生态市场，接入流程请参考[SDK类商品接入说明](https://developer.huawei.com/consumer/cn/doc/start/dev-mall-marketplace-sp-sdkservice-access-explain-0000001866499490)。
 
@@ -459,13 +459,13 @@ DevEco Studio在构建HAR流程的基础上，支持对HAR进行签名。签名�
 
 
 
-#### 多HAR合并打包
+## 多HAR合并打包
 
 SDK厂商在对外发布SDK（HAR包）时，有时需要隐藏内部实现细节及依赖，仅暴露必要的接口。从26.0.0版本开始，Hvigor支持将字节码HAR及其所有依赖合并打包，生成一个无外部依赖、可直接使用的独立HAR包。
 
 
 
-#### 配置方法
+### 配置方法
 
 在HAR模块的build-profile.json5文件中，配置bundle字段可以实现多HAR合并打包的能力。bundle下包含bundledDeclare和bundledAllDependencies两个字段，是[bundledDependencies](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-hvigor-build-profile#section8368152412552)的增强版。使用时，不能同时配置bundle和bundledDependencies。
 
@@ -499,7 +499,7 @@ SDK厂商在对外发布SDK（HAR包）时，有时需要隐藏内部实现细�
 
 
 
-#### 使用效果说明
+### 使用效果说明
 
 关于bundledDeclare字段的使用效果，示例代码如下：
 

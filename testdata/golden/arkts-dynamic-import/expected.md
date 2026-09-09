@@ -7,7 +7,7 @@
 动态import支持条件延迟加载，支持部分反射功能，可以提升页面的加载速度；动态import支持加载HSP模块/HAR模块/ohpm包/Native库等，并且HAR模块之间可通过变量动态import来访问彼此导出的内容，可避免编译期强依赖，实现模块解耦。
 
 
-#### 技术适用场景介绍
+## 技术适用场景介绍
 
 应用开发的有些场景中，如果希望根据条件导入模块或者按需导入模块，可以使用动态import代替[静态import](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/introduction-to-arkts#导入)。下面是可能会需要动态import的场景：
 
@@ -20,7 +20,7 @@
 
 
 
-#### 业务扩展场景介绍
+## 业务扩展场景介绍
 
 动态import在业务上除了能实现条件延迟加载，还可以实现部分反射功能。实例如下，HAP动态import HAR包harlibrary，并调用类Calc的静态成员函数staticAdd()、成员函数instanceAdd()，以及全局方法addHarLibrary()。
 
@@ -82,7 +82,7 @@ import('harlibrary').then((ns: ESObject) => {
 
 
 
-#### 动态import实现方案介绍
+## 动态import实现方案介绍
 
 动态import根据入参是常量或变量，分为动态import常量表达式和动态import变量表达式两大特性规格。
 
@@ -110,11 +110,11 @@ import('harlibrary').then((ns: ESObject) => {
 
 
 
-#### 动态import实现中的关键点
+## 动态import实现中的关键点
 
 
 
-#### 动态import常量表达式
+### 动态import常量表达式
 
 动态import常量表达式是指动态import的入参为常量的场景。下面以HAP引用其他模块的API的示例来说明典型用法。
 
@@ -346,7 +346,7 @@ import('@ohos.hilog').then((ns: ESObject) => {
 
 
 
-#### 动态import变量表达式
+### 动态import变量表达式
 
 DevEco Studio中模块间的依赖关系通过oh-package.json5中的dependencies字段进行配置。dependencies列表中所有的模块默认都会进行安装（本地模块）或下载（远程模块），但是不会默认参与编译。HAP/HSP编译时会以入口文件（一般为Index.ets/Index.ts）开始搜索依赖关系，搜索到的模块或文件才会加入编译。
 
@@ -666,7 +666,7 @@ import(packageName).then((ns: ESObject) => {
 
 
 
-#### HAR模块间动态import依赖解耦
+### HAR模块间动态import依赖解耦
 
 当应用包含多个HAR包，HAR包之间的依赖关系比较复杂。在DevEco Studio中配置依赖关系时，可能会形成循环依赖。这时，如果HAR之间的依赖关系中仅有变量动态import，可以将HAR包之间直接依赖关系转移到HAP/HSP中配置，HAR包之间无需配置依赖关系，从而达到HAR包间依赖解耦的目的。如下示意图：
 

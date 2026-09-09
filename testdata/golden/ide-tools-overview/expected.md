@@ -4,11 +4,11 @@
 
 来源：https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-tools-overview
 
-#### HarmonyOS应用/元服务开发
+## HarmonyOS应用/元服务开发
 
 
 
-#### DevEco Studio集成开发环境
+### DevEco Studio集成开发环境
 
 HUAWEI DevEco Studio（获取工具请单击[链接下载](https://developer.huawei.com/consumer/cn/download/deveco-studio)，以下简称DevEco Studio）是基于IntelliJ IDEA Community开源版本打造，面向HarmonyOS应用/元服务开发场景的一站式集成开发环境。提供AI辅助编程、编译构建、UI实时预览、代码调试、性能调优、模拟器等功能，帮助你高效开发HarmonyOS应用/元服务。
 
@@ -25,7 +25,7 @@ HUAWEI DevEco Studio（获取工具请单击[链接下载](https://developer.hua
 
 
 
-#### 开发流程
+### 开发流程
 
 开发一个应用/元服务流程如图所示：
 
@@ -59,7 +59,7 @@ HarmonyOS应用/元服务开发、测试完成后，需要[将应用/元服务�
 
 
 
-#### 命令行开发
+## 命令行开发
 
 针对流水线或命令行开发场景，推荐使用Command Line Tools[命令行工具](https://developer.huawei.com/consumer/cn/download/command-line-tools-for-hmos)，其中集合了HarmonyOS应用开发所用到的系列工具，包括代码检查工具codelinter、三方包管理工具ohpm、堆栈解析工具hstack、命令行构建工具hvigorw。
 
@@ -71,7 +71,7 @@ HarmonyOS应用/元服务开发、测试完成后，需要[将应用/元服务�
 
 
 
-#### 约束与限制
+## 约束与限制
 
 以下功能仅支持中国境内（香港特别行政区、澳门特别行政区、中国台湾除外）：
 1. Partner SDK功能
@@ -87,6 +87,6 @@ HarmonyOS应用/元服务开发、测试完成后，需要[将应用/元服务�
 
 
 
-#### 文档声明
+## 文档声明
 
 HUAWEI DevEco Studio使用指南配套DevEco Studio[最新版本](https://developer.huawei.com/consumer/cn/download/)。如使用DevEco Studio其它版本，可能存在文档与产品功能界面、操作不一致的情况，请以实际功能界面为准。

@@ -19,11 +19,11 @@ ArkTS语言设计中考虑了与TypeScript和JavaScript的互通性。许多移�
 如需详细了解ArkTS语言，请参阅[ArkTS具体指南](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-overview)和[DevEco Studio](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-tools-overview)。
 
 
-#### 基本知识
+## 基本知识
 
 
 
-#### 声明
+### 声明
 
 ArkTS通过声明引入变量、常量、类型和函数。
 
@@ -59,7 +59,7 @@ let hi2 = 'hello, world';
 
 
 
-#### 类型
+### 类型
 
 **基本类型和引用类型**
 
@@ -287,7 +287,7 @@ let emptyData: NullableObject = null;
 
 
 
-#### 运算符
+### 运算符
 
 **赋值运算符**
 
@@ -300,6 +300,7 @@ let emptyData: NullableObject = null;
 复合赋值运算符包括：+=、-=、*=、/=、%=、<<=、>>=、>>>=、&=、|=、^=。
 
 **比较运算符**
+
 
 | 运算符 | 说明 |
 | --- | --- |
@@ -328,6 +329,7 @@ console.info(String(null === undefined)); // false
 
 二元运算符列举如下：
 
+
 | 运算符 | 说明 |
 | --- | --- |
 | + | 加法 |
@@ -338,6 +340,7 @@ console.info(String(null === undefined)); // false
 
 
 **位运算符**
+
 
 | 运算符 | 说明 |
 | --- | --- |
@@ -351,6 +354,7 @@ console.info(String(null === undefined)); // false
 
 
 **逻辑运算符**
+
 
 | 运算符 | 说明 |
 | --- | --- |
@@ -392,7 +396,7 @@ if (bird instanceof Animal) {
 
 
 
-#### 语句
+### 语句
 
 **if语句**
 
@@ -697,11 +701,11 @@ function processData(s: string) {
 
 
 
-#### 函数
+## 函数
 
 
 
-#### 函数声明
+### 函数声明
 
 函数声明引入一个函数，包含其名称、参数列表、返回类型和函数体。
 
@@ -722,7 +726,7 @@ function add(x: string, y: string): string {
 
 
 
-#### 可选参数
+### 可选参数
 
 可选参数的格式可为name?: Type。
 
@@ -749,7 +753,7 @@ function multiply(n: number, coeff: number = 2): number {
 
 
 
-#### rest参数
+### rest参数
 
 函数的最后一个参数可以是rest参数，格式为...restName: Type[]。rest参数允许函数接收一个不定长数组，用于处理不定数量的参数输入。
 
@@ -768,7 +772,7 @@ function sum(...numbers: number[]): number {
 
 
 
-#### 返回类型
+### 返回类型
 
 如果可以从函数体内推断出函数返回类型，则可在函数声明中省略标注返回类型。
 
@@ -791,7 +795,7 @@ function hi2(): void { console.info('hi'); }
 
 
 
-#### 函数的作用域
+### 函数的作用域
 
 函数中定义的变量和其他实例仅可以在函数内部访问，不能从外部访问。
 
@@ -810,7 +814,7 @@ function func() {
 
 
 
-#### 函数调用
+### 函数调用
 
 调用函数以执行其函数体，实参值会赋值给函数的形参。
 
@@ -832,7 +836,7 @@ console.info(x); // 输出: hello world
 
 
 
-#### 函数类型
+### 函数类型
 
 函数类型通常用于定义回调函数：
 
@@ -848,7 +852,7 @@ doAction(Math.sin); // 将函数作为参数传入
 
 
 
-#### 箭头函数（又名Lambda函数）
+### 箭头函数（又名Lambda函数）
 
 函数可以定义为箭头函数，例如：
 
@@ -869,7 +873,7 @@ let sum2 = (x: number, y: number) => x + y
 
 
 
-#### 闭包
+### 闭包
 
 闭包是由函数及声明该函数的环境组合而成的。该环境包含了这个闭包创建时作用域内的任何局部变量。
 
@@ -889,7 +893,7 @@ function f(): () => number {
 
 
 
-#### 函数重载
+### 函数重载
 
 可以通过编写重载，指定函数的不同调用方式。具体方法是，为同一个函数写入多个同名但签名不同的函数头，函数实现紧随其后。
 
@@ -907,7 +911,7 @@ foo1('aa'); // OK，使用第二个定义
 
 
 
-#### 类
+## 类
 
 类声明引入一个新类型，并定义其字段、方法和构造函数。
 
@@ -946,7 +950,7 @@ let p: Point = {x: 42, y: 42};
 
 
 
-#### 字段
+### 字段
 
 字段是直接在类中声明的某种类型的变量。
 
@@ -1102,7 +1106,7 @@ class Person4 {
 
 
 
-#### 方法
+### 方法
 
 方法属于类。类可以定义实例方法或者静态方法。静态方法属于类本身，只能访问静态字段。而实例方法既可以访问静态字段，也可以访问实例字段，包括类的私有字段。
 
@@ -1269,7 +1273,7 @@ c.foo('aa'); // OK，使用第二个签名
 
 
 
-#### 构造函数
+### 构造函数
 
 类声明可以包含用于初始化对象状态的构造函数。
 
@@ -1329,7 +1333,7 @@ let c2 = new C('abc');    // OK，使用第二个签名
 
 
 
-#### 可见性修饰符
+### 可见性修饰符
 
 类的方法和属性都可以使用可见性修饰符。
 
@@ -1375,7 +1379,7 @@ class Derived extends Base {
 
 
 
-#### 对象字面量
+### 对象字面量
 
 对象字面量是一个表达式，可用于创建类实例并提供一些初始值。它在某些情况下更方便，可以用来代替new表达式。
 
@@ -1448,7 +1452,7 @@ let map: Record<string, PersonInfo> = {
 
 
 
-#### 抽象类
+### 抽象类
 
 带有abstract修饰符的类称为抽象类。抽象类可用于表示一组更具体的概念所共有的概念。
 
@@ -1498,7 +1502,7 @@ class Y {
 
 
 
-#### 接口
+## 接口
 
 接口声明引入新类型。接口是定义代码协定的常见方式。
 
@@ -1543,7 +1547,7 @@ class RectangleSize implements AreaSize {
 
 
 
-#### 接口属性
+### 接口属性
 
 接口属性可以是字段、getter、setter或getter和setter组合的形式。
 
@@ -1588,7 +1592,7 @@ class StyledRectangle implements Style {
 
 
 
-#### 接口继承
+### 接口继承
 
 接口可以继承其他接口，示例如下：
 
@@ -1606,7 +1610,7 @@ interface ExtendedStyle extends Style {
 
 
 
-#### 抽象类和接口
+### 抽象类和接口
 
 抽象类与接口都无法实例化。抽象类是类的抽象，抽象类用来捕捉子类的通用特性，接口是行为的抽象。在ArkTS语法中抽象类与接口的区别如下：
 
@@ -1669,13 +1673,13 @@ interface MyInterface {
 
 
 
-#### 泛型类型和函数
+## 泛型类型和函数
 
 泛型类型和函数使代码能够以类型安全的方式操作多种数据类型，而无需为每种类型编写重复的逻辑。
 
 
 
-#### 泛型类和接口
+### 泛型类和接口
 
 类和接口可以定义为泛型，将参数添加到类型定义中。如以下示例中的类型参数Element：
 
@@ -1703,7 +1707,7 @@ s.push(55); // 将会产生编译时错误
 
 
 
-#### 泛型约束
+### 泛型约束
 
 泛型类型的类型参数可以被限制只能取某些特定的值。例如，MyHashMap<Key, Value>这个类中的Key类型参数必须具有hash方法。
 
@@ -1723,7 +1727,7 @@ class MyHashMap<Key extends Hashable, Value> {
 
 
 
-#### 泛型函数
+### 泛型函数
 
 使用泛型函数可编写更通用的代码。比如返回数组最后一个元素的函数：
 
@@ -1759,7 +1763,7 @@ let res3: number = last([1, 2, 3]);
 
 
 
-#### 泛型默认值
+### 泛型默认值
 
 泛型类型的类型参数可以设置默认值，这样无需指定实际类型实参，直接使用泛型类型名称即可。以下示例展示了类和函数的这一特性。
 
@@ -1781,7 +1785,7 @@ foo<number>();
 
 
 
-#### 空安全
+## 空安全
 
 默认情况下，ArkTS中的所有类型都不允许为空，这类似于TypeScript的(strictNullChecks)模式，但规则更严格。
 
@@ -1804,7 +1808,7 @@ if (x != null) { /* do something */ }
 
 
 
-#### 非空断言运算符
+### 非空断言运算符
 
 后缀运算符!可用于断言其操作数为非空。
 
@@ -1823,7 +1827,7 @@ function foo(a: A | null) {
 
 
 
-#### 空值合并运算符
+### 空值合并运算符
 
 空值合并二元运算符??用于检查左侧表达式的求值是否等于null或者undefined。如果是，则表达式的结果为右侧表达式；否则，结果为左侧表达式。
 
@@ -1843,7 +1847,7 @@ class Person {
 
 
 
-#### 可选链
+### 可选链
 
 访问对象属性时，如果属性是undefined或null，可选链运算符返回undefined。
 
@@ -1888,7 +1892,7 @@ p.spouse?.nick; // undefined
 
 
 
-#### 模块
+## 模块
 
 程序可划分为多组编译单元或模块。
 
@@ -1898,7 +1902,7 @@ p.spouse?.nick; // undefined
 
 
 
-#### 导出
+### 导出
 
 可以使用关键字export导出顶层的声明。
 
@@ -1931,7 +1935,7 @@ export default new Demo();
 
 
 
-#### 导入
+### 导入
 
 **静态导入**
 
@@ -2067,17 +2071,17 @@ import * as module from '@kit.AbilityKit';
 
 
 
-#### 顶层语句
+### 顶层语句
 
 顶层语句是指在模块最外层编写的语句，不被任何函数、类或块级作用域包裹。这些语句包括变量声明、函数声明和表达式。
 
 
 
-#### 关键字
+## 关键字
 
 
 
-#### this
+### this
 
 关键字this只能在类的实例方法中使用。
 
@@ -2122,7 +2126,7 @@ function foo(arg1: number) {
 
 
 
-#### 注解
+## 注解
 
 注解（Annotation）是一种语言特性，它通过添加元数据来改变应用声明的语义。
 
@@ -2185,7 +2189,7 @@ class MyClass1 {
 
 
 
-#### 用户自定义注解
+### 用户自定义注解
 
 **从API version 20及之后版本，支持用户自定义注解。**
 
@@ -2625,7 +2629,7 @@ abstract class C {
 
 
 
-#### 源码态注解
+### 源码态注解
 
 从API version 24开始，支持用户自定义源码态注解。
 
@@ -2693,13 +2697,13 @@ enum ColorSet { RED, GREEN, BLUE }
 
 
 
-#### ArkUI支持
+## ArkUI支持
 
 本节演示ArkTS为创建图形用户界面（GUI）程序提供的机制。ArkUI基于TypeScript提供了一系列扩展能力，以声明式地描述应用程序的GUI以及GUI组件间的交互。
 
 
 
-#### ArkUI示例
+### ArkUI示例
 
 [MVVM代码示例](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-mvvm#代码示例)提供了一个完整的基于ArkUI的应用程序，以展示其GUI编程功能。
 

@@ -1,8 +1,9 @@
 //! 黄金样本门禁（v1 G2 / v2 R4，S 级验收）。
 //!
 //! 样本布局：`testdata/golden/<slug>/{input.html, meta.json, expected.md}`。
-//! - `expected.md` 冻结基线：优先取 Python 参考实现输出（若存在），否则取 Rust 引擎基线；
+//! - `expected.md` 冻结当前转换引擎输出（含华为标题层级映射，与官网一致）；
 //! - 对比经规范化（去行尾空白 + 折叠连续空行），只报内容差异；
+//! - 引擎有意变更时设 `YOHU_UPDATE_GOLDEN=1` 重写 `expected.md`；
 //! - 系统性偏差登记在 `testdata/golden/exceptions.md`（每条一行：`` - `<slug>` — 归因 ``），
 //!   登记后本测试跳过该样本并计入报告；未登记的差异一律失败。
 
@@ -106,6 +107,10 @@ fn run_sample(dir: &Path) -> Result<String, String> {
     let (na, ne) = (normalize(&actual), normalize(&expected));
     if na == ne {
         return Ok(format!("一致（{} 行）", na.lines().count()));
+    }
+    if std::env::var("YOHU_UPDATE_GOLDEN").as_deref() == Ok("1") {
+        std::fs::write(dir.join("expected.md"), &actual).map_err(|e| e.to_string())?;
+        return Ok(format!("已重写 expected.md（{} 行）", na.lines().count()));
     }
     // 首个差异 + 差异行数统计
     let (la, le): (Vec<&str>, Vec<&str>) = (na.lines().collect(), ne.lines().collect());

@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use yohu_md_convert::{html_to_markdown, ConvertOptions};
+use yohu_md_convert::{heading_level, html_to_markdown, ConvertOptions};
 
 fn opts(title: &str) -> ConvertOptions {
     ConvertOptions {
@@ -17,12 +17,39 @@ fn opts(title: &str) -> ConvertOptions {
 }
 
 #[test]
-fn headings_map_and_strip_markers() {
-    let html = "<h1>测试文档</h1><h2>[h2] 基础概念</h2><p>正文段落。</p>";
+fn heading_level_table_matches_testdata() {
+    let table: serde_json::Value =
+        serde_json::from_str(include_str!("../../../testdata/huawei-headings.json")).unwrap();
+    for case in table["cases"].as_array().expect("cases") {
+        let tag = case["tag"].as_u64().unwrap() as u8;
+        let marker = case["marker"].as_u64().map(|n| n as u8);
+        let level = case["level"].as_u64().unwrap() as u8;
+        assert_eq!(
+            heading_level(tag, marker),
+            level,
+            "tag={tag} marker={marker:?}"
+        );
+    }
+}
+
+#[test]
+fn headings_map_huawei_live_levels() {
+    let html = concat!(
+        "<h1>测试文档</h1>",
+        "<h4>基本知识</h4>",
+        "<h4>[h2]基础概念</h4>",
+        "<h4>[h3]细节</h4>",
+        "<h2>[h2] 仍按标记加深</h2>",
+        "<p>正文段落。</p>",
+    );
     let md = html_to_markdown(html, &opts("测试文档"));
     assert!(md.starts_with("# 测试文档\n"));
-    assert!(md.contains("## 基础概念"));
+    assert!(md.contains("## 基本知识"), "unmarked h4 → h2:\n{md}");
+    assert!(md.contains("### 基础概念"), "[h2] → h3:\n{md}");
+    assert!(md.contains("#### 细节"), "[h3] → h4:\n{md}");
+    assert!(md.contains("### 仍按标记加深"), "h2+[h2] → h3:\n{md}");
     assert!(!md.contains("[h2]"));
+    assert!(!md.contains("[h3]"));
     assert!(md.contains("正文段落。"));
 }
 

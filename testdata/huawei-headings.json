@@ -1,0 +1,14 @@
+{
+  "comment": "Huawei API HTML heading tags vs live HarmonyOS docs levels. Unmarked h4 is a section (h2). [hN] is one level deeper than the marker number, capped at 4.",
+  "cases": [
+    { "tag": 1, "marker": null, "level": 1 },
+    { "tag": 4, "marker": null, "level": 2 },
+    { "tag": 4, "marker": 2, "level": 3 },
+    { "tag": 4, "marker": 3, "level": 4 },
+    { "tag": 4, "marker": 4, "level": 4 },
+    { "tag": 2, "marker": null, "level": 2 },
+    { "tag": 2, "marker": 2, "level": 3 },
+    { "tag": 3, "marker": null, "level": 3 },
+    { "tag": 3, "marker": 3, "level": 4 }
+  ]
+}

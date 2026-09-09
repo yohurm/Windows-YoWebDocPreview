@@ -4,7 +4,7 @@
 
 来源：https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/resource-categories-and-access
 
-#### 功能介绍
+## 功能介绍
 
 在应用开发中，常需使用字符串、颜色、字体、间距和图标等资源。为了让应用在不同设备（如手机、平板、车机）和配置（如语言、屏幕密度、颜色模式）下都能提供最佳体验，系统支持通过资源动态匹配机制，自动为各类场景选取最合适的资源。本文档将介绍资源类型与组织方式，并提供资源开发指导。
 
@@ -12,7 +12,7 @@
 
 
 
-#### 资源分类
+## 资源分类
 
 应用开发中使用的各类资源文件，需要放入特定子目录中存储管理。目录结构如下所示，base目录、限定词目录、rawfile目录、resfile目录称为资源目录，element、media、profile称为资源组目录。
 
@@ -42,9 +42,10 @@ resources
 
 
 
-#### 资源目录
+### 资源目录
 
 表1 资源目录说明
+
 
 | 目录类型 | 说明 |
 | --- | --- |
@@ -56,9 +57,10 @@ resources
 
 
 
-#### 资源组目录
+### 资源组目录
 
 表2 资源组目录说明
+
 
 | 目录类型 | 说明 | 资源文件 |
 | --- | --- | --- |
@@ -70,6 +72,7 @@ resources
 **媒体资源类型说明**
 
 表3 图片资源类型说明
+
 
 | 格式 | 文件后缀名 |
 | --- | --- |
@@ -83,6 +86,7 @@ resources
 
 表4 音视频资源类型说明
 
+
 | 格式 | 支持的文件类型 |
 | --- | --- |
 | H.264 AVC | .3gp |
@@ -91,7 +95,7 @@ resources
 
 
 
-#### 限定词目录
+### 限定词目录
 
 限定词目录由一个或多个表征应用场景或设备特征的限定词组合而成，限定词包括移动国家码和移动网络码、语言、文字、国家或地区、横竖屏、设备类型、颜色模式和屏幕密度，限定词之间通过下划线（_）或者中划线（-）连接。开发者在创建限定词目录时，需要遵守如下限定词目录命名规则。
 
@@ -101,6 +105,7 @@ resources
 
 
 表5 限定词取值要求
+
 
 | 限定词类型 | 含义与取值说明 |
 | --- | --- |
@@ -116,7 +121,7 @@ resources
 
 
 
-#### 资源文件示例
+### 资源文件示例
 
 color.json文件的内容如下：
 
@@ -203,13 +208,13 @@ plural.json文件的内容如下：
 
 
 
-#### 创建资源目录和资源文件
+## 创建资源目录和资源文件
 
 在resources目录下，可按照限定词目录命名规则和资源组目录支持的文件类型，创建资源目录和资源组目录，添加特定类型资源。DevEco Studio支持同时创建资源目录和资源文件，也支持单独创建资源目录或资源文件。
 
 
 
-#### 创建资源目录和资源文件
+### 创建资源目录和资源文件
 
 在resources目录右键菜单选择“New > Resource File”，可同时创建资源目录和资源文件，文件默认创建在base目录的对应资源组中。如果选择了限定词，则会按照命名规范自动生成限定词和资源组目录，并将文件创建在限定词目录中。
 
@@ -225,7 +230,7 @@ plural.json文件的内容如下：
 
 
 
-#### 创建资源目录
+### 创建资源目录
 
 在resources目录右键菜单选择“New > Resource Directory”，可创建资源目录，默认创建的是base目录。如果选择了限定词，则会按照命名规范自动生成限定词和资源组目录。确定限定词后，选择资源组类型，当前资源组类型支持Element、Media、Profile三种，创建后生成资源目录。
 
@@ -235,7 +240,7 @@ plural.json文件的内容如下：
 
 
 
-#### 创建资源文件
+### 创建资源文件
 
 在资源组目录（element、media、profile）的右键菜单选择“New > XXX Resource File”，可创建对应资源组目录的资源文件。例如，在element目录下可新建Element Resource File。
 
@@ -245,7 +250,7 @@ plural.json文件的内容如下：
 
 
 
-#### 示例
+### 示例
 
 以创建中文和英文字符串资源文件为例，说明如何创建不同限定词的资源。
 1. 在resources目录右键菜单选择“New > Resource File”，File name填写为string_sample，Resource type选择Element，Root Element选择string，Available qualifiers选中Locale，在右侧的语言列表中选择zh，地区列表中选择CN，将会在resources目录下创建zh_CN/element/string_sample.json文件。
@@ -263,17 +268,18 @@ plural.json文件的内容如下：
 
 
 
-#### 资源可翻译特性
+## 资源可翻译特性
 
 
 
-#### 功能介绍
+### 功能介绍
 
 当应用引用的字符串资源需要支持国际化多语言翻译时，可使用attr属性标记字符串翻译范围和翻译状态。attr属性不参与资源编译，只标记字符串是否翻译。
 
 未配置attr属性时，默认需要翻译。
 
 **attr支持属性**
+
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
@@ -283,7 +289,7 @@ plural.json文件的内容如下：
 
 
 
-#### 使用约束
+### 使用约束
 
 可翻译特性使能范围：base目录下string、strarray、plural类型资源。
 
@@ -298,7 +304,7 @@ resources
 
 
 
-#### 示例
+### 示例
 
 string资源配置attr属性示例如下，其中string1字符串被标记为不需要翻译，string2字符串被标记为需要翻译且翻译已验证。
 
@@ -326,11 +332,11 @@ string资源配置attr属性示例如下，其中string1字符串被标记为不
 
 
 
-#### 资源访问
+## 资源访问
 
 
 
-#### 访问本模块资源或模块依赖的HAR资源
+### 访问本模块资源或模块依赖的HAR资源
 
 **方式一：** 通过$r或$rawfile访问资源。此方法适合简单的、静态的资源引用场景，比如在UI组件中直接引用。
 
@@ -392,7 +398,7 @@ Text($r('app.plural.eat_apple', 2, 2)).id('app_plural_resource')
 
 
 
-#### 访问跨HAP/HSP包资源
+### 访问跨HAP/HSP包资源
 
 **bundle相同，跨module访问**
 
@@ -514,7 +520,7 @@ struct Third {
 
 
 
-#### 访问系统资源
+### 访问系统资源
 
 对于系统资源，可以通过\$r('sys.type.name')的形式访问。其中，sys表示系统资源，type为资源类型，取值包括“color”、“float”、“string”、“media”、“symbol”，name为资源名称。
 
@@ -531,7 +537,7 @@ Text('Hello')
 
 
 
-#### 资源匹配
+## 资源匹配
 
 应用使用某资源时，系统会根据当前设备状态优先从相匹配的限定词目录中寻找该资源。只有当resources目录中没有与设备状态匹配的限定词目录，或者在限定词目录中找不到该资源时，才会去base目录中查找。rawfile和resfile是原始文件目录，不会根据设备状态去匹配资源。
 
@@ -541,7 +547,7 @@ Text('Hello')
 
 
 
-#### 限定词目录与设备状态的匹配规则
+### 限定词目录与设备状态的匹配规则
 
  - 在为设备匹配对应的资源文件时，限定词目录匹配的优先级从高到低依次为：移动国家码和移动网络码 > 区域（可选组合：语言、语言_文字、语言_国家或地区、语言_文字_国家或地区）> 横竖屏 > 设备类型 > 颜色模式 > 屏幕密度。
  - 如果限定词目录中包含移动国家码和移动网络码、语言、文字、横竖屏、设备类型、颜色模式限定词，则对应限定词的取值必须与当前的设备状态完全一致，该目录才能够参与设备的资源匹配。例如，限定词目录zh_CN-car-ldpi不能参与en_US设备的资源匹配。
@@ -552,7 +558,7 @@ Text('Hello')
 
 
 
-#### 获取指定配置的资源
+### 获取指定配置的资源
 
 **基本概念**
 
@@ -561,6 +567,7 @@ Text('Hello')
 应用如果有获取指定配置的资源的诉求，可以通过以下方法进行获取。
 
 **接口说明**
+
 
 | 接口名 | 描述 |
 | --- | --- |
@@ -683,13 +690,13 @@ struct Index {
 
 
 
-#### overlay机制
+## overlay机制
 
 overlay是一种资源替换机制，针对不同品牌、产品的显示风格，开发者可以在不重新打包HAP的情况下，通过配置和使用overlay资源包，实现应用界面风格变换。overlay资源包只包含资源文件、资源索引文件和配置文件。
 
 
 
-#### 动态overlay使用方式
+### 动态overlay使用方式
 1. 对应的overlay资源包需要放在对应应用安装路径下。如应用com.example.overlay的安装路径为data/app/el1/bundle/public/com.example.overlay/。
 2. 应用通过[addResource](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-resource-manager#addresource10)，实现资源覆盖；通过[removeResource](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-resource-manager#removeresource10)，实现overlay删除。overlay资源路径需经过元能力的getContext().bundleCodeDir获取此应用对应的沙箱根目录，由应用的沙箱根目录与overlay资源包名称拼接而成。如：let path = getContext().bundleCodeDir + "overlay资源包名称"，其对应沙箱路径为/data/storage/el1/bundle/overlay资源包名称。
 
@@ -699,7 +706,7 @@ overlay是一种资源替换机制，针对不同品牌、产品的显示风格�
 
 
 
-#### 静态overlay配置方式
+### 静态overlay配置方式
 
 该功能默认使能，使能及去使能请参考[@ohos.bundle.overlay (overlay特征模块)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-overlay)。
 
@@ -745,28 +752,28 @@ overlay是一种资源替换机制，针对不同品牌、产品的显示风格�
 
 
 
-#### 术语
+## 术语
 
 
 
-#### Qualifier；限定词
+### Qualifier；限定词
 
 表征应用场景或设备特征的标签值，用于命名资源目录以实现资源动态匹配。包括移动国家码（MCC）、移动网络码（MNC）、语言、文字、国家或地区、横竖屏、设备类型、颜色模式和屏幕密度，各限定词按固定顺序组合并以特定分隔连接。限定词取值必须与当前设备状态一致才能参与资源匹配。
 
 
 
-#### Qualifiers directory；限定词目录
+### Qualifiers directory；限定词目录
 
 由一个或多个限定词组合命名的资源目录，用于存放匹配特定设备特征或应用场景的资源文件。
 
 
 
-#### rawfile
+### rawfile
 
 resources目录下的特殊资源目录，支持创建多层子目录存放各类文件。目录中的文件以原始形式直接打包进应用，通过指定文件路径和文件名访问。支持Native方式获取文件内容、文件列表和文件描述符。
 
 
 
-#### resfile
+### resfile
 
 resources目录下的特殊资源目录，支持创建多层子目录存放各类文件。目录中的文件以原始形式直接打包进应用。应用安装后目录中的文件会被解压到应用沙箱路径，通过Context的resourceDir属性获取目录后以只读方式通过文件路径访问。

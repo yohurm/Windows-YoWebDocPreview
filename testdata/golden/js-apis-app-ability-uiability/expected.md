@@ -14,7 +14,8 @@ UIAbility是包含UI界面的应用组件，继承自[Ability](https://developer
 各类Ability的继承关系详见[继承关系说明](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-app-ability-ability#ability的继承关系说明)。
 
 
-#### UIAbility生命周期状态
+## UIAbility生命周期状态
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -32,7 +33,8 @@ UIAbility是包含UI界面的应用组件，继承自[Ability](https://developer
 
 
 
-#### 后台通信能力
+## 后台通信能力
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -50,7 +52,8 @@ UIAbility是包含UI界面的应用组件，继承自[Ability](https://developer
 
 
 
-#### 导入模块
+## 导入模块
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -60,7 +63,8 @@ import { UIAbility } from '@kit.AbilityKit';
 
 
 
-#### UIAbility
+## UIAbility
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -68,11 +72,13 @@ import { UIAbility } from '@kit.AbilityKit';
 
 
 
-#### 属性
+### 属性
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
 **系统能力**：SystemCapability.Ability.AbilityRuntime.AbilityCore
+
 
 | 名称 | 类型 | 只读 | 可选 | 说明 |
 | --- | --- | --- | --- | --- |
@@ -86,7 +92,8 @@ import { UIAbility } from '@kit.AbilityKit';
 
 
 
-#### onCreate
+### onCreate
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -101,6 +108,7 @@ onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void
 **系统能力**：SystemCapability.Ability.AbilityRuntime.AbilityCore
 
 **参数：**
+
 
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
@@ -125,7 +133,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onWindowStageCreate
+### onWindowStageCreate
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -138,6 +147,7 @@ onWindowStageCreate(windowStage: window.WindowStage): void
 **系统能力**：SystemCapability.Ability.AbilityRuntime.AbilityCore
 
 **参数：**
+
 
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
@@ -167,7 +177,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onWindowStageWillDestroy12+
+### onWindowStageWillDestroy12+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -180,6 +191,7 @@ onWindowStageWillDestroy(windowStage: window.WindowStage): void
 **系统能力**：SystemCapability.Ability.AbilityRuntime.AbilityCore
 
 **参数：**
+
 
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
@@ -202,7 +214,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onWindowStageDestroy
+### onWindowStageDestroy
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -232,7 +245,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onWindowStageRestore
+### onWindowStageRestore
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -249,6 +263,7 @@ onWindowStageRestore(windowStage: window.WindowStage): void
 **系统能力**：SystemCapability.Ability.AbilityRuntime.AbilityCore
 
 **参数：**
+
 
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
@@ -271,7 +286,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onDestroy
+### onDestroy
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -290,6 +306,7 @@ onDestroy(): void | Promise&lt;void&gt;
 **系统能力**：SystemCapability.Ability.AbilityRuntime.AbilityCore
 
 **返回值：**
+
 
 | 类型 | 说明 |
 | --- | --- |
@@ -332,7 +349,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onWillForeground20+
+### onWillForeground20+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -402,7 +420,8 @@ export default class EntryAbility extends UIAbility {
 
 
 
-#### onForeground
+### onForeground
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -431,7 +450,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onDidForeground20+
+### onDidForeground20+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -451,7 +471,8 @@ UIAbility生命周期回调，应用转到前台后触发，在[onForeground](#o
 
 
 
-#### onWillBackground20+
+### onWillBackground20+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -497,7 +518,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onBackground
+### onBackground
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -527,7 +549,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onDidBackground20+
+### onDidBackground20+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -595,7 +618,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onContinue
+### onContinue
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -613,12 +637,14 @@ onContinue(wantParam: Record<string, Object>): AbilityConstant.OnContinueResult 
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | wantParam | Record<string, Object> | 是 | 开发者通过该参数保存待迁移的数据。 |
 
 
 **返回值：**
+
 
 | 类型 | 说明 |
 | --- | --- |
@@ -670,7 +696,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onNewWant
+### onNewWant
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -685,6 +712,7 @@ onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void
 **系统能力**：SystemCapability.Ability.AbilityRuntime.AbilityCore
 
 **参数：**
+
 
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
@@ -707,7 +735,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onDump
+### onDump
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -721,12 +750,14 @@ onDump(params: Array&lt;string&gt;): Array&lt;string&gt;
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | params | Array&lt;string&gt; | 是 | 表示dump命令参数。 |
 
 
 **返回值：**
+
 
 | 类型 | 说明 |
 | --- | --- |
@@ -748,7 +779,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onSaveState
+### onSaveState
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -766,6 +798,7 @@ onSaveState(reason: AbilityConstant.StateType, wantParam: Record<string, Object>
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | reason | AbilityConstant.StateType | 是 | 触发应用保存状态的原因，当前仅支持APP_RECOVERY（即应用故障恢复场景）。 |
@@ -773,6 +806,7 @@ onSaveState(reason: AbilityConstant.StateType, wantParam: Record<string, Object>
 
 
 **返回值：**
+
 
 | 类型 | 说明 |
 | --- | --- |
@@ -795,7 +829,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onSaveStateAsync20+
+### onSaveStateAsync20+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -809,6 +844,7 @@ onSaveStateAsync(stateType: AbilityConstant.StateType, wantParam: Record<string,
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | stateType | AbilityConstant.StateType | 是 | 触发应用保存状态的原因，当前仅支持APP_RECOVERY（即应用故障恢复场景）。 |
@@ -816,6 +852,7 @@ onSaveStateAsync(stateType: AbilityConstant.StateType, wantParam: Record<string,
 
 
 **返回值：**
+
 
 | 类型 | 说明 |
 | --- | --- |
@@ -840,7 +877,8 @@ class MyUIAbility extends UIAbility {
 
 
 
-#### onShare10+
+### onShare10+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -853,6 +891,7 @@ onShare(wantParam: Record<string, Object>): void
 **系统能力**：SystemCapability.Ability.AbilityRuntime.AbilityCore
 
 **参数：**
+
 
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
@@ -874,7 +913,8 @@ export default class MyUIAbility extends UIAbility {
 
 
 
-#### onPrepareToTerminate10+
+### onPrepareToTerminate10+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -895,6 +935,7 @@ onPrepareToTerminate(): boolean
 **设备行为差异**：该接口仅在PC/2in1和Tablet设备中可正常执行回调，在其他设备上不执行回调。
 
 **返回值：**
+
 
 | 类型 | 说明 |
 | --- | --- |
@@ -936,7 +977,8 @@ export default class EntryAbility extends UIAbility {
 
 
 
-#### onPrepareToTerminateAsync15+
+### onPrepareToTerminateAsync15+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -964,6 +1006,7 @@ onPrepareToTerminateAsync(): Promise&lt;boolean&gt;
 
 **返回值：**
 
+
 | 类型 | 说明 |
 | --- | --- |
 | Promise&lt;boolean&gt; | Promise对象。表示是否执行UIAbility关闭操作，返回true表示本次UIAbility关闭流程取消，返回false表示UIAbility继续正常关闭。 |
@@ -986,7 +1029,8 @@ export default class EntryAbility extends UIAbility {
 
 
 
-#### onBackPressed10+
+### onBackPressed10+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1003,6 +1047,7 @@ UIAbility生命周期回调，当UIAbility侧滑返回时触发，根据返回�
 **系统能力**：SystemCapability.Ability.AbilityRuntime.AbilityCore
 
 **返回值：**
+
 
 | 类型 | 说明 |
 | --- | --- |
@@ -1023,7 +1068,8 @@ export default class EntryAbility extends UIAbility {
 
 
 
-#### onCollaborate18+
+### onCollaborate18+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1039,12 +1085,14 @@ UIAbility生命周期回调，在多设备协同场景下，协同方应用在�
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | wantParam | Record<string, Object> | 是 | want相关参数，仅支持key值取"ohos.extra.param.key.supportCollaborateIndex"。通过该key值可以获取到调用方传输的数据并进行相应的处理。 |
 
 
 **返回值：**
+
 
 | 类型 | 说明 |
 | --- | --- |
@@ -1065,7 +1113,8 @@ export default class MyAbility extends UIAbility {
 
 
 
-#### Caller
+## Caller
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1073,7 +1122,8 @@ export default class MyAbility extends UIAbility {
 
 
 
-#### call
+### call
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1085,6 +1135,7 @@ Caller UIAbility向Callee UIAbility发送双方约定好的序列化的数据。
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | method | string | 是 | 由Caller和Callee双方约定好的方法名，Callee方通过该字段区分消息类型。 |
@@ -1092,6 +1143,7 @@ Caller UIAbility向Callee UIAbility发送双方约定好的序列化的数据。
 
 
 **返回值：**
+
 
 | 类型 | 说明 |
 | --- | --- |
@@ -1101,6 +1153,7 @@ Caller UIAbility向Callee UIAbility发送双方约定好的序列化的数据。
 **错误码：**
 
 以下错误码详细介绍请参考[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)和[元能力子系统错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-ability)。
+
 
 | 错误码ID | 错误信息 |
 | --- | --- |
@@ -1170,7 +1223,8 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### callWithResult
+### callWithResult
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1182,6 +1236,7 @@ Caller UIAbility向Callee UIAbility发送消息，Callee UIAbility处理完成�
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | method | string | 是 | 由Caller和Callee双方约定好的方法名，Callee方通过该字段区分消息类型。 |
@@ -1189,6 +1244,7 @@ Caller UIAbility向Callee UIAbility发送消息，Callee UIAbility处理完成�
 
 
 **返回值：**
+
 
 | 类型 | 说明 |
 | --- | --- |
@@ -1198,6 +1254,7 @@ Caller UIAbility向Callee UIAbility发送消息，Callee UIAbility处理完成�
 **错误码：**
 
 以下错误码详细介绍请参考[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)和[元能力子系统错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-ability)。
+
 
 | 错误码ID | 错误信息 |
 | --- | --- |
@@ -1270,7 +1327,8 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### release
+### release
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1283,6 +1341,7 @@ Caller主动释放与Callee UIAbility的连接。调用该接口后，Caller不�
 **错误码：**
 
 以下错误码详细介绍请参考[元能力子系统错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-ability)。
+
 
 | 错误码ID | 错误信息 |
 | --- | --- |
@@ -1321,7 +1380,8 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### onRelease
+### onRelease
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1333,6 +1393,7 @@ Caller UIAbility可使用该接口注册与Callee UIAbility连接断开通知的
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | callback | OnReleaseCallback | 是 | 回调函数，返回onRelease回调结果。 |
@@ -1341,6 +1402,7 @@ Caller UIAbility可使用该接口注册与Callee UIAbility连接断开通知的
 **错误码：**
 
 以下错误码详细介绍请参考[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)和[元能力子系统错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-ability)。
+
 
 | 错误码ID | 错误信息 |
 | --- | --- |
@@ -1379,7 +1441,8 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### onRemoteStateChange10+
+### onRemoteStateChange10+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1391,6 +1454,7 @@ onRemoteStateChange(callback: OnRemoteStateChangeCallback): void
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | callback | OnRemoteStateChangeCallback | 是 | 回调函数，返回onRemoteStateChange回调结果。 |
@@ -1399,6 +1463,7 @@ onRemoteStateChange(callback: OnRemoteStateChangeCallback): void
 **错误码：**
 
 以下错误码详细介绍请参考[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)和[元能力子系统错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-ability)。
+
 
 | 错误码ID | 错误信息 |
 | --- | --- |
@@ -1438,7 +1503,8 @@ export default class MainAbility extends UIAbility {
 
 
 
-#### on('release')
+### on('release')
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1450,6 +1516,7 @@ Caller UIAbility可使用该接口注册与Callee UIAbility连接断开通知的
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | type | string | 是 | 监听releaseCall事件，固定为'release'。 |
@@ -1459,6 +1526,7 @@ Caller UIAbility可使用该接口注册与Callee UIAbility连接断开通知的
 **错误码：**
 
 以下错误码详细介绍请参考[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)和[元能力子系统错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-ability)。
+
 
 | 错误码ID | 错误信息 |
 | --- | --- |
@@ -1498,7 +1566,8 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### off('release')
+### off('release')
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1510,6 +1579,7 @@ off(type: 'release', callback: OnReleaseCallback): void
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | type | string | 是 | 监听releaseCall事件，固定为'release'。 |
@@ -1519,6 +1589,7 @@ off(type: 'release', callback: OnReleaseCallback): void
 **错误码：**
 
 以下错误码详细介绍请参考[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)。
+
 
 | 错误码ID | 错误信息 |
 | --- | --- |
@@ -1558,7 +1629,8 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### off('release')
+### off('release')
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1570,6 +1642,7 @@ off(type: 'release'): void
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | type | string | 是 | 监听releaseCall事件，固定为'release'。 |
@@ -1578,6 +1651,7 @@ off(type: 'release'): void
 **错误码：**
 
 以下错误码详细介绍请参考[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)。
+
 
 | 错误码ID | 错误信息 |
 | --- | --- |
@@ -1619,7 +1693,8 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### Callee
+## Callee
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1627,7 +1702,8 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### on
+### on
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1639,6 +1715,7 @@ on(method: string, callback: CalleeCallback): void
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | method | string | 是 | 由Caller和Callee双方约定好的方法名，Callee方通过该字段区分消息类型。 |
@@ -1648,6 +1725,7 @@ on(method: string, callback: CalleeCallback): void
 **错误码：**
 
 以下错误码详细介绍请参考[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)和[元能力子系统错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-ability)。
+
 
 | 错误码ID | 错误信息 |
 | --- | --- |
@@ -1709,7 +1787,8 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### off
+### off
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1721,6 +1800,7 @@ off(method: string): void
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | method | string | 是 | 已注册的通知事件字符串。 |
@@ -1729,6 +1809,7 @@ off(method: string): void
 **错误码：**
 
 以下错误码详细介绍请参考[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)和[元能力子系统错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-ability)。
+
 
 | 错误码ID | 错误信息 |
 | --- | --- |
@@ -1758,13 +1839,15 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### OnReleaseCallback
+## OnReleaseCallback
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
 
 
-#### (msg: string)
+### (msg: string)
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1776,6 +1859,7 @@ export default class MainUIAbility extends UIAbility {
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | msg | string | 是 | 用于传递释放消息。 |
@@ -1783,13 +1867,15 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### OnRemoteStateChangeCallback10+
+## OnRemoteStateChangeCallback10+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
 
 
-#### (msg: string)10+
+### (msg: string)10+
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1801,6 +1887,7 @@ export default class MainUIAbility extends UIAbility {
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | msg | string | 是 | 用于传递释放消息。 |
@@ -1808,13 +1895,15 @@ export default class MainUIAbility extends UIAbility {
 
 
 
-#### CalleeCallback
+## CalleeCallback
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
 
 
-#### (indata: rpc.MessageSequence)
+### (indata: rpc.MessageSequence)
+
 
 **支持设备：** Phone | PC/2in1 | Tablet | Wearable | TV
 
@@ -1826,12 +1915,14 @@ export default class MainUIAbility extends UIAbility {
 
 **参数：**
 
+
 | 参数名 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | indata | rpc.MessageSequence | 是 | 发送需传递的数据。 |
 
 
 **返回值：**
+
 
 | 类型 | 说明 |
 | --- | --- |

@@ -9,11 +9,11 @@
 本文档涵盖了大多数状态管理V1装饰器，所以在阅读本文档前，建议开发者对状态管理V1有一定的了解。建议提前阅读：[状态管理概述](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-state-management-overview)和状态管理V1装饰器相关文档。
 
 
-#### MVVM模式介绍
+## MVVM模式介绍
 
 
 
-#### 概念
+### 概念
 
 在应用开发中，UI更新需要实时同步数据状态变化，这直接影响应用程序的性能和用户体验。为了解决数据与UI同步的复杂性，ArkUI采用了 Model-View-ViewModel（MVVM）架构模式。MVVM 将应用分为Model、View和ViewModel三个核心部分，实现数据、视图与逻辑的分离。通过这种模式，UI可以自动更新状态变化，从而更高效地管理数据和视图的绑定与更新。
 
@@ -30,7 +30,7 @@ ArkUI的UI开发模式就属于MVVM模式，通过对MVVM概念的基本介绍�
 
 
 
-#### ArkUI开发模式图
+### ArkUI开发模式图
 
 ArkUI的UI开发模式即是MVVM模式，而状态变量在MVVM模式中扮演着ViewModel的角色，向上刷新UI，向下更新数据，整体框架如下图：
 
@@ -40,7 +40,7 @@ ArkUI的UI开发模式即是MVVM模式，而状态变量在MVVM模式中扮演�
 
 
 
-#### 分层说明
+### 分层说明
 
 **View层**
 
@@ -67,7 +67,7 @@ ViewModel层数据，是提供某个页面上使用的数据，它可能是整�
 
 
 
-#### 架构核心原则
+### 架构核心原则
 
 **不可跨层访问**
 
@@ -96,13 +96,13 @@ ViewModel层数据，是提供某个页面上使用的数据，它可能是整�
 
 
 
-#### 备忘录开发实战
+## 备忘录开发实战
 
 本节通过备忘录应用的开发，使开发者了解如何使用ArkUI框架设计自己的应用。本节直接进行功能开发，未设计代码架构，即根据需求即时开发，不考虑后续维护，同时，本节还将介绍功能开发所需的装饰器。
 
 
 
-#### @State状态变量
+### @State状态变量
 
  - [@State](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-state)装饰器是最常用的装饰器之一，用于定义状态变量。通常，这些状态变量作为父组件的数据源，开发者点击时，触发状态变量的更新，刷新UI。
 
@@ -166,7 +166,7 @@ struct StateIndex {
 
 
 
-#### @Prop、@Link的作用
+### @Prop、@Link的作用
 
 上述示例中，所有代码都写在了@Entry组件中。随着需要渲染的组件越来越多，@Entry组件必然需要进行拆分，为此，拆分出的子组件就需要使用@Prop和@Link装饰器：
 
@@ -311,7 +311,7 @@ struct PropLinkIndex {
 
 
 
-#### 循环渲染组件
+### 循环渲染组件
 
  - 上个示例虽然拆分出了子组件，但发现组件1和组件2的代码非常相似，当渲染的组件除了数据外，其他设置都相同时，此时就需要使用[ForEach循环渲染](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-rendering-control-foreach)。
  - ForEach使用之后，冗余代码变得更少，并且代码结构更加清晰。
@@ -450,7 +450,7 @@ struct ForEachIndex {
 
 
 
-#### @Builder方法
+### @Builder方法
 
  - Builder方法用于组件内定义方法，可以使得相同代码可以在组件内进行复用。
  - 本示例不仅使用了[@Builder](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-builder)方法进行去重，还对数据进行了移除，可以看到此时代码更加清晰易读，相对于最开始的代码，@Entry组件基本只用于处理页面构建逻辑，而不处理大量与页面设计无关的内容。
@@ -601,7 +601,7 @@ struct BuilderIndex {
 
 
 
-#### 总结
+### 总结
 
  - 通过逐步优化代码结构，可以看到@Entry组件作为页面的入口，其build函数应该仅考虑将需要的组件组合起来，类似于搭积木。被page调用的子组件则如同积木，等着被需要的page进行调用。状态变量类似于粘合剂，当触发UI刷新事件时，状态变量自动刷新绑定的组件，实现page的按需刷新。
  - 虽然现有的架构并未使用到MVVM的设计理念，但MVVM的核心理念已初见端倪。ArkUI的UI开发天然适合MVVM模式。在ArkUI中，page和组件构成View层，page负责组织组件，组件则作为构成元素。当组件需要更新时，通过状态变量驱动组件刷新，从而更新page。ViewModel的数据则来源于Model层。
@@ -610,13 +610,13 @@ struct BuilderIndex {
 
 
 
-#### 通过MVVM开发备忘录实战
+## 通过MVVM开发备忘录实战
 
 上一章节展示了非MVVM模式下的代码组织方式。随着主页面代码的增加，应该采取合理的分层策略，使项目结构清晰，组件之间不互相引用，避免后期维护时牵一发而动全身，增加功能更新的困难。本章将通过对MVVM的核心文件组织模式，向开发者展示如何使用MVVM来重构上一章节的代码。
 
 
 
-#### 分层设计技巧
+### 分层设计技巧
 
 **Model层**
 
@@ -651,7 +651,7 @@ View层根据需要来组织，但View层需要区分以下三种组件：
 
 
 
-#### 代码示例
+### 代码示例
 
 按MVVM模式组织结构，重构如下：
 

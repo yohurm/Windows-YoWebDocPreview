@@ -8,6 +8,8 @@ mod protect;
 mod tables;
 mod transform;
 
+pub use transform::heading_level;
+
 use std::collections::HashMap;
 
 /// 转换选项（由调用方注入；本 crate 不做 IO）
