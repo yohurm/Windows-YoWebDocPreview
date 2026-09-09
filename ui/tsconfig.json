@@ -8,11 +8,13 @@
     "packages/api/src",
     "packages/workbench/src",
     "packages/modules/*/src",
+    "vite-env.d.ts",
     "apps/shell/src",
     "apps/shell/vite.config.ts",
     "vitest.config.ts",
     "test-setup.ts",
     "../testdata/huawei-catalogs.json",
-    "../testdata/huawei-headings.json"
+    "../testdata/huawei-headings.json",
+    "../testdata/huawei-code-lang.json"
   ]
 }
