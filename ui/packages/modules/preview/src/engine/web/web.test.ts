@@ -5,11 +5,13 @@ import headingTable from "../../../../../../../testdata/huawei-headings.json";
 import type { DocMeta } from "@yohu/api";
 
 import {
+  assignWebSrcdoc,
   buildWebDocument,
   extractDeviceTypes,
   extractWebToc,
   identifyWebCode,
   normalizeArticleHtml,
+  paintWebAppearance,
   resolveHeadingLevel,
 } from "./index";
 
@@ -253,21 +255,43 @@ describe("buildWebDocument", () => {
     expect(result).toContain('viewBox="0 0 5.726 11.817"');
   });
 
-  it("stamps the workbench appearance onto the article document", () => {
-    const dark = buildWebDocument({
-      meta: null,
-      rawHtml: "<p>正文</p>",
-      sourceUrl: "https://example.com",
-      appearance: "dark",
-    });
-    const light = buildWebDocument({
+  it("does not bake workbench appearance into the article html", () => {
+    const html = buildWebDocument({
       meta: null,
       rawHtml: "<p>正文</p>",
       sourceUrl: "https://example.com",
     });
-    expect(light).toContain('<html lang="zh-CN" data-theme="light">');
-    expect(light).toContain('<meta name="color-scheme" content="light">');
-    expect(dark).toContain('<html lang="zh-CN" data-theme="dark">');
-    expect(dark).toContain('<meta name="color-scheme" content="dark">');
+    expect(html).toMatch(/<html lang="zh-CN">/);
+    expect(html).not.toMatch(/<html[^>]*data-theme=/);
+    expect(html).toContain('<meta name="color-scheme" content="light dark">');
+  });
+});
+
+describe("paintWebAppearance", () => {
+  it("paints data-theme onto an already-built document without rewriting html", () => {
+    const html = buildWebDocument({
+      meta: null,
+      rawHtml: "<p>正文</p>",
+      sourceUrl: "https://example.com",
+    });
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    paintWebAppearance(doc, "dark");
+    expect(doc.documentElement.getAttribute("data-theme")).toBe("dark");
+    expect(doc.documentElement.style.colorScheme).toBe("dark");
+    expect(doc.querySelector("meta[name='color-scheme']")?.getAttribute("content")).toBe("dark");
+    paintWebAppearance(doc, "light");
+    expect(doc.documentElement.getAttribute("data-theme")).toBe("light");
+    expect(doc.querySelector("#doc-body-content")?.textContent).toContain("正文");
+  });
+});
+
+describe("assignWebSrcdoc", () => {
+  it("writes the srcdoc property and skips identical html", () => {
+    const frame = document.createElement("iframe");
+    expect(assignWebSrcdoc(frame, "<p>a</p>")).toBe(true);
+    expect(frame.srcdoc).toBe("<p>a</p>");
+    expect(assignWebSrcdoc(frame, "<p>a</p>")).toBe(false);
+    expect(assignWebSrcdoc(frame, "<p>b</p>")).toBe(true);
+    expect(frame.srcdoc).toBe("<p>b</p>");
   });
 });
