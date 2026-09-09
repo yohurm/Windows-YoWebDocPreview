@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { extractDeviceTypes, normalizeArticleHtml } from "./normalizeArticleHtml";
+import headingTable from "../../../../../../testdata/huawei-headings.json";
+import { extractDeviceTypes, normalizeArticleHtml, resolveHeadingLevel } from "./normalizeArticleHtml";
 import { buildWebDocument } from "./webRenderer";
 import type { DocMeta } from "@yohu/api";
+
+describe("resolveHeadingLevel", () => {
+  it("matches testdata/huawei-headings.json", () => {
+    for (const row of headingTable.cases) {
+      expect(resolveHeadingLevel(row.tag, row.marker)).toBe(row.level);
+    }
+  });
+});
 
 describe("normalizeArticleHtml", () => {
   it("promotes unmarked h4 to h2 and [h2] markers to h3", () => {
@@ -79,6 +88,8 @@ describe("buildWebDocument", () => {
     expect(result).toContain('class="y-crumb__sep"');
     expect(result).not.toContain("&gt;");
     expect(result).toContain("36px");
+    expect(result).toContain('data-yo-read="article"');
+    expect(result).toContain("class=\"y-scroll\"");
   });
 
   it("falls back to h1 device-type when meta has none", () => {

@@ -1,82 +1,13 @@
 import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-js";
 
-import { IconCode, IconDocument, IconGlobe } from "@yohu/ui";
+import { IconGlobe } from "@yohu/ui";
 
 import { buildWebDocument } from "../engine/webRenderer";
 import type { PreviewStore } from "../store";
+import { CanvasOpBar } from "./CanvasOpBar";
 import { ChannelBar } from "./ChannelBar";
+import { DocumentPath } from "./DocumentPath";
 import { TocAside } from "./TocAside";
-
-function CanvasOpBar(props: { store: PreviewStore }) {
-  const { store } = props;
-  const onMarkdown = () => store.readingSurface() === "markdown";
-
-  return (
-    <div class="yo-canvas__opbar" role="toolbar" aria-label="操作栏">
-      <div class="yo-reader-switch">
-        <div class="yo-segmented" role="tablist" aria-label="阅读体验">
-          <button
-            type="button"
-            classList={{ "yo-segmented__btn": true, "is-on": store.readingSurface() === "web" }}
-            onClick={() => store.setReadingSurface("web")}
-            title="Web 原始阅读"
-          >
-            <IconGlobe class="yo-icon-sm" />
-            网页
-          </button>
-          <button
-            type="button"
-            classList={{ "yo-segmented__btn": true, "is-on": onMarkdown() }}
-            onClick={() => store.setReadingSurface("markdown")}
-            title="解析为 Markdown 阅读"
-          >
-            <IconDocument class="yo-icon-sm" />
-            Markdown
-          </button>
-        </div>
-        <Show when={onMarkdown()}>
-          <div class="yo-segmented" role="tablist" aria-label="Markdown 呈现">
-            <button
-              type="button"
-              classList={{
-                "yo-segmented__btn": true,
-                "is-on": store.markdownReveal() === "rendered",
-              }}
-              onClick={() => store.setMarkdownReveal("rendered")}
-              title="Markdown 渲染"
-            >
-              渲染
-            </button>
-            <button
-              type="button"
-              classList={{
-                "yo-segmented__btn": true,
-                "is-on": store.markdownReveal() === "source",
-              }}
-              onClick={() => store.setMarkdownReveal("source")}
-              title="Markdown 源码"
-            >
-              <IconCode class="yo-icon-sm" />
-              源码
-            </button>
-          </div>
-        </Show>
-      </div>
-    </div>
-  );
-}
-
-function DocumentPath(props: { catalogLabel: string; title: string }) {
-  return (
-    <div class="yo-doc-path">
-      <Show when={props.catalogLabel}>
-        <span>{props.catalogLabel}</span>
-        <span class="yo-doc-path__sep">/</span>
-      </Show>
-      <span class="yo-doc-path__title">{props.title}</span>
-    </div>
-  );
-}
 
 export function CanvasDock(props: { store: PreviewStore }) {
   const { store } = props;
@@ -93,6 +24,7 @@ export function CanvasDock(props: { store: PreviewStore }) {
   const [activeBuffer, setActiveBuffer] = createSignal<0 | 1>(0);
   const [html0, setHtml0] = createSignal("");
   const [html1, setHtml1] = createSignal("");
+  const [webTick, setWebTick] = createSignal(0);
 
   createEffect(() => {
     const nextHtml = webDocHtml();
@@ -111,6 +43,7 @@ export function CanvasDock(props: { store: PreviewStore }) {
 
   const handleFrameLoad = (bufferIdx: 0 | 1) => {
     if (activeBuffer() !== bufferIdx) setActiveBuffer(bufferIdx);
+    setWebTick((n) => n + 1);
   };
 
   onCleanup(() => {
@@ -144,6 +77,7 @@ export function CanvasDock(props: { store: PreviewStore }) {
               <iframe
                 srcdoc={html0()}
                 title="Web Buffer 0"
+                data-yo-read="web"
                 classList={{
                   "yo-web__frame": true,
                   "is-active": activeBuffer() === 0,
@@ -154,6 +88,7 @@ export function CanvasDock(props: { store: PreviewStore }) {
               <iframe
                 srcdoc={html1()}
                 title="Web Buffer 1"
+                data-yo-read="web"
                 classList={{
                   "yo-web__frame": true,
                   "is-active": activeBuffer() === 1,
@@ -166,9 +101,9 @@ export function CanvasDock(props: { store: PreviewStore }) {
         </Show>
 
         <Show when={onMarkdown() && store.markdownReveal() === "rendered"}>
-          <div class="yo-canvas__scroll">
+          <div class="yo-canvas__scroll" data-yo-read="md">
             <div class="yo-canvas__article">
-              <DocumentPath catalogLabel={store.docPath().catalogLabel} title={store.docPath().title} />
+              <DocumentPath crumbs={store.docCrumbs()} />
               <article class="yo-md" innerHTML={store.session().renderedHtml} />
             </div>
           </div>
@@ -179,7 +114,7 @@ export function CanvasDock(props: { store: PreviewStore }) {
             <textarea readOnly value={store.session().markdownText} class="yo-canvas__source-text" />
           </div>
         </Show>
-        <TocAside store={store} />
+        <TocAside store={store} webTick={webTick()} />
       </div>
     </div>
   );

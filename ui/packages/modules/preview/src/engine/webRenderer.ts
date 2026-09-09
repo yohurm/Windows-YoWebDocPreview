@@ -8,12 +8,12 @@
  * 4. article chrome — breadcrumb + title + update time
  *
  * Channel switching is workbench session chrome (ChannelBar → fetchDoc),
- * not document HTML. Left catalog / 本文导读 also stay in the workbench.
+ * not document HTML. Left catalog / outline also stay in the workbench.
  */
 
 import type { CatalogNode, DocMeta } from "@yohu/api";
 
-import { documentCrumbs, documentPath } from "../catalogPolicy";
+import { documentCrumbs, documentTitle } from "../documentCrumbs";
 import { normalizeArticleHtml, resolveDeviceTypes } from "./normalizeArticleHtml";
 import { OFFICIAL_ARTICLE_CSS } from "./officialSkin";
 
@@ -29,7 +29,7 @@ const CRUMB_CHEVRON = `<svg viewBox="0 0 5.726 11.817" fill="currentColor" aria-
 
 export function buildWebDocument(options: RenderWebOptions): string {
   const { meta, rawHtml, catalogNodes = [] } = options;
-  const { title } = documentPath(meta, "在线文档网页原貌");
+  const title = documentTitle(meta, "在线文档网页原貌");
   const body = normalizeArticleHtml(rawHtml, title);
   const safeTitle = escapeHtml(title);
   const crumbs = documentCrumbs(meta, catalogNodes, "在线文档网页原貌");
@@ -56,14 +56,16 @@ export function buildWebDocument(options: RenderWebOptions): string {
   <style>${OFFICIAL_ARTICLE_CSS}</style>
 </head>
 <body>
-  <article class="y-article">
-    <nav class="y-crumb">${crumb}</nav>
-    <h1 class="y-title">${safeTitle}</h1>
-    <div class="y-meta">${update}${devices}</div>
-    <div class="y-content" id="doc-body-content">
-      ${body || `<p>文档正文已加载，暂无排版内容</p>`}
-    </div>
-  </article>
+  <div class="y-scroll" data-yo-read="article">
+    <article class="y-article">
+      <nav class="y-crumb">${crumb}</nav>
+      <h1 class="y-title">${safeTitle}</h1>
+      <div class="y-meta">${update}${devices}</div>
+      <div class="y-content" id="doc-body-content">
+        ${body || `<p>文档正文已加载，暂无排版内容</p>`}
+      </div>
+    </article>
+  </div>
 </body>
 </html>`;
 }

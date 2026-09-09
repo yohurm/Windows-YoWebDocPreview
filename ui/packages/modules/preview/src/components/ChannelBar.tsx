@@ -1,6 +1,6 @@
 import { For, Show } from "solid-js";
 
-import { channelTabLabel, HUAWEI_CHANNELS } from "../catalogPolicy";
+import { channelTabLabel, HUAWEI_CHANNELS } from "../huaweiCatalog";
 import type { PreviewStore } from "../store";
 
 export function ChannelBar(props: { store: PreviewStore }) {

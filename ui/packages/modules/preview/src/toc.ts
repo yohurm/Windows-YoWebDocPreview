@@ -60,7 +60,8 @@ export function extractTocFromMarkdown(markdown: string): TocItem[] {
 
   if (rawItems.length === 0) return [];
 
-  return rawItems.map((item) => ({
+  const skipLeadingTitle = rawItems[0]?.rawLevel === 1;
+  return rawItems.filter((_, index) => !(skipLeadingTitle && index === 0)).map((item) => ({
     id: item.id,
     text: item.text,
     level: item.rawLevel,
@@ -84,4 +85,23 @@ export function renderMarkdownToSafeHtml(markdown: string): string {
   return DOMPurify.sanitize(anchoredHtml, {
     ADD_ATTR: ["target", "id"],
   });
+}
+
+export function extractTocFromArticleHtml(html: string): TocItem[] {
+  if (!html) return [];
+  const items: TocItem[] = [];
+  const headingRe = /<h([1-4])([^>]*)>([\s\S]*?)<\/h\1>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = headingRe.exec(html))) {
+    const level = Number(match[1]);
+    const attrs = match[2] ?? "";
+    const text = (match[3] ?? "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    const id = /\bid=["']([^"']+)["']/i.exec(attrs)?.[1];
+    if (!text || !id) continue;
+    items.push({ id, text, level });
+  }
+  return items;
 }

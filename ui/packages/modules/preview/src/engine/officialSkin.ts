@@ -21,13 +21,17 @@ export const OFFICIAL_ARTICLE_CSS = `
 
 * { box-sizing: border-box; }
 html, body {
+  height: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
 }
-body {
+.y-scroll {
+  height: 100%;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 .y-article {

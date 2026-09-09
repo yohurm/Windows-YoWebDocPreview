@@ -1,13 +1,20 @@
-import { createSignal, Show } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 
-import { IconList } from "@yohu/ui";
+import { IconSearch } from "@yohu/ui";
 
+import { filterCatalogTree } from "../catalogTree";
 import type { PreviewStore } from "../store";
 import { CatalogTree } from "./CatalogTree";
 
 export function PrimarySidebar(props: { store: PreviewStore }) {
   const { store } = props;
   const [allExpanded, setAllExpanded] = createSignal(true);
+  const [query, setQuery] = createSignal("");
+
+  const visibleNodes = createMemo(() =>
+    filterCatalogTree(store.session().catalogNodes, query())
+  );
+  const filtering = () => query().trim().length > 0;
 
   const handleToggleAll = () => {
     const next = !allExpanded();
@@ -29,29 +36,23 @@ export function PrimarySidebar(props: { store: PreviewStore }) {
         </button>
       }
     >
-      <aside class="yo-sidebar">
-        <div class="yo-sidebar__header">
-          <div class="yo-sidebar__title">
-            <IconList class="yo-icon-md yo-text-muted" />
-            <span>专栏章节</span>
-            <Show when={store.session().catalogNodes.length > 0}>
-              <span class="yo-sidebar__badge">{store.session().catalogNodes.length}</span>
-            </Show>
-          </div>
-          <div class="yo-sidebar__header-actions">
-            <Show when={store.session().catalogNodes.length > 0}>
+      <aside class="yo-nav">
+        <div class="yo-nav__head">
+          <span class="yo-nav__title">专栏</span>
+          <div class="yo-nav__actions">
+            <Show when={store.session().catalogNodes.length > 0 && !filtering()}>
               <button
                 type="button"
-                class="yo-sidebar__toggle"
+                class="yo-nav__btn"
                 title={allExpanded() ? "折叠所有章节" : "展开所有章节"}
                 onClick={handleToggleAll}
               >
-                {allExpanded() ? "全部折叠" : "全部展开"}
+                {allExpanded() ? "折叠" : "展开"}
               </button>
             </Show>
             <button
               type="button"
-              class="yo-sidebar__toggle"
+              class="yo-nav__btn"
               title="收起专栏 (Ctrl+B)"
               onClick={() => store.toggleSidebar()}
             >
@@ -59,22 +60,35 @@ export function PrimarySidebar(props: { store: PreviewStore }) {
             </button>
           </div>
         </div>
-        <div class="yo-sidebar__body">
+        <Show when={store.session().catalogNodes.length > 0}>
+          <label class="yo-nav__filter">
+            <IconSearch class="yo-icon-sm" />
+            <input
+              type="search"
+              value={query()}
+              placeholder="筛选文档标题"
+              onInput={(event) => setQuery(event.currentTarget.value)}
+            />
+          </label>
+        </Show>
+        <div class="yo-nav__body">
           <Show
             when={store.session().catalogNodes.length > 0}
-            fallback={
-              <div class="yo-sidebar__empty">
-                <span>打开文档后显示专栏目录</span>
-              </div>
-            }
+            fallback={<div class="yo-nav__empty">打开文档后显示专栏目录</div>}
           >
-            <CatalogTree
-              nodes={store.session().catalogNodes}
-              activeSlug={store.currentSlug()}
-              expandedKeys={store.expandedKeys()}
-              onToggleNode={(id) => store.toggleCatalogNode(id)}
-              onSelectDoc={(slug) => store.selectCatalogDoc(slug)}
-            />
+            <Show
+              when={visibleNodes().length > 0}
+              fallback={<div class="yo-nav__empty">没有匹配的章节</div>}
+            >
+              <CatalogTree
+                nodes={visibleNodes()}
+                activeSlug={store.currentSlug()}
+                expandedKeys={store.expandedKeys()}
+                forceExpand={filtering()}
+                onToggleNode={(id) => store.toggleCatalogNode(id)}
+                onSelectDoc={(slug) => store.selectCatalogDoc(slug)}
+              />
+            </Show>
           </Show>
         </div>
       </aside>

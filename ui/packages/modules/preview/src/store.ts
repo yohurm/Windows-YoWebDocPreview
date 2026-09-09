@@ -9,20 +9,17 @@ import {
   type CatalogNode,
 } from "@yohu/api";
 
-import {
-  catalogIdFromUrl,
-  collectExpandableIds,
-  documentPath,
-  findAncestorIds,
-  resolveCatalogDocUrl,
-} from "./catalogPolicy";
+import { collectExpandableIds, findAncestorIds, resolveCatalogDocUrl } from "./catalogTree";
+import { documentCrumbs } from "./documentCrumbs";
+import { catalogIdFromUrl } from "./huaweiCatalog";
+import { normalizeArticleHtml } from "./engine/normalizeArticleHtml";
 import {
   createEmptyDocSession,
   type MarkdownReveal,
   type ReadingSurface,
   type UnifiedDocSession,
 } from "./model";
-import { extractTocFromMarkdown, renderMarkdownToSafeHtml } from "./toc";
+import { extractTocFromArticleHtml, extractTocFromMarkdown, renderMarkdownToSafeHtml } from "./toc";
 
 export function createPreviewStore() {
   const [session, setSession] = createSignal<UnifiedDocSession>(createEmptyDocSession());
@@ -41,7 +38,10 @@ export function createPreviewStore() {
     () => Boolean(session().url && (session().rawHtml || session().markdownText))
   );
   const currentSlug = createMemo(() => session().meta?.docRef?.slug);
-  const docPath = createMemo(() => documentPath(session().meta));
+  const docCrumbs = createMemo(() => documentCrumbs(session().meta, session().catalogNodes));
+  const tocItems = createMemo(() =>
+    readingSurface() === "web" ? session().webToc : session().markdownToc
+  );
 
   const applyExpandedForSlug = (tree: CatalogNode[], slug?: string) => {
     if (!slug) return;
@@ -153,7 +153,10 @@ export function createPreviewStore() {
         rawHtml: fetchedHtml,
         markdownText: fetchedMd,
         renderedHtml: renderMarkdownToSafeHtml(fetchedMd),
-        tocList: extractTocFromMarkdown(fetchedMd),
+        markdownToc: extractTocFromMarkdown(fetchedMd),
+        webToc: extractTocFromArticleHtml(
+          normalizeArticleHtml(fetchedHtml, fetchedMeta.title ?? "")
+        ),
         catalogNodes: treeReady ? session().catalogNodes : [],
         catalogId: targetCat,
         durationMs: Math.round(performance.now() - started),
@@ -267,7 +270,8 @@ export function createPreviewStore() {
     expandedKeys,
     hasDoc,
     currentSlug,
-    docPath,
+    docCrumbs,
+    tocItems,
     resetToHome,
     fetchDoc,
     selectCatalogDoc,

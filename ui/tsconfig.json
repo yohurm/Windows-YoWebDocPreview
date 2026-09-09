@@ -11,6 +11,8 @@
     "apps/shell/src",
     "apps/shell/vite.config.ts",
     "vitest.config.ts",
-    "test-setup.ts"
+    "test-setup.ts",
+    "../testdata/huawei-catalogs.json",
+    "../testdata/huawei-headings.json"
   ]
 }

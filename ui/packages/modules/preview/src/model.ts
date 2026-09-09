@@ -1,10 +1,6 @@
 import type { CatalogNode, DocMeta } from "@yohu/api";
 
-export interface TocNode {
-  id: string;
-  text: string;
-  level: number;
-}
+import type { TocItem } from "./toc";
 
 /** 一级阅读体验：站点原文，或解析后的 Markdown。 */
 export type ReadingSurface = "web" | "markdown";
@@ -22,7 +18,8 @@ export interface UnifiedDocSession {
   rawHtml: string;
   markdownText: string;
   renderedHtml: string;
-  tocList: TocNode[];
+  markdownToc: TocItem[];
+  webToc: TocItem[];
   catalogNodes: CatalogNode[];
   catalogId: string;
   durationMs: number | null;
@@ -38,7 +35,8 @@ export function createEmptyDocSession(): UnifiedDocSession {
     rawHtml: "",
     markdownText: "",
     renderedHtml: "",
-    tocList: [],
+    markdownToc: [],
+    webToc: [],
     catalogNodes: [],
     catalogId: "",
     durationMs: null,

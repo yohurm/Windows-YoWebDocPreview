@@ -33,6 +33,14 @@ export function resolveDeviceTypes(
   return extractDeviceTypes(rawHtml);
 }
 
+/** Huawei API HTML tag + optional `[hN]` marker → live-site heading level. Locked by testdata/huawei-headings.json. */
+export function resolveHeadingLevel(tag: number, marker: number | null): number {
+  if (tag <= 1) return 1;
+  if (marker === 2) return 3;
+  if (marker != null) return Math.min(4, marker + 1);
+  return tag === 4 ? 2 : tag;
+}
+
 export function normalizeArticleHtml(rawHtml: string, pageTitle = ""): string {
   if (!rawHtml) return "";
   let html = unwrapDocument(rawHtml);
@@ -58,14 +66,8 @@ function promoteHeadings(html: string, pageTitle: string): string {
       if (pageTitle && plain === pageTitle) return "";
       return `<h1${attrs}>${text}</h1>`;
     }
-    // Live site: unmarked section h4 → h2; [h2] under the page title → h3.firsth2
-    let level: number;
-    if (marked) {
-      const marker = Number(marked[1]);
-      level = marker === 2 ? 3 : Math.min(4, marker + 1);
-    } else {
-      level = tag === "4" ? 2 : Number(tag);
-    }
+    const marker = marked ? Number(marked[1]) : null;
+    const level = resolveHeadingLevel(Number(tag), Number.isFinite(marker) ? marker : null);
     const extra = marked && marked[1] === "2" ? " class=\"firsth2\"" : "";
     const idBit = /(?:^|\s)id=/.test(attrs) ? attrs : `${attrs} id="${slugId(text)}"`;
     return `<h${level}${idBit}${extra}>${text}</h${level}>`;
