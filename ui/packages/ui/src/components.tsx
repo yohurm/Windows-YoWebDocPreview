@@ -72,6 +72,45 @@ export function IconChevron(props: { class?: string; style?: JSX.CSSProperties }
   );
 }
 
+/** VS Code Codicon `layout-sidebar-left`：左侧栏开合。 */
+export function IconPanelLeft(props: { class?: string; style?: JSX.CSSProperties }) {
+  return (
+    <svg class={props.class} style={props.style} width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path fill-rule="evenodd" d="M2 1 1 2v12l1 1h12l1-1V2l-1-1H2zm12 13H7V2h7z" />
+    </svg>
+  );
+}
+
+/** GitHub Primer `octicon-sidebar-collapse`：右侧栏开合（Docs 大纲同款）。 */
+export function IconPanelRight(props: { class?: string; style?: JSX.CSSProperties }) {
+  return (
+    <svg class={props.class} style={props.style} width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M6.823 7.823a.25.25 0 0 1 0 .354l-2.396 2.396A.25.25 0 0 1 4 10.396V5.604a.25.25 0 0 1 .427-.177Z" />
+      <path d="M1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25V1.75C0 .784.784 0 1.75 0ZM1.5 1.75v12.5c0 .138.112.25.25.25H9.5v-13H1.75a.25.25 0 0 0-.25.25ZM11 14.5h3.25a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25H11Z" />
+    </svg>
+  );
+}
+
+/** VS Code `collapse-all`：双 chevron 向上。 */
+export function IconCollapseAll(props: { class?: string; style?: JSX.CSSProperties }) {
+  return (
+    <svg class={props.class} style={props.style} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M3.5 7.5 8 3l4.5 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M3.5 13 8 8.5 12.5 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  );
+}
+
+/** VS Code `expand-all`：双 chevron 向下。 */
+export function IconExpandAll(props: { class?: string; style?: JSX.CSSProperties }) {
+  return (
+    <svg class={props.class} style={props.style} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M3.5 3 8 7.5 12.5 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M3.5 8.5 8 13 12.5 8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  );
+}
+
 export function IconFolder(props: { class?: string; style?: JSX.CSSProperties }) {
   return (
     <svg class={props.class} style={props.style} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
