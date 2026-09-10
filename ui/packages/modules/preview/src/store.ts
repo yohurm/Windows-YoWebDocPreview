@@ -10,6 +10,7 @@ import {
 } from "@yohu/api";
 
 import { collectExpandableIds, findAncestorIds, resolveCatalogDocUrl } from "./catalogTree";
+import { resolveContentHref, type ContentHref } from "./contentHref";
 import { documentCrumbs } from "./documentCrumbs";
 import { catalogIdFromUrl } from "./huaweiCatalog";
 import { parseWebArticle } from "./engine/web";
@@ -190,6 +191,14 @@ export function createPreviewStore() {
     void fetchDoc(resolveCatalogDocUrl(slugOrUrl, current));
   };
 
+  const openContentHref = (href: string): ContentHref => {
+    const nav = resolveContentHref(href, session().meta?.sourceUrl || session().url);
+    if (nav.kind === "open") {
+      void fetchDoc(nav.url);
+    }
+    return nav;
+  };
+
   const toggleCatalogNode = (nodeId: string) => {
     setExpandedKeys((prev) => {
       const next = new Set(prev);
@@ -274,6 +283,7 @@ export function createPreviewStore() {
     tocItems,
     resetToHome,
     fetchDoc,
+    openContentHref,
     selectCatalogDoc,
     toggleCatalogNode,
     toggleAllCatalogNodes,

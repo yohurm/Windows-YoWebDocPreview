@@ -12,6 +12,7 @@ mod events;
 mod panic_hook;
 mod paths;
 mod settings_store;
+mod shell_nav;
 mod state;
 
 use std::sync::{Arc, Mutex};
@@ -77,6 +78,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = builder
         .plugin(tauri_plugin_dialog::init())
+        .plugin(shell_nav::plugin())
         .invoke_handler(tauri::generate_handler![
             commands::doc::doc_fetch,
             commands::doc::doc_html,

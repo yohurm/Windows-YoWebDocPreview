@@ -1,8 +1,10 @@
-import { createMemo, createSignal, Show } from "solid-js";
+import { createMemo, createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import { IconGlobe, YoStage, type Appearance } from "@yohu/ui";
 
+import { bindContentLinks } from "../contentHref";
 import { buildWebDocument } from "../engine/web";
+import { readScroller, scrollToHeading } from "../readingScroll";
 import type { PreviewStore } from "../store";
 import { CanvasOpBar } from "./CanvasOpBar";
 import { ChannelBar } from "./ChannelBar";
@@ -26,6 +28,23 @@ export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance
   const webOpen = () => store.readingSurface() === "web";
   const onMarkdown = () => store.readingSurface() === "markdown";
   const hasWebDoc = () => Boolean(store.session().rawHtml || store.session().meta);
+
+  const followHref = (href: string) => {
+    const nav = store.openContentHref(href);
+    if (nav.kind !== "scroll") return;
+    const scroller = readScroller(store.readingSurface());
+    if (scroller) scrollToHeading(scroller, nav.id);
+  };
+
+  let markdownHost: HTMLDivElement | undefined;
+  onMount(() => {
+    if (!markdownHost) return;
+    const stop = bindContentLinks(markdownHost, {
+      baseUrl: () => store.session().meta?.sourceUrl || store.session().url,
+      onHref: followHref,
+    });
+    onCleanup(stop);
+  });
 
   return (
     <div class="yo-canvas">
@@ -60,12 +79,17 @@ export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance
                 html={webDocHtml()}
                 appearance={props.appearance ?? "light"}
                 active={webOpen()}
+                baseUrl={() => store.session().meta?.sourceUrl || store.session().url}
+                onHref={followHref}
                 onReady={() => setWebTick((n) => n + 1)}
               />
             </Show>
           </div>
 
           <div
+            ref={(el) => {
+              markdownHost = el;
+            }}
             class="yo-md-host yohu-recipe-crossfade"
             data-active={onMarkdown() ? "" : undefined}
             aria-hidden={onMarkdown() ? undefined : true}

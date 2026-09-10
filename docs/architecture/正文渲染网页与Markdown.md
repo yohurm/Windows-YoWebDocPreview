@@ -131,7 +131,7 @@ flowchart LR
 
 ### 1. 文本（段落 / 行内 / 链接 / 列表）
 
-**网页。** 保持实测：正文 16px / 24px 行高、段上边距 24px、链接 `#0a59f7`（深色主题用 officialSkin 已有 `--link`）。列表左垫 1.4em。不要把工作台 `--yo-font-base: 13px` 灌进 iframe。
+**网页。** 保持实测：正文 16px / 24px 行高、段上边距 24px、链接 `#0a59f7`（深色主题用 officialSkin 已有 `--link`）。列表左垫 1.4em。不要把工作台 `--yo-font-base: 13px` 灌进 iframe。正文 `<a>` 点击进 `store.openContentHref`，与主页/专栏同一条 `fetchDoc`；iframe 不 `allow-popups`，代码托管链接不 `target=_blank`。
 
 **Markdown。** 独立阅读尺，对齐工作台而不是官网：
 

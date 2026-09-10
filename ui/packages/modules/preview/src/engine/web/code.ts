@@ -36,7 +36,7 @@ function codeBar(lang: string, hub: WebCodeIdentity["hub"]): string {
   const bits = [
     lang ? `<span class="y-code__lang">${escapeHtml(lang)}</span>` : "",
     hub
-      ? `<a class="y-code__hub" href="${escapeAttr(hub.url)}" target="_blank" rel="noreferrer">${escapeHtml(hub.file || "示例")}</a>`
+      ? `<a class="y-code__hub" href="${escapeAttr(hub.url)}">${escapeHtml(hub.file || "示例")}</a>`
       : "",
   ].filter(Boolean);
   return bits.length ? `<div class="y-code__bar">${bits.join("")}</div>` : "";

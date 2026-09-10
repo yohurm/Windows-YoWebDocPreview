@@ -50,8 +50,18 @@ describe("preview rail overlay", () => {
     expect(surfaces).not.toContain("display: none");
   });
 
+  it("网页 iframe 不授权弹窗，正文链接不走 target=_blank", () => {
+    const frame = loadPreviewFile("components/WebReadingFrame.tsx");
+    const code = loadPreviewFile("engine/web/code.ts");
+    expect(frame).toContain("bindContentLinks");
+    expect(frame).not.toContain("allow-popups");
+    expect(code).toContain("y-code__hub");
+    expect(code).not.toContain("target=\"_blank\"");
+  });
+
   it("阅读表面不进 YoStage 身份，网页 iframe 不被卸掉", () => {
     const src = loadPreviewFile("components/CanvasDock.tsx");
+    expect(src).toContain("openContentHref");
     expect(src.length).toBeGreaterThan(0);
     expect(src).toContain("yohu-recipe-crossfade");
     expect(src).toContain("yo-md-host");

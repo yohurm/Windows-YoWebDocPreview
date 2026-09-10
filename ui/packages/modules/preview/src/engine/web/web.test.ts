@@ -85,6 +85,8 @@ describe("normalizeArticleHtml", () => {
     expect(html).toContain('class="y-code__lang">ArkTS<');
     expect(html).toContain('class="y-code__body"');
     expect(html).toContain("BasicKnowledge.ets");
+    expect(html).toContain('href="https://gitcode.com/example/pages/BasicKnowledge.ets#L23-L25"');
+    expect(html).not.toContain('target="_blank"');
     expect(html).toContain("hljs-keyword");
     expect(html).not.toContain('class="TypeScript');
     expect(html).not.toContain("prettyprint");

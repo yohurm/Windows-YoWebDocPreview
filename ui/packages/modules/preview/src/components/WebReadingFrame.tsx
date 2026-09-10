@@ -1,21 +1,35 @@
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, onCleanup } from "solid-js";
 
 import type { Appearance } from "@yohu/ui";
 
+import { bindContentLinks } from "../contentHref";
 import { assignWebSrcdoc, paintWebAppearance } from "../engine/web";
 
 export function WebReadingFrame(props: {
   html: string;
   appearance: Appearance;
   active: boolean;
+  baseUrl: () => string;
+  onHref: (href: string) => void;
   onReady?: () => void;
 }) {
   const [frame, setFrame] = createSignal<HTMLIFrameElement>();
+  let detachLinks: (() => void) | undefined;
 
   const paint = (): void => {
     const doc = frame()?.contentDocument;
     if (!doc?.documentElement) return;
     paintWebAppearance(doc, props.appearance);
+  };
+
+  const attachLinks = (): void => {
+    detachLinks?.();
+    const doc = frame()?.contentDocument;
+    if (!doc) return;
+    detachLinks = bindContentLinks(doc, {
+      baseUrl: () => props.baseUrl(),
+      onHref: (href) => props.onHref(href),
+    });
   };
 
   createEffect(() => {
@@ -30,6 +44,8 @@ export function WebReadingFrame(props: {
     paint();
   });
 
+  onCleanup(() => detachLinks?.());
+
   return (
     <iframe
       ref={setFrame}
@@ -37,9 +53,10 @@ export function WebReadingFrame(props: {
       data-yo-read="web"
       class="yo-web__frame"
       data-active={props.active ? "" : undefined}
-      sandbox="allow-same-origin allow-scripts allow-popups"
+      sandbox="allow-same-origin allow-scripts"
       onLoad={() => {
         paint();
+        attachLinks();
         props.onReady?.();
       }}
     />
