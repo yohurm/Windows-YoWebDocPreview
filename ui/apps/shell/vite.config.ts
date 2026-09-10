@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [solid()],
   clearScreen: false,
   server: {
-    port: 1420,
+    port: 1335,
     strictPort: true,
     fs: {
       allow: [repoRoot],

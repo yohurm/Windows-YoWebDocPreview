@@ -497,13 +497,33 @@
   --yo-toc-shift: calc(var(--yo-toc-w) - var(--yo-pane-rail-w));
 }
 
-.yo-canvas__content > .yohu-presence[data-recipe="fade"] {
+.yo-canvas__surfaces {
   position: absolute;
   inset: 0;
   right: var(--yo-toc-slot);
   min-width: 0;
   min-height: 0;
   transition: right var(--yohu-motion-spatial-panel);
+}
+
+.yo-canvas__surfaces > .yo-web,
+.yo-canvas__surfaces > .yo-md-host,
+.yo-canvas__surfaces > .yohu-presence[data-recipe="fade"] {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.yo-canvas__surfaces > .yohu-recipe-crossfade[data-active] {
+  z-index: 1;
+}
+
+.yo-md-host {
+  background: var(--yo-bg-card);
 }
 
 .yo-toc {
@@ -777,7 +797,8 @@
   .yo-nav,
   .yo-toc,
   .yo-canvas,
-  .yo-canvas__content > .yohu-presence[data-recipe="fade"],
+  .yo-canvas__surfaces,
+  .yo-canvas__surfaces > .yohu-presence[data-recipe="fade"],
   .yo-toc .yo-toc__head .yo-nav__icon-btn,
   .yo-toc .yo-toc__rail-label,
   .yo-nav__title,

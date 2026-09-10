@@ -23,7 +23,9 @@ export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance
     })
   );
 
+  const webOpen = () => store.readingSurface() === "web";
   const onMarkdown = () => store.readingSurface() === "markdown";
+  const hasWebDoc = () => Boolean(store.session().rawHtml || store.session().meta);
 
   return (
     <div class="yo-canvas">
@@ -38,48 +40,54 @@ export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance
         class="yo-canvas__content yohu-recipe-rail"
         classList={{ "is-toc-collapsed": !store.inspectorOpen() }}
       >
-        <YoStage
-          keys={`${store.readingSurface()}:${onMarkdown() ? store.markdownReveal() : "web"}`}
-        >
-          <Show when={store.readingSurface() === "web"}>
-            <div class="yo-web">
-              <Show
-                when={store.session().rawHtml || store.session().meta}
-                fallback={
-                  <div class="yo-web__placeholder">
-                    <IconGlobe class="yo-icon-lg" />
-                    <span>载入文档后呈现网页原文</span>
-                  </div>
-                }
-              >
-                <WebReadingFrame
-                  html={webDocHtml()}
-                  appearance={props.appearance ?? "light"}
-                  onReady={() => setWebTick((n) => n + 1)}
-                />
-              </Show>
-            </div>
-          </Show>
-
-          <Show when={onMarkdown() && store.markdownReveal() === "rendered"}>
-            <YoStage keys={store.session().url}>
-              <div class="yo-canvas__scroll" data-yo-read="md">
-                <div class="yo-canvas__article">
-                  <DocumentPath crumbs={store.docCrumbs()} />
-                  <article class="yo-md" innerHTML={store.session().renderedHtml} />
+        <div class="yo-canvas__surfaces">
+          <div
+            class="yo-web yohu-recipe-crossfade"
+            data-active={webOpen() ? "" : undefined}
+            aria-hidden={webOpen() ? undefined : true}
+            inert={webOpen() ? undefined : true}
+          >
+            <Show
+              when={hasWebDoc()}
+              fallback={
+                <div class="yo-web__placeholder">
+                  <IconGlobe class="yo-icon-lg" />
+                  <span>载入文档后呈现网页原文</span>
                 </div>
-              </div>
-            </YoStage>
-          </Show>
+              }
+            >
+              <WebReadingFrame
+                html={webDocHtml()}
+                appearance={props.appearance ?? "light"}
+                active={webOpen()}
+                onReady={() => setWebTick((n) => n + 1)}
+              />
+            </Show>
+          </div>
 
-          <Show when={onMarkdown() && store.markdownReveal() === "source"}>
-            <YoStage keys={store.session().url}>
-              <div class="yo-canvas__source">
-                <textarea readOnly value={store.session().markdownText} class="yo-canvas__source-text" />
-              </div>
+          <div
+            class="yo-md-host yohu-recipe-crossfade"
+            data-active={onMarkdown() ? "" : undefined}
+            aria-hidden={onMarkdown() ? undefined : true}
+            inert={onMarkdown() ? undefined : true}
+          >
+            <YoStage keys={`${store.markdownReveal()}:${store.session().url}`}>
+              <Show when={store.markdownReveal() === "rendered"}>
+                <div class="yo-canvas__scroll" data-yo-read="md">
+                  <div class="yo-canvas__article">
+                    <DocumentPath crumbs={store.docCrumbs()} />
+                    <article class="yo-md" innerHTML={store.session().renderedHtml} />
+                  </div>
+                </div>
+              </Show>
+              <Show when={store.markdownReveal() === "source"}>
+                <div class="yo-canvas__source">
+                  <textarea readOnly value={store.session().markdownText} class="yo-canvas__source-text" />
+                </div>
+              </Show>
             </YoStage>
-          </Show>
-        </YoStage>
+          </div>
+        </div>
         <TocAside store={store} webTick={webTick()} />
       </div>
     </div>

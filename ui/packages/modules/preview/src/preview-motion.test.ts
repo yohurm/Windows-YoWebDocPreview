@@ -2,10 +2,10 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-function loadPreviewCss(): string {
+function loadPreviewFile(name: string): string {
   const candidates = [
-    resolve(process.cwd(), "packages/modules/preview/src/preview.css"),
-    resolve(process.cwd(), "src/preview.css"),
+    resolve(process.cwd(), "packages/modules/preview/src", name),
+    resolve(process.cwd(), "src", name),
   ];
   for (const candidate of candidates) {
     if (existsSync(candidate)) {
@@ -13,6 +13,10 @@ function loadPreviewCss(): string {
     }
   }
   return "";
+}
+
+function loadPreviewCss(): string {
+  return loadPreviewFile("preview.css");
 }
 
 describe("preview rail overlay", () => {
@@ -33,5 +37,27 @@ describe("preview rail overlay", () => {
     expect(css).not.toContain("width: var(--yo-nav-visual)");
     const navBlock = css.slice(css.indexOf(".yo-nav,"), css.indexOf(".yo-nav {"));
     expect(navBlock).not.toContain("justify-content: flex-end");
+  });
+
+  it("阅读表面走 crossfade 配方，休眠不 display:none、不 visibility:hidden", () => {
+    const css = loadPreviewCss();
+    expect(css).toContain(".yo-canvas__surfaces");
+    expect(css).toContain(".yo-md-host");
+    expect(css).toContain("yohu-recipe-crossfade");
+    expect(css).not.toContain(".yo-web.is-dormant");
+    const surfaces = css.slice(css.indexOf(".yo-canvas__surfaces"), css.indexOf(".yo-toc {"));
+    expect(surfaces).not.toContain("visibility: hidden");
+    expect(surfaces).not.toContain("display: none");
+  });
+
+  it("阅读表面不进 YoStage 身份，网页 iframe 不被卸掉", () => {
+    const src = loadPreviewFile("components/CanvasDock.tsx");
+    expect(src.length).toBeGreaterThan(0);
+    expect(src).toContain("yohu-recipe-crossfade");
+    expect(src).toContain("yo-md-host");
+    expect(src).toContain("yo-canvas__surfaces");
+    expect(src).toMatch(/<YoStage keys=\{`\$\{store\.markdownReveal\(\)/);
+    expect(src).not.toMatch(/<YoStage keys=\{`\$\{store\.readingSurface\(\)/);
+    expect(src).not.toContain("is-dormant");
   });
 });

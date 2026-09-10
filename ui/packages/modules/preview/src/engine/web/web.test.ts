@@ -264,6 +264,13 @@ describe("buildWebDocument", () => {
     expect(html).toMatch(/<html lang="zh-CN">/);
     expect(html).not.toMatch(/<html[^>]*data-theme=/);
     expect(html).toContain('<meta name="color-scheme" content="light dark">');
+    expect(html).toContain('[data-theme="light"]');
+    expect(html).toContain("[data-theme=\"dark\"]");
+    expect(html).not.toMatch(/:root \{[^}]*--bg:/);
+    expect(html).toContain("--code-stroke:");
+    expect(html).toContain("--code-shadow:");
+    expect(html).toContain("border: 1px solid var(--code-stroke");
+    expect(html).toContain("box-shadow: var(--code-shadow");
   });
 });
 

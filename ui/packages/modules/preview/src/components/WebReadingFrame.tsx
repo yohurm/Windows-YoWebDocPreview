@@ -7,6 +7,7 @@ import { assignWebSrcdoc, paintWebAppearance } from "../engine/web";
 export function WebReadingFrame(props: {
   html: string;
   appearance: Appearance;
+  active: boolean;
   onReady?: () => void;
 }) {
   const [frame, setFrame] = createSignal<HTMLIFrameElement>();
@@ -35,7 +36,7 @@ export function WebReadingFrame(props: {
       title="网页阅读"
       data-yo-read="web"
       class="yo-web__frame"
-      data-active=""
+      data-active={props.active ? "" : undefined}
       sandbox="allow-same-origin allow-scripts allow-popups"
       onLoad={() => {
         paint();

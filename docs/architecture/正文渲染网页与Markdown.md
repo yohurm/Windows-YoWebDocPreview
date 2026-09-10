@@ -63,13 +63,14 @@
   → IPC doc.fetch / doc.html / convert
   → session.rawHtml + session.markdownText
 
-网页表面（readingSurface=web）：
-  View 只把 appearance + rawHtml + meta 交给 buildWebDocument
+网页表面（文档会话内始终挂着 iframe；readingSurface 只切 yohu-recipe-crossfade 的 data-active）：
+  View 把 appearance + rawHtml + meta 交给宿主
   1. normalizeArticleHtml     标题标记 / note / 代码块一次解析 / 去空锚
   2. 公式门控：正文含 TeX 分隔符或 <math> 才注入对应运行时
-  3. officialSkin             实测文章 token（浅/深两套）
+  3. officialSkin             实测文章 token；颜色只在 [data-theme]
   4. 文章铬                   面包屑 + h1 + 更新时间 + 设备
-  → iframe srcdoc
+  → iframe srcdoc（不烘焙 appearance）
+  → paintWebAppearance 涂已挂载文档（换肤不重载）
   大纲：正文 heading id（normalize 写入），点右侧 yo-toc 滚 iframe 内 [data-yo-read=article]
 
 Markdown 表面（readingSurface=markdown, reveal=rendered）：
@@ -165,7 +166,7 @@ flowchart LR
 
 ### 5. 代码块与行内代码
 
-**网页。** `<pre>` 先收成 `WebCodeBlock`（`testdata/huawei-code-lang.json`），再序列化 `.y-code`。身份只读页面字段：`codehub` 扩展名优先（`.ets` → ArkTS），否则 class 里的语言 token；`prettyprint` / `linenums` / `hljs` 不是语言。`class="TypeScript"` 在有 `.ets` 文件时不是身份。不根据代码正文猜 ArkTS。输出丢掉官网 class，正文是 `.y-code__body`。无 token span 时按 `grammar` 浅色着色。没有复制按钮槽，底边 12px。
+**网页。** `<pre>` 先收成 `WebCodeBlock`（`testdata/huawei-code-lang.json`），再序列化 `.y-code`。身份只读页面字段：`codehub` 扩展名优先（`.ets` → ArkTS），否则 class 里的语言 token；`prettyprint` / `linenums` / `hljs` 不是语言。`class="TypeScript"` 在有 `.ets` 文件时不是身份。不根据代码正文猜 ArkTS。输出丢掉官网 class，正文是 `.y-code__body`。无 token span 时按 `grammar` 浅色着色。没有复制按钮槽，底边 12px。浅色 `--code-stroke` + `--code-shadow`；深色只留细描边、无阴影。
 
 **Markdown。** 围栏走本包 `engine/markdown/highlight.ts`（highlight.js 核心 + 显式语言表：ArkTS/TS/JSON/XML/bash）。语言表不够时降级为纯转义。不与网页解析器共享模块。围栏铬：语言名即可。
 
