@@ -57,6 +57,21 @@ describe("parseMarkdown", () => {
     expect(html).toContain("<th>");
   });
 
+  it("keeps adjacent menu labels and inline icons in one sentence", () => {
+    const md =
+      "1. 点击**File > Settings**（macOS为**DevEco Studio > Preferences/Settings**）**> Plugins**，点击![icon](https://example.com/gear.png) **> Install Plugin from Disk…** 安装本地插件。";
+    const html = renderMarkdown(md);
+    expect(html).not.toContain("**");
+    expect(html).toContain("<strong>File &gt; Settings</strong>");
+    expect(html).toContain("<strong>DevEco Studio &gt; Preferences/Settings</strong>");
+    expect(html).toContain("<strong>&gt; Plugins</strong>");
+    expect(html).toContain("<strong>&gt; Install Plugin from Disk…</strong>");
+    expect(html).toContain('src="https://example.com/gear.png"');
+    expect(html).toContain('alt="icon"');
+    expect(html).toContain("点击<img");
+    expect(html).toContain("安装本地插件");
+  });
+
   it("typesets $ and $$ outside fences", () => {
     const html = renderMarkdown("行内 $E=mc^2$\n\n$$\na^2+b^2=c^2\n$$\n\n```text\n$keep$\n```\n");
     expect(html).toContain("katex");

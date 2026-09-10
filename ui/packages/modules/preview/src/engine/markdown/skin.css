@@ -164,6 +164,15 @@
   margin: 0.8em 0;
 }
 
+.yo-md img[alt="icon"] {
+  display: inline;
+  width: auto;
+  height: 1.25em;
+  margin: 0;
+  vertical-align: middle;
+  max-width: none;
+}
+
 .yo-md ul,
 .yo-md ol {
   padding-left: 1.5em;
