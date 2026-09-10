@@ -1,6 +1,7 @@
 import { renderCodeBlocks } from "./code";
 import { extractDeviceTypes, mapDeviceLabels, resolveDeviceTypes } from "./devices";
 import { promoteHeadings, resolveHeadingLevel } from "./headings";
+import { markInlineIcons } from "./images";
 import { renderWebMath } from "./math";
 import { relabelNotes } from "./notes";
 import { wrapTables } from "./tables";
@@ -27,6 +28,7 @@ export function normalizeArticleHtml(rawHtml: string, pageTitle = ""): string {
   html = relabelNotes(html);
   html = renderCodeBlocks(html);
   html = wrapTables(html);
+  html = markInlineIcons(html);
   html = renderWebMath(html);
   return html;
 }

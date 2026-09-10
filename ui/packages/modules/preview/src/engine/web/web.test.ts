@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import codeLangTable from "../../../../../../../testdata/huawei-code-lang.json";
 import headingTable from "../../../../../../../testdata/huawei-headings.json";
+import iconTable from "../../../../../../../testdata/huawei-inline-icon.json";
 import type { DocMeta } from "@yohu/api";
 
 import {
@@ -9,6 +10,7 @@ import {
   buildWebDocument,
   extractDeviceTypes,
   extractWebToc,
+  identifyInlineIcon,
   identifyWebCode,
   normalizeArticleHtml,
   paintWebAppearance,
@@ -19,6 +21,24 @@ describe("resolveHeadingLevel", () => {
   it("matches testdata/huawei-headings.json", () => {
     for (const row of headingTable.cases) {
       expect(resolveHeadingLevel(row.tag, row.marker)).toBe(row.level);
+    }
+  });
+});
+
+describe("identifyInlineIcon", () => {
+  it("matches testdata/huawei-inline-icon.json", () => {
+    expect(iconTable.maxPx).toBe(48);
+    for (const row of iconTable.cases) {
+      expect(
+        identifyInlineIcon({
+          className: row.className,
+          originWidth: row.originWidth,
+          originHeight: row.originHeight,
+          width: row.width,
+          height: row.height,
+        }),
+        row.name
+      ).toBe(row.inline);
     }
   });
 });
@@ -62,6 +82,30 @@ describe("normalizeArticleHtml", () => {
     expect(html).not.toContain("<html");
     expect(html).not.toContain("<body");
     expect(html).toMatch(/<h2[^>]*>基本知识<\/h2>/);
+  });
+
+  it("marks API gear images that have origin size but no IconPic class", () => {
+    const html = normalizeArticleHtml(
+      `<p>点击<span><img originheight="20" originwidth="21" src="https://cdn.example/gear.png"></span> <strong>&gt; Install Plugin from Disk…</strong>安装本地插件。</p>`
+    );
+    expect(html).toMatch(/<img class="y-icon"[^>]*originwidth="21"/);
+    expect(html).toContain("cdn.example/gear.png");
+  });
+
+  it("keeps official IconPic class and adds y-icon", () => {
+    const html = normalizeArticleHtml(
+      `<p>点击<img class="IconPic notEnlarge" originwidth="21" originheight="20" src="https://cdn.example/gear.png" width="21" height="20"> 安装</p>`
+    );
+    expect(html).toContain('class="y-icon IconPic notEnlarge"');
+    expect(html).toContain("cdn.example/gear.png");
+  });
+
+  it("does not mark article screenshots as icons", () => {
+    const html = normalizeArticleHtml(
+      `<p><img originheight="708" originwidth="978" src="https://cdn.example/shot.png"></p>`
+    );
+    expect(html).not.toContain("y-icon");
+    expect(html).toContain("cdn.example/shot.png");
   });
 
   it("turns Huawei note images into labeled callouts", () => {
@@ -255,6 +299,17 @@ describe("buildWebDocument", () => {
     expect(result).toContain("学习ArkTS语言");
     expect(result).toContain("ArkTS语言介绍");
     expect(result).toContain('viewBox="0 0 5.726 11.817"');
+  });
+
+  it("marks API inline icons and ships y-icon skin in the iframe document", () => {
+    const html = buildWebDocument({
+      meta: null,
+      rawHtml: `<p>点击<img originheight="20" originwidth="21" src="https://cdn.example/gear.png"> 安装</p>`,
+      sourceUrl: "https://example.com",
+    });
+    expect(html).toContain('class="y-icon"');
+    expect(html).toContain(".y-content img.y-icon");
+    expect(html).toContain("display: inline");
   });
 
   it("does not bake workbench appearance into the article html", () => {

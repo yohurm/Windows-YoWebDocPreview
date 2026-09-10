@@ -168,6 +168,16 @@ html, body {
   display: block;
   margin: 16px auto;
 }
+.y-content img.y-icon,
+.y-content img.IconPic,
+.y-content img.notEnlarge {
+  display: inline;
+  width: auto;
+  height: 1.25em;
+  margin: 0;
+  vertical-align: middle;
+  max-width: none;
+}
 .y-code {
   margin: 16px 0;
   background: var(--code-bg);

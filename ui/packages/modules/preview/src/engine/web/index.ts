@@ -1,6 +1,7 @@
 export { paintWebAppearance } from "./appearance";
 export { buildWebDocument, type RenderWebOptions } from "./document";
 export { assignWebSrcdoc } from "./frame";
+export { identifyInlineIcon, markInlineIcons, type WebImageAttrs } from "./images";
 export { identifyWebCode, type WebCodeIdentity } from "./language";
 export {
   extractDeviceTypes,

@@ -3,7 +3,7 @@
  *
  * Pipeline (this package only):
  * 1. Huawei API HTML
- * 2. parseWebArticle — headings, notes, code, tables, math
+ * 2. parseWebArticle — headings, notes, code, tables, inline icons, math
  * 3. officialSkin — tokens measured from live Chrome
  * 4. article chrome — breadcrumb + title + update time
  */
