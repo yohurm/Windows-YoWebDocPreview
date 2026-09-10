@@ -1,0 +1,48 @@
+{
+  "comment": "Huawei article images. Live site may add IconPic/notEnlarge; API HTML often has only originwidth/originheight. Identity does not inspect src text.",
+  "maxPx": 48,
+  "cases": [
+    {
+      "name": "live-gear",
+      "className": "IconPic notEnlarge",
+      "originWidth": 21,
+      "originHeight": 20,
+      "width": 21,
+      "height": 20,
+      "inline": true
+    },
+    {
+      "name": "api-gear",
+      "className": "",
+      "originWidth": 21,
+      "originHeight": 20,
+      "inline": true
+    },
+    {
+      "name": "api-toolbar",
+      "className": "",
+      "originWidth": 27,
+      "originHeight": 21,
+      "inline": true
+    },
+    {
+      "name": "api-screenshot",
+      "className": "",
+      "originWidth": 978,
+      "originHeight": 708,
+      "inline": false
+    },
+    {
+      "name": "note-label",
+      "className": "",
+      "originWidth": 102,
+      "originHeight": 38,
+      "inline": false
+    },
+    {
+      "name": "no-size",
+      "className": "",
+      "inline": false
+    }
+  ]
+}

@@ -111,10 +111,27 @@ pub fn extract_device_line(html: &str) -> String {
         .unwrap_or_default()
 }
 
+/// 官网菜单路径会拆成相邻 `<strong>`：`Preferences</strong><strong>/</strong><strong>Settings`。
+/// 各自包 `**` 会得到 `****`，CommonMark 无法配对，星号漏到正文。
+fn merge_adjacent_bold(md: &str) -> String {
+    static JOIN: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(r"(?i)</(?:strong|b)>\s*<(?:strong|b)(?:\s[^>]*)?>").unwrap()
+    });
+    let mut out = md.to_string();
+    loop {
+        let next = JOIN.replace_all(&out, "").into_owned();
+        if next == out {
+            return out;
+        }
+        out = next;
+    }
+}
+
 /// Step 6：行内格式 strong/b/a。
 pub fn inline_formatting(md: &str) -> String {
+    let md = merge_adjacent_bold(md);
     let strong = Regex::new(r"(?s)<strong[^>]*>(.*?)</strong>").unwrap();
-    let md = strong.replace_all(md, r"**${1}**").into_owned();
+    let md = strong.replace_all(&md, r"**${1}**").into_owned();
     // 注意：<b 后必须跟空白或 >，避免误吞 <br>/<base> 等标签
     let bold = Regex::new(r"(?s)<b(?:\s[^>]*)?>(.*?)</b>").unwrap();
     let md = bold.replace_all(&md, r"**${1}**").into_owned();
@@ -187,6 +204,55 @@ pub fn paragraphs(md: &str) -> String {
     span.replace_all(&md, "").into_owned()
 }
 
+/// 官网行内齿轮：`class="IconPic notEnlarge"`，origin 约 21×20。
+/// 插图走块级 `![]()`；图标走 `![icon]()`，后处理不得再拆行。
+const INLINE_ICON_MAX_PX: u32 = 48;
+
+fn attr_u32(tag: &str, names: &[&str]) -> Option<u32> {
+    let lower = tag.to_ascii_lowercase();
+    for name in names {
+        let key = format!("{name}=\"");
+        if let Some(idx) = lower.find(&key) {
+            let rest = &tag[idx + key.len()..];
+            let end = rest.find('"')?;
+            return rest[..end].parse().ok();
+        }
+    }
+    None
+}
+
+fn class_has(tag: &str, token: &str) -> bool {
+    let lower = tag.to_ascii_lowercase();
+    let key = "class=\"";
+    let Some(idx) = lower.find(key) else {
+        return false;
+    };
+    let rest = &tag[idx + key.len()..];
+    let Some(end) = rest.find('"') else {
+        return false;
+    };
+    rest[..end]
+        .split_whitespace()
+        .any(|cls| cls.eq_ignore_ascii_case(token))
+}
+
+fn is_inline_icon(tag: &str) -> bool {
+    if class_has(tag, "IconPic") || class_has(tag, "notEnlarge") {
+        return true;
+    }
+    match (
+        attr_u32(tag, &["originwidth", "width"]),
+        attr_u32(tag, &["originheight", "height"]),
+    ) {
+        (Some(w), Some(h))
+            if w > 0 && h > 0 && w <= INLINE_ICON_MAX_PX && h <= INLINE_ICON_MAX_PX =>
+        {
+            true
+        }
+        _ => false,
+    }
+}
+
 /// Step 12：图片——先按 URL 映射替换，再转换 img 标签。
 pub fn images(md: &str, image_map: &HashMap<String, String>) -> String {
     let mut out = md.to_string();
@@ -203,7 +269,14 @@ pub fn images(md: &str, image_map: &HashMap<String, String>) -> String {
                 .captures(&tag[0])
                 .or_else(|| Regex::new(r"src='([^']+)'").unwrap().captures(&tag[0]));
             match src.and_then(|c| c.get(1)) {
-                Some(s) => format!("\n![]({})\n", s.as_str().replace(' ', "%20")),
+                Some(s) => {
+                    let url = s.as_str().replace(' ', "%20");
+                    if is_inline_icon(&tag[0]) {
+                        format!("![icon]({url})")
+                    } else {
+                        format!("\n![]({url})\n")
+                    }
+                }
                 None => String::new(),
             }
         })

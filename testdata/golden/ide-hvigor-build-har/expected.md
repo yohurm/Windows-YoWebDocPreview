@@ -150,9 +150,7 @@ library  // HAR根目录
 }
 ```
 
-3. 点击DevEco Studio右上角图标
-![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/20/v3/z9wnutyWSZ2wd6vChHwiqA/zh-cn_image_0000002731382523.png?HW-CC-KV=V1&HW-CC-Date=20260907T063408Z&HW-CC-Expire=86400&HW-CC-Sign=E3165D4955883DE4A050BEFBD4E286A49C4C3CC4BF12E881B5C698C0CE7039F1)
-，选择**Build Mode，**默认为**&lt;Default&gt;**模式：在编译App时使用release模式，编译HAP/HSP/HAR时使用debug模式。
+3. 点击DevEco Studio右上角图标![icon](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/20/v3/z9wnutyWSZ2wd6vChHwiqA/zh-cn_image_0000002731382523.png?HW-CC-KV=V1&HW-CC-Date=20260907T063408Z&HW-CC-Expire=86400&HW-CC-Sign=E3165D4955883DE4A050BEFBD4E286A49C4C3CC4BF12E881B5C698C0CE7039F1)，选择**Build Mode，**默认为**&lt;Default&gt;**模式：在编译App时使用release模式，编译HAP/HSP/HAR时使用debug模式。
 
   
 ![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/b9/v3/lSURMEXLQ6qaaMs7QOwFPg/zh-cn_image_0000002701663318.png?HW-CC-KV=V1&HW-CC-Date=20260907T063408Z&HW-CC-Expire=86400&HW-CC-Sign=3387FD9A54439527EF329B03C20B0FA7117E866834E9FB04EE332B7B55C30985)
@@ -264,9 +262,7 @@ library  // HAR根目录
 > [!NOTE]
 > 使用DevEco Studio NEXT Beta1（5.0.3.800）之前的版本，模块级build-profile.json5的byteCodeHar字段的缺省默认值为false，无需执行本步骤。
 
-2. 点击DevEco Studio右上角图标
-![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/4d/v3/JlsnkP-QSaugvh6fePe6Nw/zh-cn_image_0000002731542495.png?HW-CC-KV=V1&HW-CC-Date=20260907T063408Z&HW-CC-Expire=86400&HW-CC-Sign=4C771B7A88B4FFD2AFC05A8F2D578028A03FDB10FD8ADCCFAB3CCD751EFDC073)
-，**Build Mode**选择**debug。**默认为**&lt;Default&gt;**模式：在编译App时使用release模式，编译HAP/HSP/HAR时使用debug模式。
+2. 点击DevEco Studio右上角图标![icon](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/4d/v3/JlsnkP-QSaugvh6fePe6Nw/zh-cn_image_0000002731542495.png?HW-CC-KV=V1&HW-CC-Date=20260907T063408Z&HW-CC-Expire=86400&HW-CC-Sign=4C771B7A88B4FFD2AFC05A8F2D578028A03FDB10FD8ADCCFAB3CCD751EFDC073)，**Build Mode**选择**debug。**默认为**&lt;Default&gt;**模式：在编译App时使用release模式，编译HAP/HSP/HAR时使用debug模式。
 
   
 ![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/54/v3/17QHftvbTfeot6t-RzKnVQ/zh-cn_image_0000002731542511.png?HW-CC-KV=V1&HW-CC-Date=20260907T063408Z&HW-CC-Expire=86400&HW-CC-Sign=E1D5DDCD0A34DFC46D516DD9E1450256C437A4E72EA6490A467AFE7DDA884D4A)
@@ -339,9 +335,7 @@ library  // HAR根目录
 > [!NOTE]
 > 使用DevEco Studio NEXT Beta1（5.0.3.800）之前的版本，模块级build-profile.json5的byteCodeHar字段的缺省默认值为false，无需执行本步骤。
 
-2. 点击DevEco Studio右上角图标
-![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/da/v3/O4d94NGaR7uiPlPhLkPH_g/zh-cn_image_0000002701823240.png?HW-CC-KV=V1&HW-CC-Date=20260907T063408Z&HW-CC-Expire=86400&HW-CC-Sign=5315E95082EF4FD18D35F41E4DD0097B86D661549AEE63485493A0BD3FC792EE)
-，**Build Mode**中选择**release。**默认为**&lt;Default&gt;**模式：在编译App时使用release模式，编译HAP/HSP/HAR时使用debug模式。
+2. 点击DevEco Studio右上角图标![icon](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/da/v3/O4d94NGaR7uiPlPhLkPH_g/zh-cn_image_0000002701823240.png?HW-CC-KV=V1&HW-CC-Date=20260907T063408Z&HW-CC-Expire=86400&HW-CC-Sign=5315E95082EF4FD18D35F41E4DD0097B86D661549AEE63485493A0BD3FC792EE)，**Build Mode**中选择**release。**默认为**&lt;Default&gt;**模式：在编译App时使用release模式，编译HAP/HSP/HAR时使用debug模式。
 
   
 ![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/bf/v3/gxN7CYbMTUeabL5_lTRHRg/zh-cn_image_0000002701663322.png?HW-CC-KV=V1&HW-CC-Date=20260907T063408Z&HW-CC-Expire=86400&HW-CC-Sign=BA056EE9EB2A63AF569EE1BA1FC940998E7EBD9117109E6E72C40CD13814F80F)

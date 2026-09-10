@@ -124,6 +124,41 @@ fn inline_formatting_and_links() {
 }
 
 #[test]
+fn inline_icon_table_matches_testdata() {
+    let table: serde_json::Value =
+        serde_json::from_str(include_str!("../../../testdata/huawei-inline-icon.json")).unwrap();
+    assert_eq!(table["maxPx"].as_u64().unwrap(), 48);
+    for case in table["cases"].as_array().expect("cases") {
+        let name = case["name"].as_str().unwrap();
+        let class = case["className"].as_str().unwrap_or("");
+        let mut attrs = String::new();
+        if !class.is_empty() {
+            attrs.push_str(&format!(r#" class="{class}""#));
+        }
+        if let Some(w) = case.get("originWidth").and_then(|v| v.as_u64()) {
+            attrs.push_str(&format!(r#" originwidth="{w}""#));
+        }
+        if let Some(h) = case.get("originHeight").and_then(|v| v.as_u64()) {
+            attrs.push_str(&format!(r#" originheight="{h}""#));
+        }
+        if let Some(w) = case.get("width").and_then(|v| v.as_u64()) {
+            attrs.push_str(&format!(r#" width="{w}""#));
+        }
+        if let Some(h) = case.get("height").and_then(|v| v.as_u64()) {
+            attrs.push_str(&format!(r#" height="{h}""#));
+        }
+        let html = format!(r#"<p>前<img{attrs} src="https://example.com/{name}.png">后</p>"#);
+        let md = html_to_markdown(&html, &opts("t"));
+        if case["inline"].as_bool().unwrap() {
+            assert!(md.contains("![icon]("), "{name} 应为行内图标：\n{md}");
+        } else {
+            assert!(!md.contains("![icon]("), "{name} 不应标成图标：\n{md}");
+            assert!(md.contains("![]("), "{name} 仍应是图片：\n{md}");
+        }
+    }
+}
+
+#[test]
 fn image_mapping_to_local_path() {
     let mut map = HashMap::new();
     map.insert(
@@ -155,6 +190,65 @@ fn api_metadata_spacing_for_references_catalog() {
     let o = ConvertOptions { catalog: Some("harmonyos-references".into()), ..opts("t") };
     let refs = html_to_markdown(html, &o);
     assert_eq!(gap_between(&refs), 2, "references 应插入空行：\n{refs}");
+}
+
+#[test]
+fn adjacent_code_like_bold_is_unchanged() {
+    let html = "<p>例如：<strong>mcc460_mnc00-zh_Hant_CN</strong>、<strong>zh_CN-car-ldpi</strong>。</p>";
+    let md = html_to_markdown(html, &opts("t"));
+    assert!(
+        md.contains("**mcc460_mnc00-zh_Hant_CN**、**zh_CN-car-ldpi**。"),
+        "标识符加粗后接顿号不得插入空格：\n{md}"
+    );
+}
+
+#[test]
+fn emphasis_closer_pads_before_cjk() {
+    let html = "<p>选择<strong>&gt; Install Plugin from Disk…</strong>安装本地插件。</p>";
+    let md = html_to_markdown(html, &opts("t"));
+    assert!(
+        md.contains("**> Install Plugin from Disk…** 安装本地插件。"),
+        "省略号后的 ** 必须与后接汉字隔开：\n{md}"
+    );
+}
+
+#[test]
+fn adjacent_strong_merges_menu_path() {
+    let html = concat!(
+        "<p>点击<strong>File &gt; Settings</strong>（macOS为",
+        "<strong>DevEco Studio &gt; Preferences</strong><strong>/</strong><strong>Settings</strong>）",
+        "<strong>&gt; Plugins</strong>，安装。</p>",
+    );
+    let md = html_to_markdown(html, &opts("t"));
+    assert!(
+        md.contains("**File > Settings**（macOS为**DevEco Studio > Preferences/Settings**）**> Plugins**"),
+        "相邻 strong 应合成一段加粗，不得留下 ****：\n{md}"
+    );
+    assert!(!md.contains("****"), "相邻 ** 不得黏成 ****：\n{md}");
+}
+
+#[test]
+fn inline_icon_stays_in_sentence() {
+    let html = concat!(
+        "<ol><li>点击<span><img class=\"IconPic notEnlarge\" originwidth=\"21\" originheight=\"20\" ",
+        "src=\"https://example.com/gear.png\" width=\"21\" height=\"20\"></span> ",
+        "<strong>&gt; Install Plugin from Disk…</strong>安装本地插件。",
+        "<p><span><img originwidth=\"978\" originheight=\"708\" src=\"https://example.com/shot.png\"></span></p>",
+        "</li></ol>",
+    );
+    let md = html_to_markdown(html, &opts("t"));
+    let install = md
+        .lines()
+        .find(|l| l.contains("Install Plugin from Disk"))
+        .unwrap_or(&md);
+    assert!(
+        install.contains("点击![icon](https://example.com/gear.png) **> Install Plugin from Disk…** 安装本地插件。"),
+        "IconPic 必须留在安装步骤同一行，且 …** 后要能被 CommonMark 关掉：\n{md}"
+    );
+    assert!(
+        md.lines().any(|l| l.trim() == "![](https://example.com/shot.png)"),
+        "截图仍应独立成行：\n{md}"
+    );
 }
 
 #[test]

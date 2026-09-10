@@ -1,4 +1,4 @@
-//! 后处理（全程保护代码块）：尖括号转义 / `$r` 类转义 / 图片独立成行 /
+//! 后处理（全程保护代码块）：尖括号转义 / `$r` 类转义 / 块图独立成行 /
 //! 前导空格清理 / API 参考元数据间距（Python 后处理段）。
 
 use regex::Regex;
@@ -7,6 +7,7 @@ use regex::Regex;
 pub fn run(md: &str, catalog: Option<&str>) -> String {
     let md = escape_placeholders(md);
     let md = split_images_to_lines(&md);
+    let md = pad_emphasis_closers(&md);
     let md = clean_leading_spaces(&md);
     if catalog == Some("harmonyos-references") {
         api_metadata_spacing(&md)
@@ -37,14 +38,40 @@ fn escape_placeholders(md: &str) -> String {
     })
 }
 
-/// 图片引用独立成行。
+/// CommonMark：`**` 前接省略号、后接汉字时不是 right-flanking，星号会漏到正文。
+/// `**Disk…**安装` 写成 `**Disk…** 安装` 才能配对。
+fn pad_emphasis_closers(md: &str) -> String {
+    map_non_code(md, |section| {
+        let re = Regex::new(r"\*\*([^*]+)\*\*(\S)").unwrap();
+        re.replace_all(section, |c: &regex::Captures| {
+            let inner = &c[1];
+            let next = &c[2];
+            let last = inner.chars().last();
+            let next_ch = next.chars().next();
+            if last.is_some_and(|ch| ch == '…' || ch == '.')
+                && next_ch.is_some_and(|ch| !ch.is_ascii_punctuation() && ch != '。' && ch != '，')
+            {
+                format!("**{inner}** {next}")
+            } else {
+                c[0].to_string()
+            }
+        })
+        .into_owned()
+    })
+}
+
+/// 块图独立成行。`![icon]()` 是行内图标，留在原句。
 fn split_images_to_lines(md: &str) -> String {
     map_non_code(md, |section| {
+        let icon_re = Regex::new(r"!\[icon\]\([^)]+\)").unwrap();
         let img_split = Regex::new(r"(!\[.*?\]\(.*?\))").unwrap();
         let mut result: Vec<String> = Vec::new();
         for line in section.split('\n') {
-            let has_img = line.contains("![") && line.contains("](") && !line.trim_start().starts_with("![");
-            if has_img {
+            let without_icons = icon_re.replace_all(line, "");
+            let has_block_img = without_icons.contains("![")
+                && without_icons.contains("](")
+                && !without_icons.trim_start().starts_with("![");
+            if has_block_img {
                 for part in img_split.split(line) {
                     let part = part.trim();
                     if !part.is_empty() {
