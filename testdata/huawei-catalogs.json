@@ -1,5 +1,6 @@
 {
   "prefix": "https://developer.huawei.com/consumer/cn/doc/",
+  "sourceId": "huawei-harmonyos",
   "catalogs": [
     { "id": "design-guides", "displayName": "设计指南" },
     { "id": "harmonyos-guides-V5", "displayName": "HarmonyOS NEXT 开发指南" },

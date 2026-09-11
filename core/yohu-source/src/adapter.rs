@@ -1,7 +1,7 @@
 //! SourceAdapter trait 与注册表（ADR-W4 双通道路由）。
 
 use async_trait::async_trait;
-use yohu_protocol::{DocRef, RawDoc};
+use yohu_protocol::{CatalogNode, DocRef, RawDoc};
 
 use crate::error::SourceError;
 use crate::http::HttpClient;
@@ -16,6 +16,16 @@ pub trait SourceAdapter: Send + Sync {
 
     /// 拉取文档原始数据。
     async fn fetch(&self, http: &HttpClient, r: &DocRef) -> Result<RawDoc, SourceError>;
+
+    /// 专栏树。默认无树（通用网页）。
+    async fn fetch_catalog(
+        &self,
+        http: &HttpClient,
+        r: &DocRef,
+    ) -> Result<Vec<CatalogNode>, SourceError> {
+        let _ = (http, r);
+        Ok(Vec::new())
+    }
 }
 
 /// 适配器注册表（静态注册，按顺序匹配；generic-web 永远兜底）。
@@ -37,7 +47,7 @@ impl AdapterRegistry {
     /// 获取 generic-web 兜底适配器引用
     pub fn generic(&self) -> &dyn SourceAdapter {
         for a in &self.adapters {
-            if a.id() == "generic-web" {
+            if a.id() == yohu_domain::GENERIC_WEB_SOURCE_ID {
                 return a.as_ref();
             }
         }

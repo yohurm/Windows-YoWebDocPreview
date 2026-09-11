@@ -12,14 +12,14 @@ pub struct GenericWebAdapter;
 #[async_trait]
 impl SourceAdapter for GenericWebAdapter {
     fn id(&self) -> &'static str {
-        "generic-web"
+        yohu_domain::GENERIC_WEB_SOURCE_ID
     }
 
     /// 兜底匹配所有 HTTP(S) URL。
     fn match_url(&self, url: &str) -> Option<DocRef> {
         if url.starts_with("http://") || url.starts_with("https://") {
             Some(DocRef {
-                source_id: "generic-web".into(),
+                source_id: yohu_domain::GENERIC_WEB_SOURCE_ID.into(),
                 catalog: None,
                 slug: yohu_domain::generic_slug(url),
                 url: url.to_string(),

@@ -42,7 +42,7 @@ fn post_document<'a>(
     http.raw()
         .post(&url)
         .header("Content-Type", "application/json; charset=UTF-8")
-        .header("Origin", "https://developer.huawei.com")
+        .header("Origin", yohu_domain::huawei_doc_origin())
         .header("Referer", huawei_doc_url(catalog, slug))
         .json(&body)
 }
@@ -59,7 +59,7 @@ fn post_catalog_tree<'a>(
     http.raw()
         .post(&url)
         .header("Content-Type", "application/json; charset=UTF-8")
-        .header("Origin", "https://developer.huawei.com")
+        .header("Origin", yohu_domain::huawei_doc_origin())
         .header("Referer", format!("{}{catalog}/", huawei_doc_prefix()))
         .json(&body)
 }
@@ -141,7 +141,7 @@ pub struct HuaweiAdapter;
 #[async_trait]
 impl SourceAdapter for HuaweiAdapter {
     fn id(&self) -> &'static str {
-        "huawei-harmonyos"
+        yohu_domain::huawei_source_id()
     }
 
     fn match_url(&self, url: &str) -> Option<DocRef> {
@@ -178,15 +178,23 @@ impl SourceAdapter for HuaweiAdapter {
             return Err(SourceError::NotFound(r.url.clone()));
         }
 
-        // 设备类型：直接空向量由 yohu-md-convert 从 HTML device-type 属性中自动解析
-        let device_types = Vec::new();
-
         Ok(RawDoc {
             title,
             update_time,
             html,
-            device_types,
+            device_types: Vec::new(),
         })
+    }
+
+    async fn fetch_catalog(
+        &self,
+        http: &HttpClient,
+        r: &DocRef,
+    ) -> Result<Vec<CatalogNode>, SourceError> {
+        match r.catalog.as_deref() {
+            Some(catalog) => fetch_catalog_tree(http, catalog).await,
+            None => Ok(Vec::new()),
+        }
     }
 }
 

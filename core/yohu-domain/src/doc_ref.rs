@@ -10,6 +10,8 @@ use std::sync::OnceLock;
 use serde::Deserialize;
 use yohu_protocol::DocRef;
 
+pub const GENERIC_WEB_SOURCE_ID: &str = "generic-web";
+
 const HUAWEI_CATALOGS_JSON: &str = include_str!("../../../testdata/huawei-catalogs.json");
 
 static HUAWEI_CATALOG_TABLE: OnceLock<HuaweiCatalogTable> = OnceLock::new();
@@ -17,6 +19,8 @@ static HUAWEI_CATALOG_TABLE: OnceLock<HuaweiCatalogTable> = OnceLock::new();
 #[derive(Debug, Deserialize)]
 struct HuaweiCatalogTable {
     prefix: String,
+    #[serde(rename = "sourceId")]
+    source_id: String,
     catalogs: Vec<HuaweiCatalog>,
     channels: Vec<HuaweiChannel>,
 }
@@ -48,6 +52,28 @@ fn catalog_table() -> &'static HuaweiCatalogTable {
 
 pub fn huawei_doc_prefix() -> &'static str {
     catalog_table().prefix.as_str()
+}
+
+pub fn huawei_source_id() -> &'static str {
+    catalog_table().source_id.as_str()
+}
+
+pub fn is_huawei_source(source_id: &str) -> bool {
+    source_id == huawei_source_id()
+}
+
+pub fn huawei_doc_origin() -> &'static str {
+    static ORIGIN: OnceLock<String> = OnceLock::new();
+    ORIGIN.get_or_init(|| {
+        let prefix = huawei_doc_prefix();
+        match prefix.split_once("://") {
+            Some((scheme, rest)) => {
+                let host = rest.split('/').next().unwrap_or(rest);
+                format!("{scheme}://{host}")
+            }
+            None => prefix.trim_end_matches('/').to_string(),
+        }
+    })
 }
 
 pub fn huawei_catalogs() -> &'static [HuaweiCatalog] {
@@ -93,7 +119,7 @@ pub fn match_huawei(url: &str) -> Option<DocRef> {
         return None;
     }
     Some(DocRef {
-        source_id: "huawei-harmonyos".into(),
+        source_id: huawei_source_id().into(),
         catalog: Some(catalog.into()),
         slug: slug.into(),
         url: url.to_string(),
@@ -125,7 +151,7 @@ pub fn generic_slug(url: &str) -> String {
 /// 双通道路由入口：专用适配器优先，generic-web 兜底。
 pub fn parse_url(url: &str) -> DocRef {
     match_huawei(url).unwrap_or_else(|| DocRef {
-        source_id: "generic-web".into(),
+        source_id: GENERIC_WEB_SOURCE_ID.into(),
         catalog: None,
         slug: generic_slug(url),
         url: url.to_string(),
@@ -236,5 +262,9 @@ mod tests {
             huawei_doc_prefix(),
             "https://developer.huawei.com/consumer/cn/doc/"
         );
+        assert_eq!(huawei_source_id(), "huawei-harmonyos");
+        assert_eq!(huawei_doc_origin(), "https://developer.huawei.com");
+        assert!(is_huawei_source(huawei_source_id()));
+        assert!(!is_huawei_source(GENERIC_WEB_SOURCE_ID));
     }
 }
