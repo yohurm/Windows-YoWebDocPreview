@@ -1,7 +1,7 @@
 # 正文渲染：网页表面与 Markdown 表面
 
 > 依据 YoAgentDocs architecture-design + 2026-09-09 frontend 深研。  
-> **as-built（2026-09-09）：** 网页解析器 `engine/web/`，Markdown 解析器 `engine/markdown/`，互不 import。store 是唯一组合点。  
+> **as-built（2026-09-11）：** 公共 HTML 内核 `engine/html/`，华为方言 `engine/huawei/`（可依赖 html），Markdown `engine/markdown/`。`engine/reading` 按 sourceId 组合。html 与 markdown 互不 import。  
 > 层名：Windows 桌面 `View → store → IPC → domain`。
 
 调研原文在知识库 `research/by-stack/frontend/`（源码在 `%TEMP%\YoAgentResearch\`，不进本仓）。
@@ -123,7 +123,7 @@ flowchart LR
 
 ### 0. 共享契约（不是共享皮肤）
 
-- 标题层级：`testdata/huawei-headings.json` 继续锁 `resolveHeadingLevel` 与 `heading_level`（契约孪生，禁止第三份）。
+- 标题层级：`testdata/huawei-headings.json` 继续锁 `engine/huawei` 的 `resolveHeadingLevel` 与 `yohu-md-huawei::heading_level`（契约孪生，禁止第三份）。
 - 网页代码身份：`testdata/huawei-code-lang.json` 锁 `identifyWebCode`。只读 `<pre>` 的 `codehub` / `class`，不读正文。不与 Markdown 解析器共享模块。
 - 大纲：网页用正文 id；Markdown 用 `toc-heading-N`。点击钉住高亮直到用户自滚（现行 readingScroll）。
 - 外观：`html[data-theme]` / iframe `data-theme` 已有；块颜色只读 token 或 officialSkin 变量。
@@ -196,10 +196,13 @@ flowchart LR
 ```
 @yohu/ui          L0 token（字号/色/间距）。不持有 .yo-md 文章规则。
 @yohu/module-preview
-  engine/web/     headings / notes / code(WebCodeBlock) / tables / math / skin / document
+  engine/html/    通用 unwrap / 标题打 id / tables / math / 中性皮肤
+  engine/huawei/  标题提升 / notes / codehub / IconPic / 官网皮肤
+  engine/reading  按 sourceId 选引擎
   engine/markdown/  markdown-it 插件链 + 独立 highlight.js + KaTeX 字符串 + yo-md.css
 store             持 rawHtml / markdownText / renderedHtml / toc；不写块样式
-yohu-md-convert   HTML→MD 方言（domain 纯函数）。不渲染。
+yohu-md-convert   公共 HTML→MD 内核。不渲染。
+yohu-md-huawei    华为 HTML→MD 方言。不渲染。
 ```
 
 下层不引用 View。KaTeX 字体作为预览模块静态资源，iframe 与工作台共用 URL，不进 `@yohu/ui`。

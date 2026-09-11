@@ -18,6 +18,7 @@ W1–W9 于 v1 §12 定稿；W10 起为 v2 新增（对齐参考项目 v6 重规
 | [W12](ADR-W12-workbench.md) | workbench 模块契约 | `@yohu/workbench` 注册表 + `apps/shell` 唯一组合点 + 静态 ModuleDescriptor；依赖纪律由 `check-ui-deps.mjs` 把守 |
 | [W13](ADR-W13-capability.md) | library 重定位 | yohu-library 定位为 **capability 用例层**（export_one/batch/check/import 编排归其所有），修正 v1「与 source 平级、壳层编排」的设计 |
 | [W14](ADR-W14-identity-build.md) | 身份构建期校验 | `build.rs` 校验 tauri.conf.json 与 protocol 身份常量一致；UI 身份经 `@yohu/api identity.ts` 契约测试对齐，禁止写死 |
+| [W15](ADR-W15-convert-dialect.md) | 转换方言分家 | 公共 `yohu-md-convert` 零站点知识；华为文档进 `yohu-md-huawei`；UI `engine/html` 与 `engine/huawei` 单向依赖；按 `sourceId` 选引擎 |
 
 ## 术语
 
