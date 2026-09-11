@@ -5,6 +5,7 @@
 //!
 //! 命令名用点分（`doc.fetch`），事件名用斜杠（`settings/changed`）。
 
+pub mod ai;
 pub mod doc;
 pub mod settings;
 pub mod system;

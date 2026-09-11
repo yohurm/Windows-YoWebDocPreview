@@ -5032,6 +5032,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "yohu-ai"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "serde",
+ "serde_json",
+ "yohu-protocol",
+]
+
+[[package]]
+name = "yohu-ai-cli"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tokio",
+ "yohu-ai",
+ "yohu-domain",
+ "yohu-library",
+ "yohu-protocol",
+ "yohu-source",
+]
+
+[[package]]
 name = "yohu-docpreview"
 version = "0.1.0"
 dependencies = [
@@ -5071,6 +5095,7 @@ dependencies = [
  "tokio",
  "tokio-util",
  "wiremock",
+ "yohu-ai",
  "yohu-domain",
  "yohu-md-convert",
  "yohu-md-github",

@@ -11,6 +11,7 @@ members = [
     "core/yohu-library",
     "core/yohu-ai",
     "app/yohu-docpreview",
+    "app/yohu-ai-cli",
 ]
 
 [workspace.package]

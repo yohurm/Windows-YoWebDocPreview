@@ -6,7 +6,7 @@ use yohu_protocol::{CatalogNode, DocMeta, IpcError, RawDoc};
 use crate::commands::{ipc, ipc_library, ipc_source};
 use crate::state::AppState;
 
-async fn cached_or_fetch(
+pub(crate) async fn cached_or_fetch(
     state: &AppState,
     url: &str,
 ) -> Result<(DocMeta, RawDoc), IpcError> {
