@@ -87,6 +87,8 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
             commands::doc::doc_history,
             commands::doc::doc_export,
             commands::ai::ai_parse,
+            commands::library::library_plan,
+            commands::library::library_sync,
             commands::settings::settings_get,
             commands::settings::settings_set,
             commands::system::system_info,

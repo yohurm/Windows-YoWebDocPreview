@@ -1,0 +1,18 @@
+[package]
+name = "yohu-docs-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "yohu-docs"
+path = "src/main.rs"
+
+[dependencies]
+yohu-protocol = { path = "../../core/yohu-protocol" }
+yohu-library = { path = "../../core/yohu-library" }
+yohu-source = { path = "../../core/yohu-source" }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

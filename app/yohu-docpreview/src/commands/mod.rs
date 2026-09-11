@@ -7,6 +7,7 @@
 
 pub mod ai;
 pub mod doc;
+pub mod library;
 pub mod settings;
 pub mod system;
 

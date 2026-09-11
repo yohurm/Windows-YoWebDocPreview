@@ -5074,6 +5074,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "yohu-docs-cli"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "yohu-library",
+ "yohu-protocol",
+ "yohu-source",
+]
+
+[[package]]
 name = "yohu-domain"
 version = "0.1.0"
 dependencies = [
