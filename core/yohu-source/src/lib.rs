@@ -13,7 +13,7 @@ pub use error::SourceError;
 pub use generic::GenericWebAdapter;
 pub use github::GithubAdapter;
 pub use http::{HttpClient, HttpConfig};
-pub use huawei::{probe_meta, HuaweiAdapter};
+pub use huawei::{fetch_catalog_tree, probe_meta, HuaweiAdapter};
 
 use yohu_protocol::{CatalogNode, DocMeta, DocRef, FetchChannel, RawDoc};
 

@@ -94,8 +94,8 @@ fn parse_tree_node(item: &serde_json::Value) -> Option<CatalogNode> {
     })
 }
 
-/// 拉取华为文档目录树
-pub(crate) async fn fetch_catalog_tree(
+/// 按专栏名拉官网目录树（更新对照用，不经 URL 路由）。
+pub async fn fetch_catalog_tree(
     http: &HttpClient,
     catalog: &str,
 ) -> Result<Vec<CatalogNode>, SourceError> {
