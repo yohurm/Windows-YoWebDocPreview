@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { EVENT_NAMES } from "./events";
 import { DISPLAY_NAME, PRODUCT_NAME } from "./identity";
-import type { AppSettings, DocMeta } from "./types";
+import type { AgentDocument, AppSettings, DocMeta } from "./types";
 
 describe("EVENT_NAMES", () => {
   it("uses slash layering, never dots", () => {
@@ -40,6 +40,32 @@ describe("wire contract", () => {
     const m = JSON.parse(raw) as DocMeta;
     expect(m.docRef.slug).toBe("x");
     expect(m.channel).toBe("genericWeb");
+  });
+
+  it("AgentDocument JSON uses camelCase keys", () => {
+    const raw = `{
+      "meta": {
+        "docRef": { "sourceId": "generic-web", "catalog": null, "slug": "a", "url": "https://example.com/a" },
+        "title": "A",
+        "updateTime": null,
+        "sourceUrl": "https://example.com/a",
+        "channel": "genericWeb",
+        "deviceTypes": []
+      },
+      "markdown": "## Hi\\n",
+      "outline": [{ "id": "toc-heading-0", "text": "Hi", "level": 2, "children": [] }],
+      "sections": [{
+        "id": "toc-heading-0",
+        "heading": "Hi",
+        "level": 2,
+        "markdown": "## Hi\\n",
+        "startOffset": 0,
+        "endOffset": 6
+      }]
+    }`;
+    const d = JSON.parse(raw) as AgentDocument;
+    expect(d.sections[0]?.startOffset).toBe(0);
+    expect(d.outline[0]?.text).toBe("Hi");
   });
 
   it("AppSettings JSON uses camelCase keys", () => {

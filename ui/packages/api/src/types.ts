@@ -42,6 +42,29 @@ export interface CatalogNode {
   children: CatalogNode[];
 }
 
+export interface OutlineNode {
+  id: string;
+  text: string;
+  level: number;
+  children: OutlineNode[];
+}
+
+export interface AgentSection {
+  id: string;
+  heading: string;
+  level: number;
+  markdown: string;
+  startOffset: number;
+  endOffset: number;
+}
+
+export interface AgentDocument {
+  meta: DocMeta;
+  markdown: string;
+  outline: OutlineNode[];
+  sections: AgentSection[];
+}
+
 // ── 设置域 ──
 
 /** "system" | "light" | "dark" */
