@@ -5073,6 +5073,7 @@ dependencies = [
  "wiremock",
  "yohu-domain",
  "yohu-md-convert",
+ "yohu-md-github",
  "yohu-md-huawei",
  "yohu-protocol",
  "yohu-runtime",
@@ -5085,6 +5086,15 @@ version = "0.1.0"
 dependencies = [
  "regex",
  "serde_json",
+]
+
+[[package]]
+name = "yohu-md-github"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "yohu-domain",
+ "yohu-md-convert",
 ]
 
 [[package]]

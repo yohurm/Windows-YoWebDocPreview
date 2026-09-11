@@ -53,7 +53,7 @@ Set-Location $RootDir
 $CargoRunner = Join-Path $RootDir "run_msvc_cargo.bat"
 
 Write-Host "`n[Step 3/5] Test Rust Core crates (zero Tauri)..."
-& cmd /c "$CargoRunner test -p yohu-protocol -p yohu-domain -p yohu-runtime -p yohu-source -p yohu-library -p yohu-md-convert"
+& cmd /c "$CargoRunner test -p yohu-protocol -p yohu-domain -p yohu-runtime -p yohu-source -p yohu-library -p yohu-md-convert -p yohu-md-github"
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Rust core tests failed"
     exit 1

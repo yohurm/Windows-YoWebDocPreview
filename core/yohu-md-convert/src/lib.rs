@@ -16,6 +16,7 @@ mod tables;
 mod transform;
 
 pub use dialect::{ConvertDialect, GenericDialect};
+pub use header::build_header;
 pub use images::ImageKind;
 pub use options::ConvertOptions;
 pub use pipeline::html_to_markdown_with;

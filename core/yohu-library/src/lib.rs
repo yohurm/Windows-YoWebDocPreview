@@ -11,6 +11,6 @@ pub mod import;
 pub mod store;
 
 pub use check::{run_check, CheckItem, CheckResult};
-pub use convert::html_to_markdown as convert_html;
+pub use convert::{convert_document, convert_html, export_document};
 pub use error::LibraryError;
 pub use store::LibraryStore;

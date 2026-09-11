@@ -6,6 +6,7 @@ members = [
     "core/yohu-domain",
     "core/yohu-md-convert",
     "core/yohu-md-huawei",
+    "core/yohu-md-github",
     "core/yohu-source",
     "core/yohu-library",
     "app/yohu-docpreview",

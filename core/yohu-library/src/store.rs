@@ -109,7 +109,7 @@ impl LibraryStore {
         if let Some(p) = progress {
             p("转换为 Markdown".into());
         }
-        let markdown = crate::convert_html(&meta, &raw.html, url, image_map);
+        let markdown = crate::export_document(&meta, &raw, url, image_map);
 
         // 5. 写盘（原子写）
         atomic_write(&md_path, &markdown)?;

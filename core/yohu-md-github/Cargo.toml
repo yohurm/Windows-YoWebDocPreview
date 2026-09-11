@@ -1,0 +1,10 @@
+[package]
+name = "yohu-md-github"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+yohu-md-convert = { path = "../yohu-md-convert" }
+yohu-domain = { path = "../yohu-domain" }
+regex = { workspace = true }
