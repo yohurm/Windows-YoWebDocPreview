@@ -70,7 +70,7 @@ pub struct RawDoc {
 }
 
 /// 文档元信息（UI 展示用；不含大体积 HTML）
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocMeta {
     pub doc_ref: DocRef,
