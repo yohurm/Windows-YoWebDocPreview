@@ -20,6 +20,7 @@ W1–W9 于 v1 §12 定稿；W10 起为 v2 新增（对齐参考项目 v6 重规
 | [W14](ADR-W14-identity-build.md) | 身份构建期校验 | `build.rs` 校验 tauri.conf.json 与 protocol 身份常量一致；UI 身份经 `@yohu/api identity.ts` 契约测试对齐，禁止写死 |
 | [W15](ADR-W15-convert-dialect.md) | 转换方言分家 | 公共 `yohu-md-convert` 零站点知识；华为文档进 `yohu-md-huawei`；UI `engine/html` 与 `engine/huawei` 单向依赖；按 `sourceId` 选引擎 |
 | [W16](ADR-W16-github-repo.md) | GitHub 仓库源 | 懒目录 Contents + blob 分型（markdown/code/image）；本地 GFM，失败不降级扒 github.com 壳 |
+| [W17](ADR-W17-ai-core.md) | Agent 文档解析 | **`yohu-ai` 纯函数核心**（大纲/章节）；library 只编排 convert→parse；CLI `yohu-ai` 给 Agent；不引入模型/MCP |
 
 ## 术语
 
