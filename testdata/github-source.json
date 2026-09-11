@@ -1,0 +1,49 @@
+{
+  "sourceId": "github-repo",
+  "webPrefix": "https://github.com/",
+  "rawPrefix": "https://raw.githubusercontent.com/",
+  "apiPrefix": "https://api.github.com/",
+  "webAliases": [
+    "https://www.github.com/",
+    "http://github.com/",
+    "http://www.github.com/"
+  ],
+  "docExtensions": [".md", ".markdown", ".mdx"],
+  "imageExtensions": [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".ico"],
+  "previewMaxBytes": 1048576,
+  "readmeNames": [
+    "README.md",
+    "README",
+    "readme.md",
+    "Readme.md",
+    "README.markdown",
+    "README.mdx"
+  ],
+  "reservedRepoSegments": [
+    "issues",
+    "pulls",
+    "pull",
+    "actions",
+    "settings",
+    "security",
+    "pulse",
+    "graphs",
+    "network",
+    "wiki",
+    "projects",
+    "packages",
+    "discussions",
+    "commits",
+    "commit",
+    "compare",
+    "branches",
+    "tags",
+    "releases",
+    "forks",
+    "watchers",
+    "stargazers",
+    "insights",
+    "search",
+    "activity"
+  ]
+}

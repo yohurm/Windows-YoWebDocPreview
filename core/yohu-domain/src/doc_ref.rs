@@ -123,6 +123,7 @@ pub fn match_huawei(url: &str) -> Option<DocRef> {
         catalog: Some(catalog.into()),
         slug: slug.into(),
         url: url.to_string(),
+        git_ref: None,
     })
 }
 
@@ -150,12 +151,15 @@ pub fn generic_slug(url: &str) -> String {
 
 /// 双通道路由入口：专用适配器优先，generic-web 兜底。
 pub fn parse_url(url: &str) -> DocRef {
-    match_huawei(url).unwrap_or_else(|| DocRef {
-        source_id: GENERIC_WEB_SOURCE_ID.into(),
-        catalog: None,
-        slug: generic_slug(url),
-        url: url.to_string(),
-    })
+    match_huawei(url)
+        .or_else(|| crate::github::match_github(url))
+        .unwrap_or_else(|| DocRef {
+            source_id: GENERIC_WEB_SOURCE_ID.into(),
+            catalog: None,
+            slug: generic_slug(url),
+            url: url.to_string(),
+            git_ref: None,
+        })
 }
 
 #[cfg(test)]
@@ -205,6 +209,14 @@ mod tests {
         let r = parse_url("https://blog.example.com/rust/async-basics?q=1#top");
         assert_eq!(r.source_id, "generic-web");
         assert_eq!(r.slug, "blog.example.com-rust-async-basics");
+    }
+
+    #[test]
+    fn github_repo_is_not_generic() {
+        let r = parse_url("https://github.com/yohurm/Windows-YoWebDocPreview/blob/main/README.md");
+        assert_eq!(r.source_id, "github-repo");
+        assert_eq!(r.catalog.as_deref(), Some("yohurm/Windows-YoWebDocPreview"));
+        assert_eq!(r.slug, "README.md");
     }
 
     #[test]

@@ -23,6 +23,7 @@ impl SourceAdapter for GenericWebAdapter {
                 catalog: None,
                 slug: yohu_domain::generic_slug(url),
                 url: url.to_string(),
+                git_ref: None,
             })
         } else {
             None
@@ -43,6 +44,11 @@ impl SourceAdapter for GenericWebAdapter {
             title,
             update_time: None,
             html: content,
+            markdown: None,
+            source_path: None,
+            source_ref: None,
+            blob_kind: String::new(),
+            text: None,
             device_types: Vec::new(),
         })
     }

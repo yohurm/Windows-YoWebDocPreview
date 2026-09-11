@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 /// 文档引用：定位一篇文档的最小坐标。
 ///
 /// - 结构化源（华为）：source_id="huawei-harmonyos"，catalog/slug 有值
+/// - GitHub 仓库：source_id="github-repo"，catalog=`owner/repo`，slug=仓库内路径
 /// - 通用网页：source_id="generic-web"，catalog=None，slug=域名+路径派生
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -14,6 +15,9 @@ pub struct DocRef {
     pub catalog: Option<String>,
     pub slug: String,
     pub url: String,
+    /// 已解析的 git 坐标（提交 SHA 或完整分支名）。禁止再按 `/` 切开。
+    #[serde(default)]
+    pub git_ref: Option<String>,
 }
 
 /// 拉取通道
@@ -34,6 +38,21 @@ pub struct RawDoc {
     #[serde(default)]
     pub update_time: Option<String>,
     pub html: String,
+    /// 源就是 Markdown 时填写（GitHub 仓库文件）。与 `html` 互斥：适配器只填一种。
+    #[serde(default)]
+    pub markdown: Option<String>,
+    /// 适配器实际打开的仓库路径。打开仓库根且存在 README 时回写该路径。
+    #[serde(default)]
+    pub source_path: Option<String>,
+    /// 适配器解析后的提交 SHA，回写 `DocRef.git_ref`。
+    #[serde(default)]
+    pub source_ref: Option<String>,
+    /// GitHub blob 分型：markdown / code / image / binary / tooLarge。
+    #[serde(default)]
+    pub blob_kind: String,
+    /// 代码/纯文本预览（非 Markdown）。
+    #[serde(default)]
+    pub text: Option<String>,
     /// 支持设备（device-type 映射后）；generic-web 为空
     #[serde(default)]
     pub device_types: Vec<String>,
@@ -51,9 +70,11 @@ pub struct DocMeta {
     pub channel: FetchChannel,
     #[serde(default)]
     pub device_types: Vec<String>,
+    #[serde(default)]
+    pub blob_kind: String,
 }
 
-/// 专栏/官方文档目录树节点（用于左侧导航栏多网页联动）
+/// 左侧导航树节点（华为专栏，或 GitHub 仓库一层目录）。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogNode {
@@ -78,6 +99,7 @@ mod tests {
             catalog: Some("harmonyos-guides".into()),
             slug: "resource-categories-and-access".into(),
             url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/resource-categories-and-access".into(),
+            git_ref: None,
         };
         let json = serde_json::to_string(&r).unwrap();
         assert!(json.contains("\"sourceId\""));

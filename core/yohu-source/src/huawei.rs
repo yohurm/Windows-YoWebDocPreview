@@ -182,6 +182,11 @@ impl SourceAdapter for HuaweiAdapter {
             title,
             update_time,
             html,
+            markdown: None,
+            source_path: None,
+            source_ref: None,
+            blob_kind: String::new(),
+            text: None,
             device_types: Vec::new(),
         })
     }

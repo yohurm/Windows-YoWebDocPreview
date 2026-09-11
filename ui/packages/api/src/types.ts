@@ -15,6 +15,7 @@ export interface DocRef {
   catalog: string | null;
   slug: string;
   url: string;
+  gitRef?: string | null;
 }
 
 /** "adapter" | "genericWeb" */
@@ -27,6 +28,7 @@ export interface DocMeta {
   sourceUrl: string;
   channel: FetchChannel;
   deviceTypes: string[];
+  blobKind?: string;
 }
 
 export interface CatalogNode {
