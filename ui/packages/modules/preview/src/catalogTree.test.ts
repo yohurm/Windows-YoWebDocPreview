@@ -2,7 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import type { CatalogNode } from "@yohu/api";
 
-import { collectExpandableIds, filterCatalogTree, findAncestorIds, resolveCatalogDocUrl } from "./catalogTree";
+import {
+  collectExpandableIds,
+  filePathAncestorIds,
+  filterCatalogTree,
+  findAncestorIds,
+  isCatalogBranch,
+  replaceCatalogChildren,
+  resolveCatalogDocUrl,
+} from "./catalogTree";
 
 const tree: CatalogNode[] = [
   {
@@ -32,10 +40,28 @@ describe("catalogTree", () => {
     ).toBe("https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-overview");
   });
 
+  it("resolves github repo file slugs onto blob urls", () => {
+    expect(
+      resolveCatalogDocUrl("docs/b.md", "https://github.com/o/r/blob/main/docs/a.md")
+    ).toBe("https://github.com/o/r/blob/main/docs/b.md");
+    const sha = "0123456789abcdef0123456789abcdef01234567";
+    expect(
+      resolveCatalogDocUrl("docs/guide.md", "https://github.com/diegosouzapw/OmniRoute", sha)
+    ).toBe(`https://github.com/diegosouzapw/OmniRoute/blob/${sha}/docs/guide.md`);
+  });
+
   it("passes through absolute urls", () => {
     expect(resolveCatalogDocUrl("https://example.com/a", "https://other.com/b")).toBe(
       "https://example.com/a"
     );
+  });
+
+  it("treats empty github folders as expandable branches", () => {
+    const folder = { id: "src", name: "src", isLeaf: false, children: [] };
+    expect(isCatalogBranch(folder)).toBe(true);
+    expect(collectExpandableIds([folder], 1)).toEqual(["src"]);
+    expect(filePathAncestorIds("src/engine/mod.rs")).toEqual(["src", "src/engine"]);
+    expect(replaceCatalogChildren([folder], "src", [{ id: "src/lib.rs", name: "lib.rs", slug: "src/lib.rs", isLeaf: true, children: [] }])[0]?.children[0]?.name).toBe("lib.rs");
   });
 
   it("keeps matching ancestors when filtering catalog titles", () => {

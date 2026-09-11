@@ -9,12 +9,22 @@ import {
   type CatalogNode,
 } from "@yohu/api";
 
-import { collectExpandableIds, findAncestorIds, resolveCatalogDocUrl } from "./catalogTree";
+import {
+  collectExpandableIds,
+  filePathAncestorIds,
+  findAncestorIds,
+  findCatalogNode,
+  replaceCatalogChildren,
+  resolveCatalogDocUrl,
+} from "./catalogTree";
 import { resolveContentHref, type ContentHref } from "./contentHref";
 import { documentCrumbs } from "./documentCrumbs";
+import { parseGithubArticle } from "./engine/github";
+import { githubCatalogIdFromUrl, githubTreeUrl, isGithubSource, parseGithub } from "./githubSource";
 import { catalogIdFromUrl } from "./huaweiCatalog";
 import { parseReadingArticle } from "./engine/reading";
 import { parseMarkdown } from "./engine/markdown";
+import type { DocMeta } from "@yohu/api";
 import {
   createEmptyDocSession,
   type MarkdownReveal,
@@ -35,7 +45,7 @@ export function createPreviewStore() {
   let openGen = 0;
 
   const hasDoc = createMemo(
-    () => Boolean(session().url && (session().rawHtml || session().markdownText))
+    () => Boolean(session().url && session().meta && (session().rawHtml || session().markdownText || session().meta.blobKind))
   );
   const currentSlug = createMemo(() => session().meta?.docRef?.slug);
   const docCrumbs = createMemo(() => documentCrumbs(session().meta, session().catalogNodes));
@@ -60,39 +70,72 @@ export function createPreviewStore() {
     });
   };
 
+  const githubDirUrl = (dirPath: string, meta: DocMeta | null): string | null => {
+    if (!meta || !isGithubSource(meta.docRef.sourceId)) return null;
+    const loc = parseGithub(meta.sourceUrl || meta.docRef.url);
+    const owner = loc?.owner ?? meta.docRef.catalog?.split("/")[0];
+    const repo = loc?.repo ?? meta.docRef.catalog?.split("/")[1];
+    const gitRef = meta.docRef.gitRef || loc?.gitRef;
+    if (!owner || !repo || !gitRef) return null;
+    return githubTreeUrl(owner, repo, gitRef, dirPath);
+  };
+
+  const hydrateGithubTree = async (
+    tree: CatalogNode[],
+    slug: string | undefined,
+    meta: DocMeta | null,
+    gen: number
+  ): Promise<CatalogNode[]> => {
+    if (!meta || !isGithubSource(meta.docRef.sourceId) || !slug) return tree;
+    let next = tree;
+    for (const id of filePathAncestorIds(slug)) {
+      const node = findCatalogNode(next, id);
+      if (!node || node.isLeaf !== false) break;
+      if ((node.children?.length ?? 0) > 0) continue;
+      const url = githubDirUrl(id, meta);
+      if (!url) break;
+      const children = (await docCatalog(url)) || [];
+      if (gen !== openGen) return next;
+      next = replaceCatalogChildren(next, id, children);
+    }
+    return next;
+  };
+
   const loadCatalog = async (
     targetUrl: string,
     catalogId: string,
     slug: string | undefined,
-    gen: number
+    gen: number,
+    meta: DocMeta | null
   ) => {
     const cached = catalogCache.get(catalogId);
-    if (cached) {
-      if (gen !== openGen) return;
-      setSession((prev) => ({ ...prev, catalogNodes: cached, catalogId }));
-      applyExpandedForSlug(cached, slug);
-      return;
-    }
-
-    try {
-      const tree = (await docCatalog(targetUrl)) || [];
-      if (gen !== openGen) return;
-      catalogCache.set(catalogId, tree);
-      const nextExpanded = new Set(collectExpandableIds(tree, 2));
-      if (slug) {
-        const ancestors = findAncestorIds(tree, slug);
-        if (ancestors) {
-          for (const id of ancestors) nextExpanded.add(id);
-        }
+    let tree = cached;
+    if (!tree) {
+      try {
+        tree = (await docCatalog(targetUrl)) || [];
+      } catch (cause) {
+        if (gen !== openGen) return;
+        setSession((prev) => ({ ...prev, catalogNodes: [], catalogId: "", error: errorMessage(cause) }));
+        return;
       }
-      batch(() => {
-        setSession((prev) => ({ ...prev, catalogNodes: tree, catalogId }));
-        setExpandedKeys(nextExpanded);
-      });
-    } catch (cause) {
-      if (gen !== openGen) return;
-      setSession((prev) => ({ ...prev, catalogNodes: [], catalogId: "", error: errorMessage(cause) }));
     }
+    if (gen !== openGen || !tree) return;
+    tree = await hydrateGithubTree(tree, slug, meta, gen);
+    if (gen !== openGen) return;
+    catalogCache.set(catalogId, tree);
+    const nextExpanded = new Set<string>();
+    if (slug) {
+      const ancestors = findAncestorIds(tree, slug) ?? filePathAncestorIds(slug);
+      for (const id of ancestors) nextExpanded.add(id);
+    }
+    batch(() => {
+      setSession((prev) => ({ ...prev, catalogNodes: tree!, catalogId }));
+      setExpandedKeys((prev) => {
+        const merged = new Set(prev);
+        for (const id of nextExpanded) merged.add(id);
+        return merged;
+      });
+    });
   };
 
   const fetchDoc = async (targetUrl?: string) => {
@@ -107,7 +150,7 @@ export function createPreviewStore() {
     }
 
     const gen = ++openGen;
-    const nextCat = catalogIdFromUrl(rawUrl) ?? "";
+    const nextCat = catalogIdFromUrl(rawUrl) ?? githubCatalogIdFromUrl(rawUrl) ?? "";
     const keepTree = Boolean(
       nextCat && nextCat === current.catalogId && current.catalogNodes.length > 0
     );
@@ -145,11 +188,15 @@ export function createPreviewStore() {
         targetCat === session().catalogId &&
         session().catalogNodes.length > 0;
 
-      const markdown = parseMarkdown(fetchedMd);
+      const markdown = isGithubSource(fetchedMeta.docRef?.sourceId)
+        ? parseGithubArticle(fetchedMd, fetchedMeta.title ?? "", fetchedMeta)
+        : parseMarkdown(fetchedMd);
       const web = parseReadingArticle(
         fetchedHtml,
         fetchedMeta.title ?? "",
-        fetchedMeta.docRef?.sourceId
+        fetchedMeta.docRef?.sourceId,
+        fetchedMd,
+        fetchedMeta
       );
 
       const nextSession: UnifiedDocSession = {
@@ -174,9 +221,10 @@ export function createPreviewStore() {
 
       if (targetCat) {
         if (!treeReady) {
-          void loadCatalog(rawUrl, targetCat, targetSlug, gen);
+          void loadCatalog(rawUrl, targetCat, targetSlug, gen, fetchedMeta);
         } else {
           applyExpandedForSlug(session().catalogNodes, targetSlug);
+          void loadCatalog(rawUrl, targetCat, targetSlug, gen, fetchedMeta);
         }
       }
     } catch (cause) {
@@ -192,7 +240,7 @@ export function createPreviewStore() {
   const selectCatalogDoc = (slugOrUrl: string) => {
     const current = session().meta?.sourceUrl || session().url;
     if (!current) return;
-    void fetchDoc(resolveCatalogDocUrl(slugOrUrl, current));
+    void fetchDoc(resolveCatalogDocUrl(slugOrUrl, current, session().meta?.docRef?.gitRef));
   };
 
   const openContentHref = (href: string): ContentHref => {
@@ -204,6 +252,7 @@ export function createPreviewStore() {
   };
 
   const toggleCatalogNode = (nodeId: string) => {
+    const wasOpen = expandedKeys().has(nodeId);
     setExpandedKeys((prev) => {
       const next = new Set(prev);
       if (next.has(nodeId)) {
@@ -219,6 +268,27 @@ export function createPreviewStore() {
       }
       return next;
     });
+    if (wasOpen) return;
+    const current = session();
+    const node = findCatalogNode(current.catalogNodes, nodeId);
+    if (!node || node.isLeaf !== false || (node.children?.length ?? 0) > 0) return;
+    const url = githubDirUrl(nodeId, current.meta);
+    if (!url) return;
+    const gen = openGen;
+    void (async () => {
+      try {
+        const children = (await docCatalog(url)) || [];
+        if (gen !== openGen) return;
+        setSession((prev) => {
+          const tree = replaceCatalogChildren(prev.catalogNodes, nodeId, children);
+          if (prev.catalogId) catalogCache.set(prev.catalogId, tree);
+          return { ...prev, catalogNodes: tree };
+        });
+      } catch (cause) {
+        if (gen !== openGen) return;
+        setSession((prev) => ({ ...prev, error: errorMessage(cause) }));
+      }
+    })();
   };
 
   const toggleAllCatalogNodes = (expandAll: boolean) => {

@@ -9,6 +9,7 @@ import type { PreviewStore } from "../store";
 import { CanvasOpBar } from "./CanvasOpBar";
 import { ChannelBar } from "./ChannelBar";
 import { DocumentPath } from "./DocumentPath";
+import { isGithubSource } from "../githubSource";
 import { TocAside } from "./TocAside";
 import { WebReadingFrame } from "./WebReadingFrame";
 
@@ -22,12 +23,14 @@ export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance
       rawHtml: store.session().rawHtml,
       sourceUrl: store.session().url,
       catalogNodes: store.session().catalogNodes,
+      markdownText: store.session().markdownText,
     })
   );
 
   const webOpen = () => store.readingSurface() === "web";
   const onMarkdown = () => store.readingSurface() === "markdown";
-  const hasWebDoc = () => Boolean(store.session().rawHtml || store.session().meta);
+  const hasWebDoc = () =>
+    Boolean(store.session().rawHtml || store.session().markdownText || store.session().meta);
 
   const followHref = (href: string) => {
     const nav = store.openContentHref(href);
@@ -100,7 +103,14 @@ export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance
                 <div class="yo-canvas__scroll" data-yo-read="md">
                   <div class="yo-canvas__article">
                     <DocumentPath crumbs={store.docCrumbs()} />
-                    <article class="yo-md" innerHTML={store.session().renderedHtml} />
+                    <article
+                      class={
+                        isGithubSource(store.session().meta?.docRef?.sourceId)
+                          ? "markdown-body"
+                          : "yo-md"
+                      }
+                      innerHTML={store.session().renderedHtml}
+                    />
                   </div>
                 </div>
               </Show>

@@ -2,14 +2,19 @@ import { createMemo, createSignal, Show } from "solid-js";
 
 import { IconCollapseAll, IconExpandAll, IconPanelLeft, IconSearch } from "@yohu/ui";
 
-import { filterCatalogTree } from "../catalogTree";
+import { collectExpandableIds, filterCatalogTree } from "../catalogTree";
 import type { PreviewStore } from "../store";
 import { CatalogTree } from "./CatalogTree";
 
 export function PrimarySidebar(props: { store: PreviewStore }) {
   const { store } = props;
-  const [allExpanded, setAllExpanded] = createSignal(true);
   const [query, setQuery] = createSignal("");
+  const allExpanded = createMemo(() => {
+    const allIds = collectExpandableIds(store.session().catalogNodes, 99);
+    if (allIds.length === 0) return false;
+    const expanded = store.expandedKeys();
+    return allIds.every((id) => expanded.has(id));
+  });
 
   const visibleNodes = createMemo(() =>
     filterCatalogTree(store.session().catalogNodes, query())
@@ -18,9 +23,7 @@ export function PrimarySidebar(props: { store: PreviewStore }) {
   const open = () => store.sidebarOpen();
 
   const handleToggleAll = () => {
-    const next = !allExpanded();
-    setAllExpanded(next);
-    store.toggleAllCatalogNodes(next);
+    store.toggleAllCatalogNodes(!allExpanded());
   };
 
   return (
@@ -57,7 +60,7 @@ export function PrimarySidebar(props: { store: PreviewStore }) {
               <input
                 type="search"
                 value={query()}
-                placeholder="筛选文档标题"
+                placeholder="筛选名称"
                 onInput={(event) => setQuery(event.currentTarget.value)}
               />
             </label>
@@ -65,7 +68,7 @@ export function PrimarySidebar(props: { store: PreviewStore }) {
           <div class="yo-nav__body">
             <Show
               when={store.session().catalogNodes.length > 0}
-              fallback={<div class="yo-nav__empty">打开文档后显示专栏目录</div>}
+              fallback={<div class="yo-nav__empty">打开页面后显示目录</div>}
             >
               <Show
                 when={visibleNodes().length > 0}

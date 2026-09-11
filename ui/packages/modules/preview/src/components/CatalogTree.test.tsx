@@ -97,6 +97,20 @@ describe("CatalogTree", () => {
     unmount();
   });
 
+  it("shows a chevron for an unloaded github folder", () => {
+    const { container, unmount } = render(() => (
+      <CatalogTree
+        nodes={[{ id: "src", name: "src", isLeaf: false, children: [] }]}
+        expandedKeys={new Set()}
+        onToggleNode={vi.fn()}
+        onSelectDoc={vi.fn()}
+      />
+    ));
+    expect(container.querySelector(".yo-tree__twist")).toBeTruthy();
+    expect(container.querySelector(".yo-tree__twist--leaf")).toBeNull();
+    unmount();
+  });
+
   it("opens a group that has its own slug instead of toggling it", async () => {
     const onToggleNode = vi.fn();
     const onSelectDoc = vi.fn();

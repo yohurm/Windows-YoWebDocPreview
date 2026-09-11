@@ -4,7 +4,7 @@ import type { JSX } from "solid-js";
 import { IconChevron } from "@yohu/ui";
 import type { CatalogNode } from "@yohu/api";
 
-import { catalogContainsSlug } from "../catalogTree";
+import { catalogContainsSlug, isCatalogBranch } from "../catalogTree";
 import { revealChild } from "../readingScroll";
 
 export interface CatalogTreeProps {
@@ -25,7 +25,7 @@ function CatalogItem(props: {
   onToggleNode: (id: string) => void;
   onSelectDoc: (slug: string) => void;
 }) {
-  const hasChildren = () => (props.node.children?.length ?? 0) > 0;
+  const hasChildren = () => isCatalogBranch(props.node);
   const isExpanded = () => props.forceExpand || props.expandedKeys.has(props.node.id);
   const isCurrent = () => Boolean(props.activeSlug) && props.node.slug === props.activeSlug;
   const isBranchOn = () =>
@@ -121,7 +121,7 @@ export function CatalogTree(props: CatalogTreeProps) {
   });
 
   return (
-    <nav ref={root} class="yo-tree" aria-label="专栏目录" role="tree">
+    <nav ref={root} class="yo-tree" aria-label="目录" role="tree">
       <For each={props.nodes}>
         {(node) => (
           <CatalogItem
