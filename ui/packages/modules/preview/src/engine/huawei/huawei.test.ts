@@ -327,6 +327,9 @@ describe("buildHuaweiDocument", () => {
     expect(html).toContain("--code-shadow:");
     expect(html).toContain("border: 1px solid var(--code-stroke");
     expect(html).toContain("box-shadow: var(--code-shadow");
+    expect(html).toContain("--yo-syntax-keyword: var(--hl-keyword)");
+    expect(html).toContain("var(--yo-syntax-keyword)");
+    expect(html).not.toContain(".y-content .hljs-keyword, .y-content .hljs-selector-tag");
   });
 });
 

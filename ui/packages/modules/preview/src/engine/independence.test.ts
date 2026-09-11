@@ -20,9 +20,25 @@ function walk(dir: string): string[] {
 }
 
 describe("parser isolation", () => {
-  it("html kernel never imports huawei, github, or markdown", () => {
+  it("html kernel never imports huawei, github, markdown, or syntax", () => {
     for (const file of walk(join(here, "html"))) {
       const text = readFileSync(file, "utf8");
+      expect(text, file).not.toMatch(/engine\/huawei/);
+      expect(text, file).not.toMatch(/from ["']\.\.\/huawei/);
+      expect(text, file).not.toMatch(/engine\/github/);
+      expect(text, file).not.toMatch(/from ["']\.\.\/github/);
+      expect(text, file).not.toMatch(/engine\/markdown/);
+      expect(text, file).not.toMatch(/from ["']\.\.\/markdown/);
+      expect(text, file).not.toMatch(/engine\/syntax/);
+      expect(text, file).not.toMatch(/from ["']\.\.\/syntax/);
+    }
+  });
+
+  it("syntax kernel never imports html, huawei, github, or markdown", () => {
+    for (const file of walk(join(here, "syntax"))) {
+      const text = readFileSync(file, "utf8");
+      expect(text, file).not.toMatch(/engine\/html/);
+      expect(text, file).not.toMatch(/from ["']\.\.\/html/);
       expect(text, file).not.toMatch(/engine\/huawei/);
       expect(text, file).not.toMatch(/from ["']\.\.\/huawei/);
       expect(text, file).not.toMatch(/engine\/github/);

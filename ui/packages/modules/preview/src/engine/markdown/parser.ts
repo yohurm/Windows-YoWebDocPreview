@@ -1,7 +1,7 @@
 import MarkdownIt from "markdown-it";
 
 import { markdownAlerts } from "./alerts";
-import { highlightMarkdownFence } from "./highlight";
+import { highlightMarkdownFence } from "../syntax";
 import { markdownMath } from "./math";
 import { markdownTables } from "./tables";
 import { bindMarkdownHeadingIds } from "./toc";

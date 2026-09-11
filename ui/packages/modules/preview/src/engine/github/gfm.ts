@@ -2,7 +2,7 @@ import DOMPurify from "dompurify";
 import MarkdownIt from "markdown-it";
 
 import { markdownAlerts } from "../markdown/alerts";
-import { highlightMarkdownFence } from "../markdown/highlight";
+import { highlightMarkdownFence } from "../syntax";
 import { markdownTables } from "../markdown/tables";
 import { bindMarkdownHeadingIds, extractMarkdownToc, type MarkdownTocItem } from "../markdown/toc";
 

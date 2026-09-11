@@ -1,4 +1,4 @@
-import { highlightSource } from "../markdown/highlight";
+import { highlightSource } from "../syntax";
 import { githubRawUrl, githubRepoFromMeta } from "../../githubSource";
 import type { DocMeta } from "@yohu/api";
 

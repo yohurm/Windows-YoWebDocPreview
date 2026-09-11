@@ -11,6 +11,7 @@
 import type { CatalogNode, DocMeta } from "@yohu/api";
 
 import { documentCrumbs, documentTitle } from "../../documentCrumbs";
+import { syntaxColorCss } from "../syntax";
 import { resolveDeviceTypes } from "./devices";
 import { parseHuaweiArticle } from "./normalize";
 import { OFFICIAL_ARTICLE_CSS } from "./skin";
@@ -52,6 +53,7 @@ export function buildHuaweiDocument(options: RenderHuaweiOptions): string {
   <meta name="color-scheme" content="light dark">
   <title>${safeTitle}</title>
   <style>${OFFICIAL_ARTICLE_CSS}</style>
+  <style>${syntaxColorCss()}</style>
 </head>
 <body>
   <div class="y-scroll" data-yo-read="article">

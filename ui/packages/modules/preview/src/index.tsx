@@ -1,5 +1,6 @@
 import "./preview.css";
 import "./engine/markdown/skin.css";
+import "./engine/syntax/theme.css";
 import "./engine/github/github-markdown.css";
 
 import { Show } from "solid-js";

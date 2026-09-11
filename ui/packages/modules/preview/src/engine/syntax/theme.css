@@ -1,0 +1,58 @@
+.hljs-keyword,
+.hljs-doctag,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-variable.language_ {
+  color: var(--yo-syntax-keyword);
+}
+
+.hljs-string,
+.hljs-char.escape_ {
+  color: var(--yo-syntax-string);
+}
+
+.hljs-comment {
+  color: var(--yo-syntax-comment);
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-attr,
+.hljs-attribute,
+.hljs-meta,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-operator {
+  color: var(--yo-syntax-constant);
+}
+
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-title.function_,
+.hljs-title.function_.invoke__,
+.hljs-type,
+.hljs-section {
+  color: var(--yo-syntax-entity);
+}
+
+.hljs-name,
+.hljs-tag,
+.hljs-selector-tag,
+.hljs-quote,
+.hljs-selector-pseudo {
+  color: var(--yo-syntax-entity-tag);
+}
+
+.hljs-built_in,
+.hljs-variable,
+.hljs-params,
+.hljs-symbol,
+.hljs-bullet {
+  color: var(--yo-syntax-variable);
+}
+
+.hljs-regexp {
+  color: var(--yo-syntax-regexp);
+}

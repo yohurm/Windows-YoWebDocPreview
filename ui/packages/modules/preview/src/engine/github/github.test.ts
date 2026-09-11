@@ -45,9 +45,16 @@ describe("parseGithubArticle", () => {
   });
 
   it("renders source files as highlighted code, not markdown", () => {
-    const parsed = parseGithubArticle("fn main() {}\n", "lib.rs", meta("src/lib.rs", "code"));
+    const parsed = parseGithubArticle(
+      '// note\nfn main() {\n  let n = 1;\n  println!("hi");\n}\n',
+      "lib.rs",
+      meta("src/lib.rs", "code")
+    );
     expect(parsed.html).toContain("<pre");
-    expect(parsed.html).toContain("fn");
+    expect(parsed.html).toContain("hljs-keyword");
+    expect(parsed.html).toContain("hljs-comment");
+    expect(parsed.html).toContain("hljs-string");
+    expect(parsed.html).toContain("hljs-number");
     expect(parsed.html).not.toContain("<h1");
   });
 
@@ -73,5 +80,16 @@ describe("buildGithubDocument", () => {
     expect(html).toContain("world");
     expect(html).not.toContain('class="y-title"');
     expect(html).not.toContain("HarmonyOS");
+  });
+
+  it("binds GitHub prettylights onto syntax roles instead of hardcoded hljs hex", () => {
+    const html = buildGithubDocument({
+      meta: meta("src/lib.rs", "code"),
+      markdown: "fn main() {}\n",
+    });
+    expect(html).toContain("--yo-syntax-keyword: var(--color-prettylights-syntax-keyword)");
+    expect(html).toContain("--yo-syntax-variable: var(--color-prettylights-syntax-variable)");
+    expect(html).toContain("var(--yo-syntax-keyword)");
+    expect(html).not.toContain(".hljs-keyword, .hljs-selector-tag { color: #cf222e; }");
   });
 });

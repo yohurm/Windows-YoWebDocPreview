@@ -29,6 +29,14 @@ export const OFFICIAL_ARTICLE_CSS = `
   --hl-number: #005cc5;
   --hl-title: #6f42c1;
   --hl-built: #e36209;
+  --yo-syntax-keyword: var(--hl-keyword);
+  --yo-syntax-string: var(--hl-string);
+  --yo-syntax-comment: var(--hl-comment);
+  --yo-syntax-constant: var(--hl-number);
+  --yo-syntax-entity: var(--hl-title);
+  --yo-syntax-entity-tag: var(--hl-number);
+  --yo-syntax-variable: var(--hl-built);
+  --yo-syntax-regexp: var(--hl-string);
   --code-stroke: #e2e8f0;
   --code-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.08);
   color-scheme: light;
@@ -54,6 +62,14 @@ export const OFFICIAL_ARTICLE_CSS = `
   --hl-number: #79c0ff;
   --hl-title: #d2a8ff;
   --hl-built: #ffa657;
+  --yo-syntax-keyword: var(--hl-keyword);
+  --yo-syntax-string: var(--hl-string);
+  --yo-syntax-comment: var(--hl-comment);
+  --yo-syntax-constant: var(--hl-number);
+  --yo-syntax-entity: var(--hl-title);
+  --yo-syntax-entity-tag: var(--hl-number);
+  --yo-syntax-variable: var(--hl-built);
+  --yo-syntax-regexp: var(--hl-string);
   --code-stroke: rgba(255, 255, 255, 0.08);
   --code-shadow: none;
   color-scheme: dark;
@@ -207,12 +223,6 @@ html, body {
   overflow-x: auto;
   white-space: pre;
 }
-.y-content .hljs-keyword, .y-content .hljs-selector-tag { color: var(--hl-keyword); }
-.y-content .hljs-string, .y-content .hljs-attr { color: var(--hl-string); }
-.y-content .hljs-comment { color: var(--hl-comment); }
-.y-content .hljs-number { color: var(--hl-number); }
-.y-content .hljs-title, .y-content .hljs-type { color: var(--hl-title); }
-.y-content .hljs-built_in, .y-content .hljs-literal { color: var(--hl-built); }
 .y-content code:not(pre code) {
   font-family: var(--font-mono);
   font-size: 13px;

@@ -1,4 +1,4 @@
-import { highlightWebCode } from "./highlight";
+import { highlightByGrammar } from "../syntax";
 import { identifyWebCode, type WebCodeIdentity } from "./language";
 
 export interface WebCodeBlock extends WebCodeIdentity {
@@ -25,7 +25,7 @@ export function parseWebCodeBlock(attrs: string, body: string): WebCodeBlock {
 }
 
 export function serializeWebCodeBlock(block: WebCodeBlock): string {
-  const inner = block.tokenized ? block.code : highlightWebCode(block.code, block.grammar);
+  const inner = block.tokenized ? block.code : highlightByGrammar(block.code, block.grammar);
   const lang = block.lang !== "text" ? block.lang : "";
   const bar = codeBar(lang, block.hub);
   const langAttr = lang ? ` data-lang="${escapeAttr(lang)}"` : "";

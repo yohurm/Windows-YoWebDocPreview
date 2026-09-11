@@ -12,7 +12,7 @@
   --fgColor-accent: Highlight;
 }
 @media (prefers-color-scheme: dark) {
-  .markdown-body, [data-theme="dark"] {
+  .markdown-body, .y-blob, [data-theme="dark"] {
     /*dark */
     color-scheme: dark;
     --fgColor-accent: #4493f8;
@@ -68,7 +68,7 @@
   }
 }
 @media (prefers-color-scheme: light) {
-  .markdown-body, [data-theme="light"] {
+  .markdown-body, .y-blob, [data-theme="light"] {
     /*light */
     color-scheme: light;
     --fgColor-danger: #d1242f;

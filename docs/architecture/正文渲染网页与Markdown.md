@@ -1,7 +1,7 @@
 # 正文渲染：网页表面与 Markdown 表面
 
 > 依据 YoAgentDocs architecture-design + 2026-09-09 frontend 深研。  
-> **as-built（2026-09-11）：** 公共 HTML 内核 `engine/html/`，华为方言 `engine/huawei/`（可依赖 html），GitHub 仓库 `engine/github/`（独立 GFM，可依赖 markdown 高亮/目录）。`engine/reading` 按 sourceId 与 `blobKind` 组合。html / markdown / huawei 互不 import github。  
+> **as-built（2026-09-11）：** 公共 HTML 内核 `engine/html/`，着色内核 `engine/syntax/`（语言表 + hljs 角色 → `--yo-syntax-*`），华为方言 `engine/huawei/`（可依赖 html + syntax），GitHub 仓库 `engine/github/`（独立 GFM，可依赖 markdown 目录 + syntax）。`engine/reading` 按 sourceId 与 `blobKind` 组合。html / markdown / huawei 互不 import github。syntax 不 import 任何方言。  
 > 层名：Windows 桌面 `View → store → IPC → domain`。
 
 调研原文在知识库 `research/by-stack/frontend/`（源码在 `%TEMP%\YoAgentResearch\`，不进本仓）。
@@ -78,7 +78,7 @@ Markdown 表面（readingSurface=markdown, reveal=rendered）：
   1. markdown-it（html:false，GFM 表/围栏）
   2. GitHub Alert 插件        > [!NOTE|TIP|WARNING] → yo-md-callout
   3. 公式插件                 $ / $$ → katex.renderToString（无公式则规则空转）
-  4. highlight                本包独立 highlight.js 语言表（不与网页解析器共享模块）
+  4. highlight                engine/syntax（语言表单源；色板仍由 .yo-md 绑定 YoUI）
   5. 标题 id                  与 extractTocFromMarkdown 同一套 toc-heading-N
   6. DOMPurify 兜底
   → article.yo-md（preview 模块皮肤，引用 YoUI token，不写在 theme.css）
@@ -111,7 +111,7 @@ flowchart LR
 | 宿主 | iframe srcdoc | 工作台滚动容器 |
 | 解析 | HTML→HTML 规范化 | markdown-it token→HTML |
 | 皮肤 | `officialSkin` 实测值 | preview 模块排版 + YoUI token |
-| 代码着色 | 浅色文档块（官网家族） | 工作台 token 上的独立 highlight.js |
+| 代码着色 | 官网 `--hl-*` 绑定 `--yo-syntax-*` | 工作台 YoUI 绑定同一套角色 |
 | 提示 | 说明/注意/警告/提示 | NOTE/TIP/WARNING 的工作台 callout |
 | 公式 | 门控 auto-render 或 MathML | 门控 `renderToString` |
 | 标题尺 | 36/24/20/16、无下划线 | 独立阶（见下），无 GitHub 底边 |
@@ -168,7 +168,7 @@ flowchart LR
 
 **网页。** `<pre>` 先收成 `WebCodeBlock`（`testdata/huawei-code-lang.json`），再序列化 `.y-code`。身份只读页面字段：`codehub` 扩展名优先（`.ets` → ArkTS），否则 class 里的语言 token；`prettyprint` / `linenums` / `hljs` 不是语言。`class="TypeScript"` 在有 `.ets` 文件时不是身份。不根据代码正文猜 ArkTS。输出丢掉官网 class，正文是 `.y-code__body`。无 token span 时按 `grammar` 浅色着色。没有复制按钮槽，底边 12px。浅色 `--code-stroke` + `--code-shadow`；深色只留细描边、无阴影。
 
-**Markdown。** 围栏走本包 `engine/markdown/highlight.ts`（highlight.js 核心 + 显式语言表：ArkTS/TS/JSON/XML/bash）。语言表不够时降级为纯转义。不与网页解析器共享模块。围栏铬：语言名即可。
+**Markdown。** 围栏走 `engine/syntax`（highlight.js 核心 + 显式语言表）。语言表不够时降级为纯转义。方言不互相 import 高亮文件；色板各绑各的 token。围栏铬：语言名即可。
 
 **源码 reveal。** 保持等宽 textarea，不高亮（那是源，不是阅读块）。
 
@@ -197,9 +197,11 @@ flowchart LR
 @yohu/ui          L0 token（字号/色/间距）。不持有 .yo-md 文章规则。
 @yohu/module-preview
   engine/html/    通用 unwrap / 标题打 id / tables / math / 中性皮肤
+  engine/syntax/  语言表 + 着色 + 角色 CSS（不持有任何表面色板）
   engine/huawei/  标题提升 / notes / codehub / IconPic / 官网皮肤
+  engine/github/  GFM / blobKind / Prettylights 绑定
   engine/reading  按 sourceId 选引擎
-  engine/markdown/  markdown-it 插件链 + 独立 highlight.js + KaTeX 字符串 + yo-md.css
+  engine/markdown/  markdown-it 插件链 + KaTeX 字符串 + yo-md.css
 store             持 rawHtml / markdownText / renderedHtml / toc；不写块样式
 yohu-md-convert   公共 HTML→MD 内核。不渲染。
 yohu-md-huawei    华为 HTML→MD 方言。不渲染。
@@ -217,7 +219,7 @@ yohu-md-huawei    华为 HTML→MD 方言。不渲染。
 | `normalizeArticleHtml.ts` | 保留；公式/高亮是后续步骤，不塞进标题正则 |
 | `toc.ts` 里 markdown-it `html:true` | 换成 `html:false` + Alert/公式/高亮插件；测试锁 TOC id |
 | `.yo-md` 在 `theme.css` | 迁到 preview；去掉 h1/h2 底边、行内代码强调色、图片阴影 |
-| v2「markdown-it + highlight.js」 | 落地为两条独立 highlight 模块（网页浅色 / MD 工作台色），禁止互相 import |
+| v2「markdown-it + highlight.js」 | 落地为 `engine/syntax` 单源着色；网页 / MD / GitHub 只绑定各自 token，禁止方言互相 import |
 | ADR-W2「非 iframe」 | 网页 as-built 已是 iframe；本篇不退回 innerHTML 混在壳里 |
 
 替换以上文件职责，**不**加「兼容旧皮肤」开关。

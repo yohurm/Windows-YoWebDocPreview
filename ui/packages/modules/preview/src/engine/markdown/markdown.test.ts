@@ -53,6 +53,7 @@ describe("parseMarkdown", () => {
   it("highlights fenced ArkTS and wraps GFM tables", () => {
     const html = renderMarkdown("```ArkTS\nlet hi: string = 'hello';\n```\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n");
     expect(html).toContain("hljs-keyword");
+    expect(html).toContain("hljs-string");
     expect(html).toContain("yo-md-table");
     expect(html).toContain("<th>");
   });
