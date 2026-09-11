@@ -34,11 +34,12 @@ pub struct AdapterRegistry {
 }
 
 impl AdapterRegistry {
-    /// 默认注册表：华为适配器 + generic-web 兜底。
+    /// 默认注册表：华为 / GitHub 专用适配器 + generic-web 兜底。
     pub fn with_defaults() -> Self {
         Self {
             adapters: vec![
                 Box::new(crate::huawei::HuaweiAdapter),
+                Box::new(crate::github::GithubAdapter),
                 Box::new(crate::generic::GenericWebAdapter),
             ],
         }

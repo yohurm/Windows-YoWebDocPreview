@@ -4,12 +4,14 @@ pub mod adapter;
 pub mod error;
 pub mod extract;
 pub mod generic;
+pub mod github;
 pub mod huawei;
 pub mod http;
 
 pub use adapter::{AdapterRegistry, SourceAdapter};
 pub use error::SourceError;
 pub use generic::GenericWebAdapter;
+pub use github::GithubAdapter;
 pub use http::{HttpClient, HttpConfig};
 pub use huawei::{fetch_catalog_tree, probe_meta, HuaweiAdapter};
 
@@ -33,12 +35,15 @@ pub async fn fetch_any(
         Ok(raw) => (raw, channel),
         Err(err) => {
             // 如果不是通用适配器且遇到失败，尝试透明降级为 generic-web 兜底抓取
-            if adapter.id() != yohu_domain::GENERIC_WEB_SOURCE_ID {
+            if adapter.id() != yohu_domain::GENERIC_WEB_SOURCE_ID
+                && !yohu_domain::is_github_source(adapter.id())
+            {
                 let fallback_ref = DocRef {
                     source_id: yohu_domain::GENERIC_WEB_SOURCE_ID.to_string(),
                     url: url.to_string(),
                     catalog: doc_ref.catalog.clone(),
                     slug: doc_ref.slug.clone(),
+                    git_ref: None,
                 };
                 match registry.generic().fetch(http, &fallback_ref).await {
                     Ok(raw) => (raw, FetchChannel::GenericWeb),
@@ -56,7 +61,8 @@ pub async fn fetch_any(
         source_url: url.to_string(),
         channel: final_channel,
         device_types: raw.device_types.clone(),
-        doc_ref: merge_ref(doc_ref, url),
+        blob_kind: raw.blob_kind.clone(),
+        doc_ref: merge_ref(doc_ref, url, &raw),
     };
     Ok((meta, raw))
 }
@@ -72,9 +78,20 @@ pub async fn fetch_catalog(
 }
 
 /// DocRef 的 url 字段以用户输入为准（去锚点前的原始输入保留）。
-fn merge_ref(r: DocRef, url: &str) -> DocRef {
+fn merge_ref(r: DocRef, url: &str, raw: &RawDoc) -> DocRef {
     DocRef {
         url: url.to_string(),
+        slug: raw
+            .source_path
+            .as_deref()
+            .filter(|s| !s.is_empty())
+            .unwrap_or(r.slug.as_str())
+            .to_string(),
+        git_ref: raw
+            .source_ref
+            .clone()
+            .filter(|s| !s.is_empty())
+            .or(r.git_ref),
         ..r
     }
 }
@@ -90,8 +107,27 @@ mod tests {
             catalog: None,
             slug: "s".into(),
             url: "old".into(),
+            git_ref: None,
         };
-        let merged = merge_ref(r, "new");
+        let merged = merge_ref(r, "new", &RawDoc::default());
         assert_eq!(merged.url, "new");
+        assert_eq!(merged.slug, "s");
+    }
+
+    #[test]
+    fn merge_ref_prefers_adapter_source_path() {
+        let r = DocRef {
+            source_id: "github-repo".into(),
+            catalog: Some("o/r".into()),
+            slug: String::new(),
+            url: "old".into(),
+            git_ref: None,
+        };
+        let raw = RawDoc {
+            source_path: Some("docs/guide.md".into()),
+            ..RawDoc::default()
+        };
+        let merged = merge_ref(r, "https://github.com/o/r", &raw);
+        assert_eq!(merged.slug, "docs/guide.md");
     }
 }
