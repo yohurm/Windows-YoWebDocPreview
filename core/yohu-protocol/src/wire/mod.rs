@@ -10,7 +10,9 @@ mod task;
 
 pub use ai::{AgentDocument, AgentSection, OutlineNode};
 pub use doc::{BlobKind, CatalogNode, DocMeta, DocRef, FetchChannel, RawDoc};
-pub use library::{BatchEntry, ImportListResult, LibraryEntry, TreeNode};
+pub use library::{
+    BatchEntry, ImportListResult, LibraryEntry, SyncItem, SyncReport, TreeNode,
+};
 pub use task::{TaskError, TaskProgress, TaskState, TaskSummary};
 
 pub use crate::settings::AppSettings;

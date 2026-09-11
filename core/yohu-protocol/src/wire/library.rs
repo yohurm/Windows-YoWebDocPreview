@@ -9,6 +9,7 @@ pub struct LibraryEntry {
     pub file: String,
     pub url: String,
     pub slug: String,
+    #[serde(default)]
     pub catalog: String,
     #[serde(default)]
     pub local_time: Option<String>,
@@ -45,6 +46,38 @@ pub struct BatchEntry {
 pub struct ImportListResult {
     pub count: u32,
     pub items: Vec<BatchEntry>,
+}
+
+/// 文档库对照/应用的一条（UPDATE / NEW / OFFLINE）
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SyncItem {
+    pub file: String,
+    pub url: String,
+    pub slug: String,
+    pub catalog: String,
+    /// UPDATE | NEW | OFFLINE
+    pub status: String,
+    #[serde(default)]
+    pub local_time: Option<String>,
+    #[serde(default)]
+    pub official_time: Option<String>,
+    #[serde(default)]
+    pub title: String,
+    #[serde(default)]
+    pub tree_parts: Vec<String>,
+}
+
+/// `library.plan` / `library.sync` 结果
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SyncReport {
+    pub planned: u32,
+    pub updated: u32,
+    pub created: u32,
+    pub marked_offline: u32,
+    pub failed: u32,
+    pub items: Vec<SyncItem>,
 }
 
 #[cfg(test)]
@@ -105,5 +138,30 @@ mod tests {
         let json = serde_json::to_string(&r).unwrap();
         assert!(json.contains("\"count\":1"));
         assert!(json.contains("\"items\""));
+    }
+
+    #[test]
+    fn sync_report_camel_case() {
+        let r = SyncReport {
+            planned: 1,
+            updated: 0,
+            created: 1,
+            marked_offline: 0,
+            failed: 0,
+            items: vec![SyncItem {
+                file: "设计/设计指南/x.md".into(),
+                url: "https://developer.huawei.com/x".into(),
+                slug: "x".into(),
+                catalog: "design-guides".into(),
+                status: "NEW".into(),
+                local_time: None,
+                official_time: None,
+                title: "x".into(),
+                tree_parts: vec!["通用设计基础".into()],
+            }],
+        };
+        let json = serde_json::to_string(&r).unwrap();
+        assert!(json.contains("\"markedOffline\""));
+        assert!(json.contains("\"treeParts\""));
     }
 }

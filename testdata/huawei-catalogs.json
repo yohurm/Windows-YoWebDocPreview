@@ -3,15 +3,15 @@
   "sourceId": "huawei-harmonyos",
   "brand": "HarmonyOS",
   "catalogs": [
-    { "id": "design-guides", "displayName": "设计指南" },
+    { "id": "design-guides", "displayName": "设计指南", "localRoot": "设计/设计指南" },
     { "id": "harmonyos-guides-V5", "displayName": "HarmonyOS NEXT 开发指南" },
-    { "id": "harmonyos-guides", "displayName": "HarmonyOS 开发指南" },
+    { "id": "harmonyos-guides", "displayName": "HarmonyOS 开发指南", "localRoot": "开发/指南" },
     { "id": "harmonyos-references-V5", "displayName": "HarmonyOS NEXT API 参考" },
-    { "id": "harmonyos-references", "displayName": "HarmonyOS API 参考" },
-    { "id": "harmonyos-faqs", "displayName": "常见问题" },
-    { "id": "best-practices", "displayName": "最佳实践" },
-    { "id": "harmonyos-releases", "displayName": "版本说明" },
-    { "id": "harmonyos-roadmap", "displayName": "变更预告" }
+    { "id": "harmonyos-references", "displayName": "HarmonyOS API 参考", "localRoot": "开发/API参考" },
+    { "id": "harmonyos-faqs", "displayName": "常见问题", "localRoot": "开发/FAQ" },
+    { "id": "best-practices", "displayName": "最佳实践", "localRoot": "开发/最佳实践" },
+    { "id": "harmonyos-releases", "displayName": "版本说明", "localRoot": "开发/版本说明" },
+    { "id": "harmonyos-roadmap", "displayName": "变更预告", "localRoot": "开发/变更预告" }
   ],
   "channels": [
     {

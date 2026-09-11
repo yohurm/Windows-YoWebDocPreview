@@ -31,6 +31,9 @@ pub struct HuaweiCatalog {
     pub id: String,
     #[serde(rename = "displayName")]
     pub display_name: String,
+    /// 知识库内相对根。空 = 本机树不收录该专栏（如 NEXT V5）。
+    #[serde(default, rename = "localRoot")]
+    pub local_root: String,
 }
 
 #[derive(Debug, Deserialize)]
