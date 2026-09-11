@@ -1,7 +1,7 @@
 # 正文渲染：网页表面与 Markdown 表面
 
 > 依据 YoAgentDocs architecture-design + 2026-09-09 frontend 深研。  
-> **as-built（2026-09-11）：** 公共 HTML 内核 `engine/html/`，华为方言 `engine/huawei/`（可依赖 html），Markdown `engine/markdown/`。`engine/reading` 按 sourceId 组合。html 与 markdown 互不 import。  
+> **as-built（2026-09-11）：** 公共 HTML 内核 `engine/html/`，华为方言 `engine/huawei/`（可依赖 html），GitHub 仓库 `engine/github/`（独立 GFM，可依赖 markdown 高亮/目录）。`engine/reading` 按 sourceId 与 `blobKind` 组合。html / markdown / huawei 互不 import github。  
 > 层名：Windows 桌面 `View → store → IPC → domain`。
 
 调研原文在知识库 `research/by-stack/frontend/`（源码在 `%TEMP%\YoAgentResearch\`，不进本仓）。
@@ -117,7 +117,7 @@ flowchart LR
 | 标题尺 | 36/24/20/16、无下划线 | 独立阶（见下），无 GitHub 底边 |
 | TOC | 禁止出现在 iframe | 禁止出现在 article 内 |
 
-禁止：`.yo-md` 与 `.y-content` 互相 import；禁止 github-markdown-css / Infima / `.vp-doc` / `.md-typeset` 进任一表面。
+禁止：`.yo-md` 与 `.y-content` 互相 import；禁止 Infima / `.vp-doc` / `.md-typeset` 进华为或通用表面。`github-markdown-css` 只挂 GitHub 的 `.markdown-body`，不进 `.yo-md` / `.y-content`。
 
 ## 自底而上：块规范
 
@@ -224,7 +224,7 @@ yohu-md-huawei    华为 HTML→MD 方言。不渲染。
 
 ## 不引入
 
-- Infima、github-markdown-css、`.vp-doc`、`.md-typeset`、MDX
+- Infima、`.vp-doc`、`.md-typeset`、MDX（`github-markdown-css` 仅 GitHub `.markdown-body`）
 - MathJax 全家桶、KaTeX `trust: true`、进程级 macros
 - 全量 `import 'shiki'` / Twoslash / Monaco
 - 网页 iframe 内第二份 TOC / 频道栏 / 专栏
