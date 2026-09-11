@@ -94,6 +94,27 @@ export interface SystemInfo {
   libraryRoot: string;
 }
 
+export interface SyncItem {
+  file: string;
+  url: string;
+  slug: string;
+  catalog: string;
+  status: string;
+  localTime?: string | null;
+  officialTime?: string | null;
+  title?: string;
+  treeParts?: string[];
+}
+
+export interface SyncReport {
+  planned: number;
+  updated: number;
+  created: number;
+  markedOffline: number;
+  failed: number;
+  items: SyncItem[];
+}
+
 // ── 事件 ──
 
 export interface SettingsChangedEvent {

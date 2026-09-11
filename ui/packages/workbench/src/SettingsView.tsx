@@ -3,6 +3,7 @@ import { createEffect, createSignal, For, Show } from "solid-js";
 import {
   dialogPickFolder,
   DISPLAY_NAME,
+  librarySync,
   systemInfo,
   type AppSettings,
   type SystemInfo,
@@ -77,6 +78,8 @@ function SettingsForm(props: { session: SettingsSession }) {
   const [concurrency, setConcurrency] = createSignal("4");
   const [hydrated, setHydrated] = createSignal(false);
   const [about, setAbout] = createSignal<SystemInfo | null>(null);
+  const [syncing, setSyncing] = createSignal(false);
+  const [syncNote, setSyncNote] = createSignal("");
 
   createEffect(() => {
     const current = props.session.settings();
@@ -97,6 +100,21 @@ function SettingsForm(props: { session: SettingsSession }) {
     if (!path) return;
     setLibraryRoot(path);
     void props.session.patch({ libraryRoot: path });
+  };
+
+  const runLibrarySync = async () => {
+    setSyncing(true);
+    setSyncNote("");
+    try {
+      const report = await librarySync(["开发", "设计"]);
+      setSyncNote(
+        `计划 ${report.planned}：更新 ${report.updated}，新增 ${report.created}，下线 ${report.markedOffline}，失败 ${report.failed}`,
+      );
+    } catch (err) {
+      setSyncNote(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const commitLibrary = () => {
@@ -226,6 +244,28 @@ function SettingsForm(props: { session: SettingsSession }) {
                       </div>
                     </div>
                     <p class="yo-settings__note">失焦或回车即保存。当前会话仍使用启动时的库根。</p>
+                  </section>
+                  <section class="yo-settings__group" aria-label="对照官网更新">
+                    <div class="yo-settings__item yo-settings__item--stack">
+                      <div class="yo-settings__item-text">
+                        <div class="yo-settings__item-label">全量更新开发 / 设计</div>
+                        <div class="yo-settings__item-help">
+                          用本应用的拉取与转换引擎对照官网：过时重写、新篇落盘、下线只打标记不删。库根须指向文档树。
+                        </div>
+                      </div>
+                      <div class="yo-settings__item-control">
+                        <YoButton
+                          kind="secondary"
+                          disabled={syncing()}
+                          onClick={() => void runLibrarySync()}
+                        >
+                          <span>{syncing() ? "正在更新…" : "全量更新"}</span>
+                        </YoButton>
+                      </div>
+                    </div>
+                    <Show when={syncNote()}>
+                      <p class="yo-settings__note">{syncNote()}</p>
+                    </Show>
                   </section>
                 </Show>
 

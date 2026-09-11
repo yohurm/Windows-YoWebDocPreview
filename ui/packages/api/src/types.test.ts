@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { EVENT_NAMES } from "./events";
 import { DISPLAY_NAME, PRODUCT_NAME } from "./identity";
-import type { AgentDocument, AppSettings, DocMeta } from "./types";
+import type { AgentDocument, AppSettings, DocMeta, SyncReport } from "./types";
 
 describe("EVENT_NAMES", () => {
   it("uses slash layering, never dots", () => {
@@ -76,5 +76,20 @@ describe("wire contract", () => {
     const s = JSON.parse(raw) as AppSettings;
     expect(s.requestTimeoutSec).toBe(15);
     expect(s.theme).toBe("system");
+  });
+
+  it("SyncReport JSON uses camelCase keys", () => {
+    const raw = `{
+      "planned": 2, "updated": 1, "created": 1, "markedOffline": 0, "failed": 0,
+      "items": [{
+        "file": "开发/指南/x.md", "url": "https://developer.huawei.com/x",
+        "slug": "x", "catalog": "harmonyos-guides", "status": "UPDATE",
+        "localTime": "2026-01-01 00:00:00", "officialTime": "2026-02-01 00:00:00",
+        "title": "X", "treeParts": []
+      }]
+    }`;
+    const r = JSON.parse(raw) as SyncReport;
+    expect(r.markedOffline).toBe(0);
+    expect(r.items[0]?.treeParts).toEqual([]);
   });
 });
