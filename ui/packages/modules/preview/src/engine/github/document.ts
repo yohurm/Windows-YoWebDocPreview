@@ -1,5 +1,6 @@
-import type { DocMeta } from "@yohu/api";
+import type { BlobKind, DocMeta } from "@yohu/api";
 
+import { githubTooLargeNote } from "../../githubSource";
 import githubMarkdownCss from "./github-markdown.css?raw";
 import { rewriteGithubHtmlAssets } from "./assets";
 import { renderGithubCode, renderGithubImage, renderGithubNote } from "./code";
@@ -11,7 +12,7 @@ export interface RenderGithubOptions {
 }
 
 export function parseGithubArticle(markdown: string, _pageTitle = "", meta: DocMeta | null = null) {
-  const kind = meta?.blobKind || "markdown";
+  const kind: BlobKind = meta?.blobKind || "markdown";
   const path = meta?.docRef.slug ?? "";
   if (kind === "code") {
     return { html: renderGithubCode(markdown, path), toc: [] };
@@ -23,7 +24,7 @@ export function parseGithubArticle(markdown: string, _pageTitle = "", meta: DocM
     return { html: renderGithubNote("该文件是二进制，无法在预览中打开。"), toc: [] };
   }
   if (kind === "tooLarge") {
-    return { html: renderGithubNote("文件超过 1MB，不在应用内预览。"), toc: [] };
+    return { html: renderGithubNote(githubTooLargeNote()), toc: [] };
   }
   const parsed = parseGithubGfm(markdown);
   return { html: rewriteGithubHtmlAssets(parsed.html, meta), toc: parsed.toc };
@@ -61,6 +62,7 @@ export function buildGithubDocument(options: RenderGithubOptions): string {
 </html>`;
 }
 
+/** GitHub 网页表面跟 github-markdown.css，色板留在 iframe 内，不跟宿主 YoUI token 混用。 */
 const FRAME_CHROME = `
 html, body { height: 100%; margin: 0; }
 .y-scroll { height: 100%; overflow: auto; }

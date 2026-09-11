@@ -7,8 +7,8 @@ mod doc;
 mod library;
 mod task;
 
-pub use doc::{CatalogNode, DocMeta, DocRef, FetchChannel, RawDoc};
-pub use library::{BatchEntry, ImportListResult, LibraryEntry, TreeNode, UpdateStatus};
+pub use doc::{BlobKind, CatalogNode, DocMeta, DocRef, FetchChannel, RawDoc};
+pub use library::{BatchEntry, ImportListResult, LibraryEntry, TreeNode};
 pub use task::{TaskError, TaskProgress, TaskState, TaskSummary};
 
 pub use crate::settings::AppSettings;

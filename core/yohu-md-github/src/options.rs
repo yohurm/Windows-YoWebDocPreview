@@ -19,7 +19,6 @@ impl GithubConvertOptions {
             update_time: self.update_time.clone(),
             source_url: self.source_url.clone(),
             image_map: Default::default(),
-            device_types: Vec::new(),
             base_url: None,
         }
     }

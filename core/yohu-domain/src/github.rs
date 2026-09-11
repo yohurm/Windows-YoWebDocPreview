@@ -5,7 +5,7 @@
 use std::sync::OnceLock;
 
 use serde::Deserialize;
-use yohu_protocol::DocRef;
+use yohu_protocol::{BlobKind, DocRef};
 
 const GITHUB_SOURCE_JSON: &str = include_str!("../../../testdata/github-source.json");
 
@@ -103,13 +103,13 @@ pub fn is_github_image_path(path: &str) -> bool {
 }
 
 /// 仓库 blob 分型（路径契约，零 IO）。
-pub fn classify_github_blob(path: &str) -> &'static str {
+pub fn classify_github_blob(path: &str) -> BlobKind {
     if is_github_doc_path(path) {
-        "markdown"
+        BlobKind::Markdown
     } else if is_github_image_path(path) {
-        "image"
+        BlobKind::Image
     } else {
-        "code"
+        BlobKind::Code
     }
 }
 
@@ -196,6 +196,15 @@ impl GithubLoc {
     pub fn catalog(&self) -> String {
         format!("{}/{}", self.owner, self.repo)
     }
+}
+
+/// `owner/repo` 专栏坐标。禁止把 git ref 按 `/` 切开；这里只拆两段。
+pub fn parse_github_catalog(catalog: &str) -> Option<(String, String)> {
+    let (owner, repo) = catalog.split_once('/')?;
+    if owner.is_empty() || repo.is_empty() || repo.contains('/') {
+        return None;
+    }
+    Some((owner.to_string(), repo.to_string()))
 }
 
 fn strip_url(url: &str) -> &str {
@@ -454,6 +463,16 @@ mod tests {
         let fixed = apply_known_ref(parsed, "release/v3.8.51");
         assert_eq!(fixed.git_ref.as_deref(), Some("release/v3.8.51"));
         assert_eq!(fixed.path, "README.md");
+    }
+
+    #[test]
+    fn parse_github_catalog_is_two_segments() {
+        assert_eq!(
+            parse_github_catalog("yohurm/Windows-YoWebDocPreview"),
+            Some(("yohurm".into(), "Windows-YoWebDocPreview".into()))
+        );
+        assert!(parse_github_catalog("only-owner").is_none());
+        assert!(parse_github_catalog("a/b/c").is_none());
     }
 
     #[test]

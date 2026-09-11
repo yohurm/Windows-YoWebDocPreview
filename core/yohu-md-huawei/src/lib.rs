@@ -26,6 +26,7 @@ pub fn html_to_markdown(html: &str, opts: &HuaweiConvertOptions) -> String {
         &opts.to_inner(),
         &HuaweiDialect {
             catalog: opts.catalog.clone(),
+            device_types: opts.device_types.clone(),
         },
     )
 }

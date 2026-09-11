@@ -3,7 +3,7 @@
 //! - 并发受 `concurrency` 限制（复用 HttpClient 信号量语义，本地 worker 池）；
 //! - `CancellationToken` 可取消；
 //! - 断点续跑：`.check_progress.json` 每 100 条持久化，`resume` 跳过已处理条目；
-//! - generic-web 条目（catalog=="web"）跳过（无官方时间可查）。
+//! - 只检查华为文档（probe_meta 走华为 API）；GitHub / generic-web 跳过。
 
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -69,10 +69,13 @@ pub async fn run_check(
     let resume_keys: std::collections::HashSet<String> =
         prog.processed.iter().cloned().collect();
 
-    // 目标条目：跳过 generic-web；断点续跑时跳过已完成
+    // 只检查华为文档：probe_meta 走华为 API。GitHub / generic-web 不进清单。
     let candidates: Vec<_> = entries
         .into_iter()
-        .filter(|e| e.catalog != "web" && !e.slug.is_empty())
+        .filter(|e| {
+            !e.slug.is_empty()
+                && yohu_domain::is_huawei_source(&yohu_domain::parse_url(&e.url).source_id)
+        })
         .collect();
 
     let done = Arc::new(AtomicU32::new(0));

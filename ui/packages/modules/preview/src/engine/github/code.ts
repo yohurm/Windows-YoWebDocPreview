@@ -1,5 +1,5 @@
 import { highlightSource } from "../markdown/highlight";
-import { githubRawUrl, parseGithub } from "../../githubSource";
+import { githubRawUrl, githubRepoFromMeta } from "../../githubSource";
 import type { DocMeta } from "@yohu/api";
 
 export function languageFromPath(path: string): string {
@@ -14,15 +14,11 @@ export function renderGithubCode(text: string, path: string): string {
 }
 
 export function renderGithubImage(meta: DocMeta | null, title: string): string {
-  const loc = meta ? parseGithub(meta.sourceUrl || meta.docRef.url) : null;
-  const owner = loc?.owner ?? meta?.docRef.catalog?.split("/")[0];
-  const repo = loc?.repo ?? meta?.docRef.catalog?.split("/")[1];
-  const gitRef = meta?.docRef.gitRef || loc?.gitRef;
-  const path = meta?.docRef.slug || loc?.path || "";
-  if (!owner || !repo || !gitRef || !path) {
+  const repo = githubRepoFromMeta(meta);
+  if (!repo || !repo.path) {
     return `<p class="y-blob-note">${escapeHtml(title || "图片")}</p>`;
   }
-  const src = githubRawUrl(owner, repo, gitRef, path);
+  const src = githubRawUrl(repo.owner, repo.repo, repo.gitRef, repo.path);
   return `<p class="y-blob-image"><img src="${escapeHtml(src)}" alt="${escapeHtml(title)}"></p>`;
 }
 

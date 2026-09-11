@@ -56,5 +56,3 @@ export const descriptor = {
   title: DISPLAY_NAME,
   Component: PreviewView,
 };
-
-export default PreviewView;

@@ -102,4 +102,24 @@ describe("documentCrumbs", () => {
       )
     ).toEqual(["指南", "基础入门", "学习ArkTS语言", "ArkTS语言介绍"]);
   });
+
+  it("uses owner/repo and path ancestors for GitHub files", () => {
+    expect(
+      documentCrumbs({
+        docRef: {
+          sourceId: "github-repo",
+          catalog: "o/r",
+          slug: "docs/guide.md",
+          url: "https://github.com/o/r/blob/main/docs/guide.md",
+          gitRef: "main",
+        },
+        title: "Guide",
+        updateTime: null,
+        sourceUrl: "https://github.com/o/r/blob/main/docs/guide.md",
+        channel: "adapter",
+        deviceTypes: [],
+        blobKind: "markdown",
+      })
+    ).toEqual(["o/r", "docs", "Guide"]);
+  });
 });

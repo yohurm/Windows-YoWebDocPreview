@@ -5,6 +5,7 @@ const DISPLAY_NAMES = Object.fromEntries(table.catalogs.map((c) => [c.id, c.disp
 
 export const HUAWEI_DOC_PREFIX = table.prefix;
 export const HUAWEI_SOURCE_ID = table.sourceId;
+export const HUAWEI_BRAND = table.brand;
 
 export function isHuaweiSource(sourceId?: string | null): boolean {
   return sourceId === HUAWEI_SOURCE_ID;

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   catalogDisplayName,
   catalogIdFromUrl,
+  HUAWEI_BRAND,
   HUAWEI_CHANNELS,
   HUAWEI_DOC_PREFIX,
   HUAWEI_SOURCE_ID,
@@ -28,6 +29,7 @@ describe("huaweiCatalog", () => {
 
   it("reads source identity from the same catalog table", () => {
     expect(HUAWEI_SOURCE_ID).toBe("huawei-harmonyos");
+    expect(HUAWEI_BRAND).toBe("HarmonyOS");
     expect(isHuaweiSource(HUAWEI_SOURCE_ID)).toBe(true);
     expect(isHuaweiSource("generic-web")).toBe(false);
   });

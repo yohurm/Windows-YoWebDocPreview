@@ -32,7 +32,7 @@ yohu-library::convert           按 sourceId 选引擎；code 预览为原文，
 
 `DocRef.git_ref` 回写提交 SHA。专栏点击与懒展开用 SHA 拼 blob/tree。
 
-`RawDoc.blob_kind` + `text` 承载非 Markdown；`html` 仍为空。禁止把源码塞进假 Markdown 围栏再当文档渲染。
+`RawDoc.blob_kind` 为 `protocol::BlobKind`（markdown / code / image / binary / tooLarge；HTML 源为 `None`）+ `text` 承载非 Markdown；`html` 仍为空。禁止把源码塞进假 Markdown 围栏再当文档渲染。预览图/二进制由 UI 按枚举画，convert 预览不编用户文案。
 
 不引入：GitHub token 设置、gist、wiki、docs.github.com、recursive `git/trees?recursive=1` 整仓树。
 

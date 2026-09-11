@@ -21,6 +21,7 @@ struct HuaweiCatalogTable {
     prefix: String,
     #[serde(rename = "sourceId")]
     source_id: String,
+    brand: String,
     catalogs: Vec<HuaweiCatalog>,
     channels: Vec<HuaweiChannel>,
 }
@@ -56,6 +57,10 @@ pub fn huawei_doc_prefix() -> &'static str {
 
 pub fn huawei_source_id() -> &'static str {
     catalog_table().source_id.as_str()
+}
+
+pub fn huawei_brand() -> &'static str {
+    catalog_table().brand.as_str()
 }
 
 pub fn is_huawei_source(source_id: &str) -> bool {
@@ -275,6 +280,7 @@ mod tests {
             "https://developer.huawei.com/consumer/cn/doc/"
         );
         assert_eq!(huawei_source_id(), "huawei-harmonyos");
+        assert_eq!(huawei_brand(), "HarmonyOS");
         assert_eq!(huawei_doc_origin(), "https://developer.huawei.com");
         assert!(is_huawei_source(huawei_source_id()));
         assert!(!is_huawei_source(GENERIC_WEB_SOURCE_ID));

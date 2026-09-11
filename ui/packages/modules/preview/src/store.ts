@@ -19,11 +19,10 @@ import {
 } from "./catalogTree";
 import { resolveContentHref, type ContentHref } from "./contentHref";
 import { documentCrumbs } from "./documentCrumbs";
-import { parseGithubArticle } from "./engine/github";
-import { githubCatalogIdFromUrl, githubTreeUrl, isGithubSource, parseGithub } from "./githubSource";
+import { githubEmptyDirUrl, hydrateGithubTree } from "./githubCatalog";
+import { githubCatalogIdFromUrl } from "./githubSource";
 import { catalogIdFromUrl } from "./huaweiCatalog";
-import { parseReadingArticle } from "./engine/reading";
-import { parseMarkdown } from "./engine/markdown";
+import { parseMarkdownArticle, parseReadingArticle } from "./engine/reading";
 import type { DocMeta } from "@yohu/api";
 import {
   createEmptyDocSession,
@@ -44,9 +43,14 @@ export function createPreviewStore() {
   const catalogCache = new Map<string, CatalogNode[]>();
   let openGen = 0;
 
-  const hasDoc = createMemo(
-    () => Boolean(session().url && session().meta && (session().rawHtml || session().markdownText || session().meta.blobKind))
-  );
+  const hasDoc = createMemo(() => {
+    const current = session();
+    return Boolean(
+      current.url &&
+        current.meta &&
+        (current.rawHtml || current.markdownText || current.meta.blobKind)
+    );
+  });
   const currentSlug = createMemo(() => session().meta?.docRef?.slug);
   const docCrumbs = createMemo(() => documentCrumbs(session().meta, session().catalogNodes));
   const tocItems = createMemo(() =>
@@ -70,37 +74,6 @@ export function createPreviewStore() {
     });
   };
 
-  const githubDirUrl = (dirPath: string, meta: DocMeta | null): string | null => {
-    if (!meta || !isGithubSource(meta.docRef.sourceId)) return null;
-    const loc = parseGithub(meta.sourceUrl || meta.docRef.url);
-    const owner = loc?.owner ?? meta.docRef.catalog?.split("/")[0];
-    const repo = loc?.repo ?? meta.docRef.catalog?.split("/")[1];
-    const gitRef = meta.docRef.gitRef || loc?.gitRef;
-    if (!owner || !repo || !gitRef) return null;
-    return githubTreeUrl(owner, repo, gitRef, dirPath);
-  };
-
-  const hydrateGithubTree = async (
-    tree: CatalogNode[],
-    slug: string | undefined,
-    meta: DocMeta | null,
-    gen: number
-  ): Promise<CatalogNode[]> => {
-    if (!meta || !isGithubSource(meta.docRef.sourceId) || !slug) return tree;
-    let next = tree;
-    for (const id of filePathAncestorIds(slug)) {
-      const node = findCatalogNode(next, id);
-      if (!node || node.isLeaf !== false) break;
-      if ((node.children?.length ?? 0) > 0) continue;
-      const url = githubDirUrl(id, meta);
-      if (!url) break;
-      const children = (await docCatalog(url)) || [];
-      if (gen !== openGen) return next;
-      next = replaceCatalogChildren(next, id, children);
-    }
-    return next;
-  };
-
   const loadCatalog = async (
     targetUrl: string,
     catalogId: string,
@@ -120,7 +93,7 @@ export function createPreviewStore() {
       }
     }
     if (gen !== openGen || !tree) return;
-    tree = await hydrateGithubTree(tree, slug, meta, gen);
+    tree = await hydrateGithubTree(tree, slug, meta, async (url) => (await docCatalog(url)) || [], () => gen === openGen);
     if (gen !== openGen) return;
     catalogCache.set(catalogId, tree);
     const nextExpanded = new Set<string>();
@@ -188,9 +161,11 @@ export function createPreviewStore() {
         targetCat === session().catalogId &&
         session().catalogNodes.length > 0;
 
-      const markdown = isGithubSource(fetchedMeta.docRef?.sourceId)
-        ? parseGithubArticle(fetchedMd, fetchedMeta.title ?? "", fetchedMeta)
-        : parseMarkdown(fetchedMd);
+      const markdown = parseMarkdownArticle(
+        fetchedMd,
+        fetchedMeta.title ?? "",
+        fetchedMeta
+      );
       const web = parseReadingArticle(
         fetchedHtml,
         fetchedMeta.title ?? "",
@@ -220,10 +195,9 @@ export function createPreviewStore() {
       });
 
       if (targetCat) {
-        if (!treeReady) {
-          void loadCatalog(rawUrl, targetCat, targetSlug, gen, fetchedMeta);
-        } else {
+        if (treeReady) {
           applyExpandedForSlug(session().catalogNodes, targetSlug);
+        } else {
           void loadCatalog(rawUrl, targetCat, targetSlug, gen, fetchedMeta);
         }
       }
@@ -272,7 +246,7 @@ export function createPreviewStore() {
     const current = session();
     const node = findCatalogNode(current.catalogNodes, nodeId);
     if (!node || node.isLeaf !== false || (node.children?.length ?? 0) > 0) return;
-    const url = githubDirUrl(nodeId, current.meta);
+    const url = githubEmptyDirUrl(node, current.meta);
     if (!url) return;
     const gen = openGen;
     void (async () => {

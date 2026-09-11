@@ -1,6 +1,5 @@
 use regex::Regex;
 use std::sync::LazyLock;
-use yohu_md_convert::ConvertOptions;
 
 const DEVICE_MAP: &[(&str, &str)] = &[
     ("phone", "Phone"),
@@ -32,9 +31,9 @@ pub fn extract_device_line(html: &str) -> String {
         .unwrap_or_default()
 }
 
-pub fn extra_header(html: &str, opts: &ConvertOptions) -> String {
-    if !opts.device_types.is_empty() {
-        format!("**支持设备：** {}", opts.device_types.join(" | "))
+pub fn extra_header(html: &str, device_types: &[String]) -> String {
+    if !device_types.is_empty() {
+        format!("**支持设备：** {}", device_types.join(" | "))
     } else {
         extract_device_line(html)
     }

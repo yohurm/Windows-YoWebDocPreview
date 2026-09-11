@@ -45,16 +45,6 @@ impl AdapterRegistry {
         }
     }
 
-    /// 获取 generic-web 兜底适配器引用
-    pub fn generic(&self) -> &dyn SourceAdapter {
-        for a in &self.adapters {
-            if a.id() == yohu_domain::GENERIC_WEB_SOURCE_ID {
-                return a.as_ref();
-            }
-        }
-        unreachable!("generic-web adapter matches all urls");
-    }
-
     /// 路由：返回 (adapter, doc_ref)。generic-web 的 match_url 恒 Some，故必有结果。
     pub fn route(&self, url: &str) -> (&dyn SourceAdapter, DocRef) {
         for a in &self.adapters {

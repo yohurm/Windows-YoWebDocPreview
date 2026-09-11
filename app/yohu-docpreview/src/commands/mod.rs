@@ -32,3 +32,8 @@ pub fn ipc_source(e: yohu_source::SourceError) -> IpcError {
     };
     IpcError::new(code, e.to_string())
 }
+
+/// library 错误 → IPC。
+pub fn ipc_library(e: yohu_library::LibraryError) -> IpcError {
+    IpcError::new(e.code(), e.to_string())
+}

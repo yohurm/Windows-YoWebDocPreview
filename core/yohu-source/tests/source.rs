@@ -88,6 +88,28 @@ async fn not_found_maps_to_error() {
     let err = yohu_source::fetch_any(&reg, &client(), &url).await.unwrap_err();
     assert_eq!(err.code(), "NOT_FOUND");
 }
+
+#[tokio::test]
+async fn dedicated_adapter_failure_does_not_scrape_generic_web() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .respond_with(ResponseTemplate::new(500).set_body_string("boom"))
+        .mount(&server)
+        .await;
+
+    let _guard = ENV_LOCK.lock().unwrap();
+    std::env::set_var("YOHU_DOC_API_URL", format!("{}/api", server.uri()));
+    let err = yohu_source::fetch_any(
+        &AdapterRegistry::with_defaults(),
+        &client(),
+        "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/test-slug",
+    )
+    .await
+    .unwrap_err();
+    std::env::remove_var("YOHU_DOC_API_URL");
+
+    assert_eq!(err.code(), "API", "{err}");
+}
 #[tokio::test]
 async fn probe_meta_reads_title_and_time() {
     let server = MockServer::start().await;
@@ -176,7 +198,7 @@ async fn github_adapter_fetches_readme_markdown() {
     assert!(raw.html.is_empty());
     assert_eq!(raw.markdown.as_deref(), Some("# Hello\n\nbody"));
     assert_eq!(raw.source_path.as_deref(), Some("README.md"));
-    assert_eq!(raw.blob_kind, "markdown");
+    assert_eq!(raw.blob_kind, Some(yohu_protocol::BlobKind::Markdown));
     assert!(raw.text.is_none());
 }
 
@@ -213,7 +235,7 @@ async fn github_adapter_opens_repo_root_without_readme() {
     let (meta, raw) = result.unwrap();
     assert_eq!(meta.doc_ref.slug, "");
     assert_eq!(meta.doc_ref.git_ref.as_deref(), Some(SHA));
-    assert_eq!(raw.blob_kind, "markdown");
+    assert_eq!(raw.blob_kind, Some(yohu_protocol::BlobKind::Markdown));
     assert!(
         raw.markdown.as_deref().unwrap_or("").contains("没有 README"),
         "{:?}",
@@ -345,8 +367,8 @@ async fn github_adapter_fetches_source_as_code_blob() {
     std::env::remove_var("YOHU_GITHUB_RAW_URL");
 
     let (meta, raw) = result.unwrap();
-    assert_eq!(raw.blob_kind, "code");
-    assert_eq!(meta.blob_kind, "code");
+    assert_eq!(raw.blob_kind, Some(yohu_protocol::BlobKind::Code));
+    assert_eq!(meta.blob_kind, Some(yohu_protocol::BlobKind::Code));
     assert_eq!(raw.text.as_deref(), Some("fn main() {}\n"));
     assert!(raw.markdown.is_none());
     assert_eq!(raw.source_path.as_deref(), Some("src/lib.rs"));

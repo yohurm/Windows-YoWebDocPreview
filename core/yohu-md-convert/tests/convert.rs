@@ -10,7 +10,6 @@ fn opts(title: &str) -> ConvertOptions {
         update_time: Some("2026-05-26 06:48:54".into()),
         source_url: "https://blog.example.com/posts/1".into(),
         image_map: HashMap::new(),
-        device_types: vec![],
         base_url: None,
     }
 }

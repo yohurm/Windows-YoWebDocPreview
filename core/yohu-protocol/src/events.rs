@@ -39,11 +39,6 @@ impl AppEvent {
             AppEvent::SettingsChanged { .. } => SETTINGS_CHANGED,
         }
     }
-
-    /// 是否属于可丢的聚合类事件（总线 200ms 聚合器据此分流）
-    pub fn is_droppable(&self) -> bool {
-        matches!(self, AppEvent::TaskProgress(_))
-    }
 }
 
 #[cfg(test)]
@@ -84,8 +79,5 @@ mod tests {
         assert_eq!(events[1].name(), "task/done");
         assert_eq!(events[2].name(), "task/error");
         assert_eq!(events[3].name(), "settings/changed");
-        assert!(events[0].is_droppable());
-        assert!(!events[1].is_droppable());
-        assert!(!events[3].is_droppable());
     }
 }

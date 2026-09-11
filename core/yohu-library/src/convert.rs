@@ -1,9 +1,13 @@
 //! 转换编排：按 `source_id` 选引擎。壳与 store 只走这里，禁止各自 if 方言。
 
 use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 
-use yohu_domain::{apply_known_ref, parse_github, GithubLoc};
-use yohu_protocol::{DocMeta, RawDoc};
+use yohu_domain::{apply_known_ref, parse_github, parse_github_catalog, safe_stem, GithubLoc};
+use yohu_protocol::{BlobKind, DocMeta, RawDoc};
+use yohu_runtime::atomic_write;
+
+use crate::error::LibraryError;
 
 pub fn convert_document(
     meta: &DocMeta,
@@ -12,25 +16,7 @@ pub fn convert_document(
     image_map: HashMap<String, String>,
 ) -> String {
     if yohu_domain::is_github_source(&meta.doc_ref.source_id) {
-        let opts = github_opts(meta, page_url);
-        if raw.blob_kind == "code" {
-            return raw.text.clone().unwrap_or_default();
-        }
-        if raw.blob_kind == "image" {
-            return format!(
-                "![{}]({})\n",
-                meta.title,
-                yohu_domain::github_raw_url(&opts.owner, &opts.repo, &opts.git_ref, &opts.path)
-            );
-        }
-        if raw.blob_kind == "binary" {
-            return "该文件是二进制，无法在预览中打开。\n".into();
-        }
-        if raw.blob_kind == "tooLarge" {
-            return "文件超过 1MB，不在应用内预览。\n".into();
-        }
-        let md = raw.markdown.as_deref().unwrap_or("");
-        return yohu_md_github::markdown_to_document(md, &opts);
+        return convert_github_preview(meta, raw, page_url);
     }
     if yohu_domain::is_huawei_source(&meta.doc_ref.source_id) {
         return yohu_md_huawei::html_to_markdown(
@@ -52,10 +38,21 @@ pub fn convert_document(
             update_time: meta.update_time.clone(),
             source_url: page_url.to_string(),
             image_map,
-            device_types: meta.device_types.clone(),
             base_url: Some(page_url.to_string()),
         },
     )
+}
+
+/// 预览正文：代码给原文；图/二进制由 UI 按 `blobKind` 画，这里不编用户文案。
+fn convert_github_preview(meta: &DocMeta, raw: &RawDoc, page_url: &str) -> String {
+    match raw.blob_kind {
+        Some(BlobKind::Code) => raw.text.clone().unwrap_or_default(),
+        Some(BlobKind::Image | BlobKind::Binary | BlobKind::TooLarge) => String::new(),
+        Some(BlobKind::Markdown) | None => {
+            let md = raw.markdown.as_deref().unwrap_or("");
+            yohu_md_github::markdown_to_document(md, &github_opts(meta, page_url))
+        }
+    }
 }
 
 pub fn export_document(
@@ -64,19 +61,39 @@ pub fn export_document(
     page_url: &str,
     image_map: HashMap<String, String>,
 ) -> String {
-    let body = convert_document(meta, raw, page_url, image_map);
     if yohu_domain::is_github_source(&meta.doc_ref.source_id) {
         let opts = github_opts(meta, page_url);
-        let body = if raw.blob_kind == "code" {
-            let ext = file_ext(&meta.doc_ref.slug);
-            format!("```{ext}\n{body}\n```\n")
-        } else {
-            body
+        let body = match raw.blob_kind {
+            Some(BlobKind::Code) => {
+                let ext = file_ext(&meta.doc_ref.slug);
+                let text = raw.text.clone().unwrap_or_default();
+                format!("```{ext}\n{text}\n```\n")
+            }
+            Some(BlobKind::Image) => format!(
+                "![{}]({})\n",
+                meta.title,
+                yohu_domain::github_raw_url(&opts.owner, &opts.repo, &opts.git_ref, &opts.path)
+            ),
+            Some(BlobKind::Binary | BlobKind::TooLarge) => String::new(),
+            Some(BlobKind::Markdown) | None => convert_github_preview(meta, raw, page_url),
         };
-        yohu_md_github::with_export_header(&body, &opts)
-    } else {
-        body
+        return yohu_md_github::with_export_header(&body, &opts);
     }
+    convert_document(meta, raw, page_url, image_map)
+}
+
+/// 预览导出：写一篇 Markdown，不改 manifest、不拉图。
+pub fn export_to_dir(
+    dest_dir: &Path,
+    meta: &DocMeta,
+    raw: &RawDoc,
+    page_url: &str,
+) -> Result<PathBuf, LibraryError> {
+    std::fs::create_dir_all(dest_dir)?;
+    let md_path = dest_dir.join(format!("{}.md", safe_stem(&meta.title)));
+    let md = export_document(meta, raw, page_url, HashMap::new());
+    atomic_write(&md_path, md)?;
+    Ok(md_path)
 }
 
 pub fn convert_html(
@@ -94,7 +111,7 @@ pub fn convert_html(
             markdown: None,
             source_path: None,
             source_ref: None,
-            blob_kind: String::new(),
+            blob_kind: None,
             text: None,
             device_types: meta.device_types.clone(),
         },
@@ -141,11 +158,11 @@ fn loc_from_meta(meta: &DocMeta) -> GithubLoc {
         .doc_ref
         .catalog
         .as_deref()
-        .and_then(|c| c.split_once('/'))
-        .unwrap_or(("", ""));
+        .and_then(parse_github_catalog)
+        .unwrap_or_else(|| (String::new(), String::new()));
     GithubLoc {
-        owner: owner.into(),
-        repo: repo.into(),
+        owner,
+        repo,
         git_ref: meta.doc_ref.git_ref.clone(),
         path: meta.doc_ref.slug.clone(),
     }
@@ -163,7 +180,7 @@ mod tests {
             source_url: "https://example.com/x".into(),
             channel: FetchChannel::GenericWeb,
             device_types: vec![],
-            blob_kind: String::new(),
+            blob_kind: None,
             doc_ref: DocRef {
                 source_id: source_id.into(),
                 catalog: Some("harmonyos-guides".into()),
@@ -209,7 +226,7 @@ mod tests {
             markdown: Some("# Guide\n\nSee [x](./x.md)".into()),
             source_path: Some("docs/guide.md".into()),
             source_ref: None,
-            blob_kind: "markdown".into(),
+            blob_kind: Some(BlobKind::Markdown),
             text: None,
             device_types: vec![],
         };
@@ -229,6 +246,7 @@ mod tests {
             Default::default(),
         );
         assert!(exported.contains("来源：https://github.com/o/r/blob/main/docs/guide.md"));
+        assert_eq!(exported.matches("# Guide").count(), 1);
     }
 
     #[test]
@@ -236,11 +254,11 @@ mod tests {
         let mut m = meta(yohu_domain::github_source_id());
         m.doc_ref.catalog = Some("o/r".into());
         m.doc_ref.slug = "src/lib.rs".into();
-        m.blob_kind = "code".into();
+        m.blob_kind = Some(BlobKind::Code);
         m.title = "lib.rs".into();
         let raw = RawDoc {
             title: "lib.rs".into(),
-            blob_kind: "code".into(),
+            blob_kind: Some(BlobKind::Code),
             text: Some("fn main() {}\n".into()),
             ..RawDoc::default()
         };
@@ -258,5 +276,24 @@ mod tests {
             Default::default(),
         );
         assert!(exported.contains("```rs\nfn main() {}\n\n```"), "{exported}");
+    }
+
+    #[test]
+    fn github_binary_preview_leaves_presentation_to_ui() {
+        let mut m = meta(yohu_domain::github_source_id());
+        m.doc_ref.catalog = Some("o/r".into());
+        m.doc_ref.slug = "a.bin".into();
+        m.blob_kind = Some(BlobKind::Binary);
+        let raw = RawDoc {
+            blob_kind: Some(BlobKind::Binary),
+            ..RawDoc::default()
+        };
+        let preview = convert_document(
+            &m,
+            &raw,
+            "https://github.com/o/r/blob/main/a.bin",
+            Default::default(),
+        );
+        assert!(preview.is_empty());
     }
 }

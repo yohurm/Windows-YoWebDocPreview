@@ -9,12 +9,6 @@ pub fn normalize_time(t: &str) -> &str {
     if t.len() >= 19 { &t[..19] } else { t }
 }
 
-/// 对比本地与官方时间：不同则需更新。
-/// 本地缺失视为 NEW；官方缺失无法判定 → false。
-pub fn needs_update(local: Option<&str>, official: Option<&str>) -> bool {
-    matches!(classify(local, official), UpdateKind::New | UpdateKind::Update)
-}
-
 /// 判定结果分类
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UpdateKind {
@@ -74,7 +68,9 @@ mod tests {
             classify(Some("2026-04-30 02:41:24"), Some("2026-05-26 06:48:54")),
             UpdateKind::Update
         );
-        assert!(needs_update(Some("2026-04-30 02:41:24"), Some("2026-05-26 06:48:54")));
-        assert!(!needs_update(Some("2026-05-26 06:48:54"), Some("2026-05-26 06:48:54 CST")));
+        assert_eq!(
+            classify(Some("2026-05-26 06:48:54"), Some("2026-05-26 06:48:54 CST")),
+            UpdateKind::Unchanged
+        );
     }
 }

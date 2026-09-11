@@ -47,7 +47,7 @@ impl SourceAdapter for GenericWebAdapter {
             markdown: None,
             source_path: None,
             source_ref: None,
-            blob_kind: String::new(),
+            blob_kind: None,
             text: None,
             device_types: Vec::new(),
         })

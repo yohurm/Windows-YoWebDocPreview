@@ -10,6 +10,7 @@ use crate::postprocess;
 
 pub struct HuaweiDialect {
     pub catalog: Option<String>,
+    pub device_types: Vec<String>,
 }
 
 impl ConvertDialect for HuaweiDialect {
@@ -70,7 +71,7 @@ impl ConvertDialect for HuaweiDialect {
         }
     }
 
-    fn extra_header(&self, html: &str, opts: &ConvertOptions) -> String {
-        devices::extra_header(html, opts)
+    fn extra_header(&self, html: &str, _opts: &ConvertOptions) -> String {
+        devices::extra_header(html, &self.device_types)
     }
 }

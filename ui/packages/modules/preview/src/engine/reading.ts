@@ -2,11 +2,23 @@ import type { CatalogNode, DocMeta } from "@yohu/api";
 
 import { isGithubSource } from "../githubSource";
 import { isHuaweiSource } from "../huaweiCatalog";
+import { parseMarkdown } from "./markdown";
 import { buildGithubDocument, parseGithubArticle } from "./github";
 import { buildHtmlDocument, parseHtmlArticle } from "./html";
 import { buildHuaweiDocument, parseHuaweiArticle } from "./huawei";
 
 export { assignWebSrcdoc, paintWebAppearance } from "./html";
+
+export function parseMarkdownArticle(
+  markdown: string,
+  pageTitle: string,
+  meta?: DocMeta | null
+) {
+  if (isGithubSource(meta?.docRef?.sourceId)) {
+    return parseGithubArticle(markdown, pageTitle, meta);
+  }
+  return parseMarkdown(markdown);
+}
 
 export function parseReadingArticle(
   rawHtml: string,

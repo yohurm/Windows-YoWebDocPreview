@@ -95,7 +95,7 @@ fn parse_tree_node(item: &serde_json::Value) -> Option<CatalogNode> {
 }
 
 /// 拉取华为文档目录树
-pub async fn fetch_catalog_tree(
+pub(crate) async fn fetch_catalog_tree(
     http: &HttpClient,
     catalog: &str,
 ) -> Result<Vec<CatalogNode>, SourceError> {
@@ -185,7 +185,7 @@ impl SourceAdapter for HuaweiAdapter {
             markdown: None,
             source_path: None,
             source_ref: None,
-            blob_kind: String::new(),
+            blob_kind: None,
             text: None,
             device_types: Vec::new(),
         })

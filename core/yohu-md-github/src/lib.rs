@@ -18,9 +18,21 @@ pub fn markdown_to_document(md: &str, opts: &GithubConvertOptions) -> String {
     body
 }
 
-/// 导出时再补文档头，避免预览叠「来源」行和重复标题。
+/// 导出时再补文档头。正文已有同名一级标题则不再叠一层。
 pub fn with_export_header(md: &str, opts: &GithubConvertOptions) -> String {
-    build_header(&opts.to_inner(), "") + md.trim_start()
+    build_header(&opts.to_inner(), "") + strip_matching_title(md.trim_start(), &opts.title)
+}
+
+fn strip_matching_title<'a>(md: &'a str, title: &str) -> &'a str {
+    let Some(rest) = md.strip_prefix("# ") else {
+        return md;
+    };
+    let (line, after) = rest.split_once('\n').unwrap_or((rest, ""));
+    if line.trim() == title.trim() {
+        after.trim_start_matches(['\r', '\n'])
+    } else {
+        md
+    }
 }
 
 #[cfg(test)]
@@ -78,5 +90,7 @@ mod tests {
         let exported = with_export_header(&body, &opts());
         assert!(exported.contains("来源：https://github.com/o/r/blob/main/docs/guide.md"));
         assert!(exported.starts_with("# Guide"));
+        assert_eq!(exported.matches("# Guide").count(), 1);
+        assert!(exported.contains("\ntext"));
     }
 }

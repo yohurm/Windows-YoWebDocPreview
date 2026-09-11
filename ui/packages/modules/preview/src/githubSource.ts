@@ -1,8 +1,17 @@
+import type { BlobKind, DocMeta } from "@yohu/api";
+
 import table from "../../../../../testdata/github-source.json";
 
 export const GITHUB_SOURCE_ID = table.sourceId;
 export const GITHUB_WEB_PREFIX = table.webPrefix;
 export const GITHUB_RAW_PREFIX = table.rawPrefix;
+export const GITHUB_PREVIEW_MAX_BYTES = table.previewMaxBytes;
+
+export function githubTooLargeNote(): string {
+  const mb = GITHUB_PREVIEW_MAX_BYTES / (1024 * 1024);
+  const label = Number.isInteger(mb) ? `${mb}MB` : `${mb.toFixed(1)}MB`;
+  return `文件超过 ${label}，不在应用内预览。`;
+}
 
 const DOC_EXTS = table.docExtensions.map((ext) => ext.toLowerCase());
 const README_NAMES = table.readmeNames.map((name) => name.toLowerCase());
@@ -129,7 +138,45 @@ export function githubTreeUrl(owner: string, repo: string, gitRef: string, path:
     : `${table.webPrefix}${owner}/${repo}/tree/${gitRef}`;
 }
 
-export function classifyGithubBlob(path: string): "markdown" | "image" | "code" {
+/** `owner/repo` 专栏坐标。禁止把 git ref 按 `/` 切开。 */
+export function parseGithubCatalog(catalog?: string | null): { owner: string; repo: string } | null {
+  if (!catalog) return null;
+  const sep = catalog.indexOf("/");
+  if (sep <= 0 || sep !== catalog.lastIndexOf("/")) return null;
+  const owner = catalog.slice(0, sep);
+  const repo = catalog.slice(sep + 1);
+  if (!owner || !repo) return null;
+  return { owner, repo };
+}
+
+export function githubRepoFromMeta(meta: DocMeta | null): {
+  owner: string;
+  repo: string;
+  gitRef: string;
+  path: string;
+} | null {
+  if (!meta || !isGithubSource(meta.docRef.sourceId)) return null;
+  const loc = parseGithub(meta.sourceUrl || meta.docRef.url);
+  const catalog = parseGithubCatalog(meta.docRef.catalog);
+  const owner = loc?.owner ?? catalog?.owner;
+  const repo = loc?.repo ?? catalog?.repo;
+  const gitRef = meta.docRef.gitRef || loc?.gitRef;
+  if (!owner || !repo || !gitRef) return null;
+  return {
+    owner,
+    repo,
+    gitRef,
+    path: meta.docRef.slug || loc?.path || "",
+  };
+}
+
+export function githubTreeUrlFromMeta(dirPath: string, meta: DocMeta | null): string | null {
+  const repo = githubRepoFromMeta(meta);
+  if (!repo) return null;
+  return githubTreeUrl(repo.owner, repo.repo, repo.gitRef, dirPath);
+}
+
+export function classifyGithubBlob(path: string): BlobKind {
   if (isGithubDocPath(path)) return "markdown";
   const lower = path.toLowerCase();
   if (table.imageExtensions.some((ext) => lower.endsWith(ext))) return "image";

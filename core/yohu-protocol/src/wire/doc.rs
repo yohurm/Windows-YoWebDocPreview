@@ -30,6 +30,17 @@ pub enum FetchChannel {
     GenericWeb,
 }
 
+/// 仓库 blob 分型。HTML 文档源不填（`None`）。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum BlobKind {
+    Markdown,
+    Code,
+    Image,
+    Binary,
+    TooLarge,
+}
+
 /// 源文档原始数据（适配器/正文提取的产出）
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -47,9 +58,9 @@ pub struct RawDoc {
     /// 适配器解析后的提交 SHA，回写 `DocRef.git_ref`。
     #[serde(default)]
     pub source_ref: Option<String>,
-    /// GitHub blob 分型：markdown / code / image / binary / tooLarge。
+    /// 仓库 blob 分型；HTML 文档源为 `None`。
     #[serde(default)]
-    pub blob_kind: String,
+    pub blob_kind: Option<BlobKind>,
     /// 代码/纯文本预览（非 Markdown）。
     #[serde(default)]
     pub text: Option<String>,
@@ -71,7 +82,7 @@ pub struct DocMeta {
     #[serde(default)]
     pub device_types: Vec<String>,
     #[serde(default)]
-    pub blob_kind: String,
+    pub blob_kind: Option<BlobKind>,
 }
 
 /// 左侧导航树节点（华为专栏，或 GitHub 仓库一层目录）。

@@ -63,8 +63,8 @@ pub trait ConvertDialect {
     }
 
     fn extra_header(&self, html: &str, opts: &ConvertOptions) -> String {
-        let _ = html;
-        device_line_from_opts(opts)
+        let _ = (html, opts);
+        String::new()
     }
 }
 
@@ -73,12 +73,4 @@ pub struct GenericDialect;
 
 impl ConvertDialect for GenericDialect {
     type Extra = ();
-}
-
-pub fn device_line_from_opts(opts: &ConvertOptions) -> String {
-    if opts.device_types.is_empty() {
-        String::new()
-    } else {
-        format!("**支持设备：** {}", opts.device_types.join(" | "))
-    }
 }

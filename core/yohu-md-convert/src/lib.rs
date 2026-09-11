@@ -20,7 +20,6 @@ pub use header::build_header;
 pub use images::ImageKind;
 pub use options::ConvertOptions;
 pub use pipeline::html_to_markdown_with;
-pub use state::ConvertState;
 
 /// 通用入口：标准 HTML 方言。
 pub fn html_to_markdown(html: &str, opts: &ConvertOptions) -> String {

@@ -5,7 +5,7 @@ import { buildGithubDocument, parseGithubArticle } from "./index";
 
 const sha = "0123456789abcdef0123456789abcdef01234567";
 
-function meta(slug = "README.md", blobKind = "markdown") {
+function meta(slug = "README.md", blobKind: "markdown" | "code" = "markdown") {
   return {
     docRef: {
       sourceId: GITHUB_SOURCE_ID,
@@ -49,6 +49,14 @@ describe("parseGithubArticle", () => {
     expect(parsed.html).toContain("<pre");
     expect(parsed.html).toContain("fn");
     expect(parsed.html).not.toContain("<h1");
+  });
+
+  it("reads the too-large note from testdata previewMaxBytes", () => {
+    const parsed = parseGithubArticle("", "huge.bin", {
+      ...meta("huge.bin", "code"),
+      blobKind: "tooLarge",
+    });
+    expect(parsed.html).toContain("文件超过 1MB");
   });
 });
 

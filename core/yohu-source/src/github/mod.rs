@@ -40,7 +40,7 @@ impl SourceAdapter for GithubAdapter {
             markdown: blob.markdown,
             source_path: Some(blob.path),
             source_ref: Some(resolved.sha),
-            blob_kind: blob.kind,
+            blob_kind: Some(blob.kind),
             text: blob.text,
             device_types: Vec::new(),
         })

@@ -238,6 +238,17 @@ async fn check_produces_update_list() {
             status: None,
         })
         .unwrap();
+    store
+        .upsert_entry(yohu_protocol::LibraryEntry {
+            file: "github/README.md".into(),
+            url: "https://github.com/o/r/blob/main/README.md".into(),
+            slug: "README.md".into(),
+            catalog: "o/r".into(),
+            local_time: None,
+            official_time: None,
+            status: None,
+        })
+        .unwrap();
 
     let entries = store.load_manifest();
     let result = yohu_library::run_check(
@@ -255,6 +266,7 @@ async fn check_produces_update_list() {
         .collect();
     assert_eq!(statuses.get("upd-slug"), Some(&"UPDATE"));
     assert_eq!(statuses.get("new-slug"), Some(&"NEW"));
-    // web 条目不参与检查
+    // web / GitHub 条目不参与华为 probe
     assert!(!result.items.iter().any(|i| i.slug == "w"));
+    assert!(!result.items.iter().any(|i| i.slug == "README.md"));
 }

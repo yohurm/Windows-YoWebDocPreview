@@ -1,4 +1,5 @@
 use yohu_domain::{classify_github_blob, github_preview_max_bytes, github_readme_api_path};
+use yohu_protocol::BlobKind;
 
 use crate::error::SourceError;
 use crate::http::HttpClient;
@@ -8,7 +9,7 @@ use super::resolve::ResolvedRepo;
 
 pub struct FetchedBlob {
     pub path: String,
-    pub kind: String,
+    pub kind: BlobKind,
     pub title: String,
     pub markdown: Option<String>,
     pub text: Option<String>,
@@ -41,7 +42,7 @@ pub async fn resolve_blob(
         }
         return Ok(FetchedBlob {
             path: String::new(),
-            kind: "markdown".into(),
+            kind: BlobKind::Markdown,
             title: resolved.loc.catalog(),
             markdown: Some(format!(
                 "# {}\n\n仓库根目录没有 README。从左侧打开文件。\n",
@@ -52,10 +53,10 @@ pub async fn resolve_blob(
     }
 
     let kind = classify_github_blob(&path);
-    if kind == "image" {
+    if kind == BlobKind::Image {
         return Ok(FetchedBlob {
             path: path.clone(),
-            kind: kind.into(),
+            kind,
             title: file_name(&path),
             markdown: None,
             text: None,
@@ -66,7 +67,7 @@ pub async fn resolve_blob(
     if body.as_bytes().contains(&0) {
         return Ok(FetchedBlob {
             path,
-            kind: "binary".into(),
+            kind: BlobKind::Binary,
             title: file_name(&resolved.loc.path),
             markdown: None,
             text: None,
@@ -75,18 +76,18 @@ pub async fn resolve_blob(
     if body.len() as u64 > github_preview_max_bytes() {
         return Ok(FetchedBlob {
             path,
-            kind: "tooLarge".into(),
+            kind: BlobKind::TooLarge,
             title: file_name(&resolved.loc.path),
             markdown: None,
             text: None,
         });
     }
-    if kind == "markdown" {
+    if kind == BlobKind::Markdown {
         return Ok(markdown_blob(path, body));
     }
     Ok(FetchedBlob {
         path: path.clone(),
-        kind: "code".into(),
+        kind: BlobKind::Code,
         title: file_name(&path),
         markdown: None,
         text: Some(body),
@@ -96,7 +97,7 @@ pub async fn resolve_blob(
 fn markdown_blob(path: String, body: String) -> FetchedBlob {
     FetchedBlob {
         title: title_from_markdown(&body, &path),
-        kind: "markdown".into(),
+        kind: BlobKind::Markdown,
         path,
         markdown: Some(body),
         text: None,
@@ -176,8 +177,8 @@ mod tests {
 
     #[test]
     fn classify_keeps_code_out_of_markdown() {
-        assert_eq!(classify_github_blob("src/lib.rs"), "code");
-        assert_eq!(classify_github_blob("README.md"), "markdown");
-        assert_eq!(classify_github_blob("docs/shot.png"), "image");
+        assert_eq!(classify_github_blob("src/lib.rs"), BlobKind::Code);
+        assert_eq!(classify_github_blob("README.md"), BlobKind::Markdown);
+        assert_eq!(classify_github_blob("docs/shot.png"), BlobKind::Image);
     }
 }

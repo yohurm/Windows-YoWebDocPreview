@@ -20,7 +20,6 @@ impl HuaweiConvertOptions {
             update_time: self.update_time.clone(),
             source_url: self.source_url.clone(),
             image_map: self.image_map.clone(),
-            device_types: self.device_types.clone(),
             base_url: None,
         }
     }

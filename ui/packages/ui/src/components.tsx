@@ -43,27 +43,6 @@ export function IconDocument(props: { class?: string; style?: JSX.CSSProperties 
   );
 }
 
-export function IconCheck(props: { class?: string; style?: JSX.CSSProperties }) {
-  return (
-    <svg class={props.class} style={props.style} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="20 6 9 17 4 12"></polyline>
-    </svg>
-  );
-}
-
-export function IconList(props: { class?: string; style?: JSX.CSSProperties }) {
-  return (
-    <svg class={props.class} style={props.style} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="8" y1="6" x2="21" y2="6"></line>
-      <line x1="8" y1="12" x2="21" y2="12"></line>
-      <line x1="8" y1="18" x2="21" y2="18"></line>
-      <line x1="3" y1="6" x2="3.01" y2="6"></line>
-      <line x1="3" y1="12" x2="3.01" y2="12"></line>
-      <line x1="3" y1="18" x2="3.01" y2="18"></line>
-    </svg>
-  );
-}
-
 export function IconChevron(props: { class?: string; style?: JSX.CSSProperties }) {
   return (
     <svg class={props.class} style={props.style} width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">

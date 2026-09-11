@@ -18,14 +18,6 @@ pub struct LibraryEntry {
     pub status: Option<String>,
 }
 
-/// 更新检查结果条目状态
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum UpdateStatus {
-    New,
-    Update,
-}
-
 /// 库目录树节点
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

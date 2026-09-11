@@ -30,9 +30,8 @@ pub fn collect_image_urls(html: &str) -> Vec<String> {
 
 /// 已有本地资源按出现顺序对齐映射（同脚本 build_image_map）。
 pub fn build_image_map(html: &str, md_path: &Path) -> HashMap<String, String> {
-    let dir = md_path.parent().unwrap_or(Path::new("."));
+    let assets_dir = yohu_domain::assets_dir_for(md_path);
     let stem = md_path.file_stem().and_then(|s| s.to_str()).unwrap_or("untitled");
-    let assets_dir = dir.join("assets").join(stem);
 
     let existing: Vec<String> = if assets_dir.exists() {
         let mut files: Vec<String> = std::fs::read_dir(&assets_dir)
@@ -76,9 +75,8 @@ pub async fn download_missing(
     warnings: &mut Vec<String>,
 ) -> HashMap<String, String> {
     let mut out = map.clone();
-    let dir = md_path.parent().unwrap_or(Path::new("."));
+    let assets_dir = yohu_domain::assets_dir_for(md_path);
     let stem = md_path.file_stem().and_then(|s| s.to_str()).unwrap_or("untitled");
-    let assets_dir = dir.join("assets").join(stem);
 
     for (i, url) in collect_image_urls(html).into_iter().enumerate() {
         if out.contains_key(&url) {

@@ -21,6 +21,9 @@ export interface DocRef {
 /** "adapter" | "genericWeb" */
 export type FetchChannel = "adapter" | "genericWeb";
 
+/** 仓库 blob 分型；HTML 文档源不填 */
+export type BlobKind = "markdown" | "code" | "image" | "binary" | "tooLarge";
+
 export interface DocMeta {
   docRef: DocRef;
   title: string;
@@ -28,7 +31,7 @@ export interface DocMeta {
   sourceUrl: string;
   channel: FetchChannel;
   deviceTypes: string[];
-  blobKind?: string;
+  blobKind?: BlobKind | null;
 }
 
 export interface CatalogNode {
@@ -84,6 +87,8 @@ export type IpcErrorCode =
   | "network"
   | "extract_failed"
   | "api"
+  | "io"
+  | "cancelled"
   | "internal";
 
 export interface IpcErrorWire {
