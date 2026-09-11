@@ -9,6 +9,7 @@ members = [
     "core/yohu-md-github",
     "core/yohu-source",
     "core/yohu-library",
+    "core/yohu-ai",
     "app/yohu-docpreview",
 ]
 

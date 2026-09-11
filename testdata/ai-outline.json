@@ -1,0 +1,63 @@
+{
+  "comment": "ATX heading scan shared by yohu-ai::extract_outline_items and UI extractMarkdownToc. Leading h1 is skipped from the outline; ids still count it. Fenced ``` toggles ignore. A line starting with $$ is skipped (not a math fence). Only #–####.",
+  "cases": [
+    {
+      "id": "empty",
+      "markdown": "",
+      "headings": []
+    },
+    {
+      "id": "no-headings",
+      "markdown": "just a paragraph\n\nand another.",
+      "headings": []
+    },
+    {
+      "id": "leading-h1-skipped",
+      "markdown": "# Title\n\n## A\n\n### B\n\n## C\n",
+      "headings": [
+        { "id": "toc-heading-1", "text": "A", "level": 2 },
+        { "id": "toc-heading-2", "text": "B", "level": 3 },
+        { "id": "toc-heading-3", "text": "C", "level": 2 }
+      ]
+    },
+    {
+      "id": "no-leading-h1",
+      "markdown": "## Real\n\n## After\n",
+      "headings": [
+        { "id": "toc-heading-0", "text": "Real", "level": 2 },
+        { "id": "toc-heading-1", "text": "After", "level": 2 }
+      ]
+    },
+    {
+      "id": "code-fence-ignored",
+      "markdown": "## Real\n\n```\n# not a heading\n```\n\n## After\n",
+      "headings": [
+        { "id": "toc-heading-0", "text": "Real", "level": 2 },
+        { "id": "toc-heading-1", "text": "After", "level": 2 }
+      ]
+    },
+    {
+      "id": "math-line-skipped",
+      "markdown": "## Keep\n\n$$\n## not\n$$\n\n## After\n",
+      "headings": [
+        { "id": "toc-heading-0", "text": "Keep", "level": 2 },
+        { "id": "toc-heading-1", "text": "not", "level": 2 },
+        { "id": "toc-heading-2", "text": "After", "level": 2 }
+      ]
+    },
+    {
+      "id": "strip-markup",
+      "markdown": "## See [link](http://x) and **bold**\n",
+      "headings": [
+        { "id": "toc-heading-0", "text": "See link and bold", "level": 2 }
+      ]
+    },
+    {
+      "id": "h5-ignored",
+      "markdown": "## Keep\n\n##### Skip\n",
+      "headings": [
+        { "id": "toc-heading-0", "text": "Keep", "level": 2 }
+      ]
+    }
+  ]
+}
