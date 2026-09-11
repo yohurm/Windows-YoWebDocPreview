@@ -4,6 +4,11 @@ const CATALOG_IDS = new Set(table.catalogs.map((c) => c.id));
 const DISPLAY_NAMES = Object.fromEntries(table.catalogs.map((c) => [c.id, c.displayName]));
 
 export const HUAWEI_DOC_PREFIX = table.prefix;
+export const HUAWEI_SOURCE_ID = table.sourceId;
+
+export function isHuaweiSource(sourceId?: string | null): boolean {
+  return sourceId === HUAWEI_SOURCE_ID;
+}
 
 export const HUAWEI_CHANNELS = table.channels.map((ch) => ({
   key: ch.key,

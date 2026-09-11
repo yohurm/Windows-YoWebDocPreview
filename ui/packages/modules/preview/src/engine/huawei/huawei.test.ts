@@ -5,17 +5,16 @@ import headingTable from "../../../../../../../testdata/huawei-headings.json";
 import iconTable from "../../../../../../../testdata/huawei-inline-icon.json";
 import type { DocMeta } from "@yohu/api";
 
+import { HUAWEI_SOURCE_ID } from "../../huaweiCatalog";
 import {
-  assignWebSrcdoc,
-  buildWebDocument,
+  buildHuaweiDocument,
   extractDeviceTypes,
-  extractWebToc,
   identifyInlineIcon,
   identifyWebCode,
-  normalizeArticleHtml,
-  paintWebAppearance,
+  normalizeHuaweiArticle,
   resolveHeadingLevel,
 } from "./index";
+import { assignWebSrcdoc, extractArticleToc, paintWebAppearance } from "../html";
 
 describe("resolveHeadingLevel", () => {
   it("matches testdata/huawei-headings.json", () => {
@@ -54,9 +53,9 @@ describe("identifyWebCode", () => {
   });
 });
 
-describe("normalizeArticleHtml", () => {
+describe("normalizeHuaweiArticle", () => {
   it("promotes unmarked h4 to h2 and [h2] markers to h3", () => {
-    const html = normalizeArticleHtml(
+    const html = normalizeHuaweiArticle(
       `<h1>ArkTS语言介绍</h1><h4>基本知识</h4><h4>[h2]声明</h4><p>正文</p>`,
       "ArkTS语言介绍"
     );
@@ -75,7 +74,7 @@ describe("normalizeArticleHtml", () => {
   });
 
   it("unwraps a full html document into article body", () => {
-    const html = normalizeArticleHtml(
+    const html = normalizeHuaweiArticle(
       `<html><head><title>x</title></head><body><h4>基本知识</h4></body></html>`,
       "x"
     );
@@ -85,7 +84,7 @@ describe("normalizeArticleHtml", () => {
   });
 
   it("marks API gear images that have origin size but no IconPic class", () => {
-    const html = normalizeArticleHtml(
+    const html = normalizeHuaweiArticle(
       `<p>点击<span><img originheight="20" originwidth="21" src="https://cdn.example/gear.png"></span> <strong>&gt; Install Plugin from Disk…</strong>安装本地插件。</p>`
     );
     expect(html).toMatch(/<img class="y-icon"[^>]*originwidth="21"/);
@@ -93,7 +92,7 @@ describe("normalizeArticleHtml", () => {
   });
 
   it("keeps official IconPic class and adds y-icon", () => {
-    const html = normalizeArticleHtml(
+    const html = normalizeHuaweiArticle(
       `<p>点击<img class="IconPic notEnlarge" originwidth="21" originheight="20" src="https://cdn.example/gear.png" width="21" height="20"> 安装</p>`
     );
     expect(html).toContain('class="y-icon IconPic notEnlarge"');
@@ -101,7 +100,7 @@ describe("normalizeArticleHtml", () => {
   });
 
   it("does not mark article screenshots as icons", () => {
-    const html = normalizeArticleHtml(
+    const html = normalizeHuaweiArticle(
       `<p><img originheight="708" originwidth="978" src="https://cdn.example/shot.png"></p>`
     );
     expect(html).not.toContain("y-icon");
@@ -109,7 +108,7 @@ describe("normalizeArticleHtml", () => {
   });
 
   it("turns Huawei note images into labeled callouts", () => {
-    const html = normalizeArticleHtml(
+    const html = normalizeHuaweiArticle(
       `<div class="note"><img src="https://cdn.example/note_3.0-zh-cn.png"><span class="notetitle"> </span><div class="notebody"><p>仅 ets</p></div></div>`
     );
     expect(html).toContain('data-note="note"');
@@ -117,12 +116,12 @@ describe("normalizeArticleHtml", () => {
   });
 
   it("wraps tables for overflow", () => {
-    const html = normalizeArticleHtml(`<table class="tablenoborder"><tr><th>A</th></tr></table>`);
+    const html = normalizeHuaweiArticle(`<table class="tablenoborder"><tr><th>A</th></tr></table>`);
     expect(html).toContain('class="y-table-scroll"');
   });
 
   it("parses a Huawei pre into y-code once, without leftover official class", () => {
-    const html = normalizeArticleHtml(
+    const html = normalizeHuaweiArticle(
       `<pre class="TypeScript prettyprint linenums" codehub="https://gitcode.com/example/pages/BasicKnowledge.ets#L23-L25">let hi: string = 'hello';\n</pre>`
     );
     expect(html).toContain('class="y-code" data-lang="ArkTS"');
@@ -142,13 +141,13 @@ describe("normalizeArticleHtml", () => {
   });
 
   it("uses class as identity only when codehub has no language file", () => {
-    const html = normalizeArticleHtml(`<pre class="TypeScript">@Component\nstruct Demo {\n  build() {}\n}</pre>`);
+    const html = normalizeHuaweiArticle(`<pre class="TypeScript">@Component\nstruct Demo {\n  build() {}\n}</pre>`);
     expect(html).toContain('data-lang="TypeScript"');
     expect(html).not.toContain('data-lang="ArkTS"');
   });
 
   it("keeps existing token spans and still replaces official chrome", () => {
-    const html = normalizeArticleHtml(
+    const html = normalizeHuaweiArticle(
       `<pre class="TypeScript"><span class="hljs-keyword">let</span> hi</pre>`
     );
     expect(html).toContain('<span class="hljs-keyword">let</span> hi');
@@ -157,7 +156,7 @@ describe("normalizeArticleHtml", () => {
   });
 
   it("typesets TeX outside code and leaves fence dollars alone", () => {
-    const html = normalizeArticleHtml(
+    const html = normalizeHuaweiArticle(
       `<p>质能 $$E=mc^2$$</p><pre class="TypeScript">const x = "$$not-math$$";</pre>`
     );
     expect(html).toMatch(/<math[\s>]/);
@@ -167,11 +166,11 @@ describe("normalizeArticleHtml", () => {
 
 describe("extractWebToc", () => {
   it("reads ids stamped by article normalization, not markdown toc-heading ids", () => {
-    const html = normalizeArticleHtml(
+    const html = normalizeHuaweiArticle(
       `<h1>ArkTS语言介绍</h1><h4>基本知识</h4><h4>[h2]声明</h4>`,
       "ArkTS语言介绍"
     );
-    const toc = extractWebToc(html);
+    const toc = extractArticleToc(html);
     expect(toc.map((item) => item.text)).toEqual(["基本知识", "声明"]);
     expect(toc.map((item) => item.level)).toEqual([2, 3]);
     expect(toc.every((item) => item.id && !item.id.startsWith("toc-heading-"))).toBe(true);
@@ -179,11 +178,11 @@ describe("extractWebToc", () => {
   });
 });
 
-describe("buildWebDocument", () => {
+describe("buildHuaweiDocument", () => {
   it("composes an official-style article without a second TOC", () => {
     const meta: DocMeta = {
       docRef: {
-        sourceId: "huawei-harmonyos",
+        sourceId: HUAWEI_SOURCE_ID,
         catalog: "harmonyos-guides-V5",
         slug: "resource-categories-and-access",
         url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/resource-categories-and-access",
@@ -196,7 +195,7 @@ describe("buildWebDocument", () => {
       deviceTypes: ["phone", "tablet"],
     };
 
-    const result = buildWebDocument({
+    const result = buildHuaweiDocument({
       meta,
       rawHtml: "<h4>[h2]资源目录分类</h4><p>支持 rawfile 与 resources 目录资源访问。</p>",
       sourceUrl: meta.sourceUrl,
@@ -221,10 +220,10 @@ describe("buildWebDocument", () => {
   });
 
   it("falls back to h1 device-type when meta has none", () => {
-    const result = buildWebDocument({
+    const result = buildHuaweiDocument({
       meta: {
         docRef: {
-          sourceId: "huawei-harmonyos",
+          sourceId: HUAWEI_SOURCE_ID,
           catalog: "harmonyos-references",
           slug: "js-apis-arkts-lang",
           url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-arkts-lang",
@@ -244,7 +243,7 @@ describe("buildWebDocument", () => {
   });
 
   it("handles empty meta gracefully", () => {
-    const result = buildWebDocument({
+    const result = buildHuaweiDocument({
       meta: null,
       rawHtml: "<p>普通纯文本网页</p>",
       sourceUrl: "https://example.com",
@@ -256,10 +255,10 @@ describe("buildWebDocument", () => {
   });
 
   it("builds catalog crumbs and a chevron separator", () => {
-    const result = buildWebDocument({
+    const result = buildHuaweiDocument({
       meta: {
         docRef: {
-          sourceId: "huawei-harmonyos",
+          sourceId: HUAWEI_SOURCE_ID,
           catalog: "harmonyos-guides",
           slug: "introduction-to-arkts",
           url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/introduction-to-arkts",
@@ -302,7 +301,7 @@ describe("buildWebDocument", () => {
   });
 
   it("marks API inline icons and ships y-icon skin in the iframe document", () => {
-    const html = buildWebDocument({
+    const html = buildHuaweiDocument({
       meta: null,
       rawHtml: `<p>点击<img originheight="20" originwidth="21" src="https://cdn.example/gear.png"> 安装</p>`,
       sourceUrl: "https://example.com",
@@ -313,7 +312,7 @@ describe("buildWebDocument", () => {
   });
 
   it("does not bake workbench appearance into the article html", () => {
-    const html = buildWebDocument({
+    const html = buildHuaweiDocument({
       meta: null,
       rawHtml: "<p>正文</p>",
       sourceUrl: "https://example.com",
@@ -333,7 +332,7 @@ describe("buildWebDocument", () => {
 
 describe("paintWebAppearance", () => {
   it("paints data-theme onto an already-built document without rewriting html", () => {
-    const html = buildWebDocument({
+    const html = buildHuaweiDocument({
       meta: null,
       rawHtml: "<p>正文</p>",
       sourceUrl: "https://example.com",

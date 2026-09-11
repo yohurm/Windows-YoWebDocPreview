@@ -52,7 +52,7 @@ describe("preview rail overlay", () => {
 
   it("网页 iframe 不授权弹窗，正文链接不走 target=_blank", () => {
     const frame = loadPreviewFile("components/WebReadingFrame.tsx");
-    const code = loadPreviewFile("engine/web/code.ts");
+    const code = loadPreviewFile("engine/huawei/code.ts");
     expect(frame).toContain("bindContentLinks");
     expect(frame).not.toContain("allow-popups");
     expect(code).toContain("y-code__hub");

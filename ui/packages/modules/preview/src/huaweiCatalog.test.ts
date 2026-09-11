@@ -5,6 +5,8 @@ import {
   catalogIdFromUrl,
   HUAWEI_CHANNELS,
   HUAWEI_DOC_PREFIX,
+  HUAWEI_SOURCE_ID,
+  isHuaweiSource,
 } from "./huaweiCatalog";
 
 describe("huaweiCatalog", () => {
@@ -22,6 +24,12 @@ describe("huaweiCatalog", () => {
     ).toBe("harmonyos-references");
     expect(catalogIdFromUrl("https://example.com/x")).toBeNull();
     expect(catalogIdFromUrl(`${HUAWEI_DOC_PREFIX}unknown-cat/foo`)).toBeNull();
+  });
+
+  it("reads source identity from the same catalog table", () => {
+    expect(HUAWEI_SOURCE_ID).toBe("huawei-harmonyos");
+    expect(isHuaweiSource(HUAWEI_SOURCE_ID)).toBe(true);
+    expect(isHuaweiSource("generic-web")).toBe(false);
   });
 
   it("keeps channel landing urls inside their catalog family", () => {

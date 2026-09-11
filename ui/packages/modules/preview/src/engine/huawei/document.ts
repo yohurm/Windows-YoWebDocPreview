@@ -3,7 +3,7 @@
  *
  * Pipeline (this package only):
  * 1. Huawei API HTML
- * 2. parseWebArticle — headings, notes, code, tables, inline icons, math
+ * 2. parseHuaweiArticle — headings, notes, code, tables, inline icons, math
  * 3. officialSkin — tokens measured from live Chrome
  * 4. article chrome — breadcrumb + title + update time
  */
@@ -12,10 +12,10 @@ import type { CatalogNode, DocMeta } from "@yohu/api";
 
 import { documentCrumbs, documentTitle } from "../../documentCrumbs";
 import { resolveDeviceTypes } from "./devices";
-import { parseWebArticle } from "./normalize";
+import { parseHuaweiArticle } from "./normalize";
 import { OFFICIAL_ARTICLE_CSS } from "./skin";
 
-export interface RenderWebOptions {
+export interface RenderHuaweiOptions {
   meta: DocMeta | null;
   rawHtml: string;
   sourceUrl: string;
@@ -24,10 +24,10 @@ export interface RenderWebOptions {
 
 const CRUMB_CHEVRON = `<svg viewBox="0 0 5.726 11.817" fill="currentColor" aria-hidden="true"><path d="M0.17 11.6C0.31 11.75 0.47 11.82 0.64 11.81C0.8 11.81 0.95 11.74 1.07 11.6L5.47 6.55C5.64 6.36 5.73 6.14 5.72 5.9C5.71 5.66 5.63 5.45 5.47 5.26L1.07 0.19C0.96 0.05 0.82 -0.01 0.64 0C0.46 0 0.31 0.06 0.19 0.19C0.07 0.3 0.01 0.45 0.01 0.61C0.01 0.78 0.07 0.93 0.19 1.06L4.37 5.9L0.17 10.72C0.06 10.85 0.01 11 0 11.17C-0.01 11.34 0.05 11.48 0.17 11.6Z" fill-opacity="0.9"/></svg>`;
 
-export function buildWebDocument(options: RenderWebOptions): string {
+export function buildHuaweiDocument(options: RenderHuaweiOptions): string {
   const { meta, rawHtml, catalogNodes = [] } = options;
   const title = documentTitle(meta, "在线文档网页原貌");
-  const { body } = parseWebArticle(rawHtml, title);
+  const { body } = parseHuaweiArticle(rawHtml, title);
   const safeTitle = escapeHtml(title);
   const crumbs = documentCrumbs(meta, catalogNodes, "在线文档网页原貌");
   const crumb = crumbs

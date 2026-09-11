@@ -2,15 +2,16 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { buildWebDocument } from "../packages/modules/preview/src/engine/web/document.ts";
+import { buildHuaweiDocument } from "../packages/modules/preview/src/engine/huawei/document.ts";
+import { HUAWEI_SOURCE_ID } from "../packages/modules/preview/src/huaweiCatalog.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = join(here, "../..");
 const raw = readFileSync(join(repo, "testdata/golden/introduction-to-arkts/input.html"), "utf8");
-const html = buildWebDocument({
+const html = buildHuaweiDocument({
   meta: {
     docRef: {
-      sourceId: "huawei-harmonyos",
+      sourceId: HUAWEI_SOURCE_ID,
       catalog: "harmonyos-guides",
       slug: "introduction-to-arkts",
       url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/introduction-to-arkts",

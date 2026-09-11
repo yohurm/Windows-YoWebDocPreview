@@ -4,7 +4,7 @@ const DISPLAY_RE = /\$\$([\s\S]+?)\$\$|\\\[([\s\S]+?)\\\]/g;
 const INLINE_RE = /\\\(([\s\S]+?)\\\)|(?<!\$)\$(?!\$)([^$\n]+?)\$(?!\$)/g;
 
 /** Typeset TeX delimiters outside pre/code. Native MathML is left untouched. */
-export function renderWebMath(html: string): string {
+export function renderArticleMath(html: string): string {
   return withProtectedCode(html, (plain) => {
     let out = plain.replace(DISPLAY_RE, (_all, dollar?: string, bracket?: string) =>
       typeset(dollar ?? bracket ?? "", true)
@@ -37,11 +37,11 @@ function withProtectedCode(html: string, fn: (plain: string) => string): string 
   const protectedHtml = html.replace(/<pre\b[\s\S]*?<\/pre>|<code\b[\s\S]*?<\/code>/gi, (block) => {
     const i = blocks.length;
     blocks.push(block);
-    return `\u0000WEBCODE${i}\u0000`;
+    return `\u0000HTMLCODE${i}\u0000`;
   });
   let out = fn(protectedHtml);
   for (let i = 0; i < blocks.length; i++) {
-    out = out.replace(`\u0000WEBCODE${i}\u0000`, () => blocks[i] ?? "");
+    out = out.replace(`\u0000HTMLCODE${i}\u0000`, () => blocks[i] ?? "");
   }
   return out;
 }

@@ -3,7 +3,7 @@ import { createMemo, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { IconGlobe, YoStage, type Appearance } from "@yohu/ui";
 
 import { bindContentLinks } from "../contentHref";
-import { buildWebDocument } from "../engine/web";
+import { buildReadingDocument } from "../engine/reading";
 import { readScroller, scrollToHeading } from "../readingScroll";
 import type { PreviewStore } from "../store";
 import { CanvasOpBar } from "./CanvasOpBar";
@@ -17,7 +17,7 @@ export function CanvasDock(props: { store: PreviewStore; appearance?: Appearance
   const [webTick, setWebTick] = createSignal(0);
 
   const webDocHtml = createMemo(() =>
-    buildWebDocument({
+    buildReadingDocument({
       meta: store.session().meta,
       rawHtml: store.session().rawHtml,
       sourceUrl: store.session().url,

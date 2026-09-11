@@ -3,7 +3,7 @@ import { createEffect, createSignal, onCleanup } from "solid-js";
 import type { Appearance } from "@yohu/ui";
 
 import { bindContentLinks } from "../contentHref";
-import { assignWebSrcdoc, paintWebAppearance } from "../engine/web";
+import { assignWebSrcdoc, paintWebAppearance } from "../engine/reading";
 
 export function WebReadingFrame(props: {
   html: string;

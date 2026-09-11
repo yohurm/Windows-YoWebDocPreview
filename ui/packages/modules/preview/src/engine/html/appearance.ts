@@ -1,6 +1,5 @@
 /**
- * 网页阅读外观：只涂已挂载的文章文档，不参与 srcdoc 合成。
- * 与工作台壳 applyAppearance 同契约：html[data-theme] + color-scheme。
+ * 只涂已挂载的文章文档，不参与 srcdoc 合成。
  */
 import type { Appearance } from "@yohu/ui";
 

@@ -1,14 +1,14 @@
-export interface WebTocItem {
+export interface ArticleTocItem {
   id: string;
   text: string;
   level: number;
 }
 
-/** Outline from normalized article headings. Ids are those stamped by heading promotion. */
-export function extractWebToc(html: string): WebTocItem[] {
+/** Outline from heading ids already stamped by the article pipeline. */
+export function extractArticleToc(html: string): ArticleTocItem[] {
   if (!html) return [];
-  const items: WebTocItem[] = [];
-  const headingRe = /<h([1-4])([^>]*)>([\s\S]*?)<\/h\1>/gi;
+  const items: ArticleTocItem[] = [];
+  const headingRe = /<h([1-6])([^>]*)>([\s\S]*?)<\/h\1>/gi;
   let match: RegExpExecArray | null;
   while ((match = headingRe.exec(html))) {
     const level = Number(match[1]);

@@ -13,7 +13,7 @@ import { collectExpandableIds, findAncestorIds, resolveCatalogDocUrl } from "./c
 import { resolveContentHref, type ContentHref } from "./contentHref";
 import { documentCrumbs } from "./documentCrumbs";
 import { catalogIdFromUrl } from "./huaweiCatalog";
-import { parseWebArticle } from "./engine/web";
+import { parseReadingArticle } from "./engine/reading";
 import { parseMarkdown } from "./engine/markdown";
 import {
   createEmptyDocSession,
@@ -146,7 +146,11 @@ export function createPreviewStore() {
         session().catalogNodes.length > 0;
 
       const markdown = parseMarkdown(fetchedMd);
-      const web = parseWebArticle(fetchedHtml, fetchedMeta.title ?? "");
+      const web = parseReadingArticle(
+        fetchedHtml,
+        fetchedMeta.title ?? "",
+        fetchedMeta.docRef?.sourceId
+      );
 
       const nextSession: UnifiedDocSession = {
         url: rawUrl,

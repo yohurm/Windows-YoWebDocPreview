@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js";
 import { YoIndicator, YoPresence } from "@yohu/ui";
 
-import { channelTabLabel, HUAWEI_CHANNELS } from "../huaweiCatalog";
+import { channelTabLabel, HUAWEI_CHANNELS, isHuaweiSource } from "../huaweiCatalog";
 import type { PreviewStore } from "../store";
 
 export function ChannelBar(props: { store: PreviewStore }) {
@@ -9,7 +9,7 @@ export function ChannelBar(props: { store: PreviewStore }) {
     props.store.session().catalogId || props.store.session().meta?.docRef.catalog || "";
   const active = () => channelTabLabel(catalogId());
   const visible = () =>
-    Boolean(active()) || props.store.session().meta?.docRef.sourceId === "huawei-harmonyos";
+    Boolean(active()) || isHuaweiSource(props.store.session().meta?.docRef.sourceId);
   const loading = () => props.store.session().status === "loading";
 
   return (
