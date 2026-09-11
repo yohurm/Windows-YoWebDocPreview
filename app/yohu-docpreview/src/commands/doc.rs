@@ -6,7 +6,7 @@ use yohu_protocol::{CatalogNode, DocMeta, IpcError};
 use crate::commands::{ipc, ipc_source};
 use crate::state::AppState;
 
-/// `doc.fetch`：拉取文档元信息（HTML 进缓存，`doc.html` 二段获取）。
+/// `doc.fetch`：拉取文档元信息（正文进缓存，`doc.html` 二段获取）。
 #[tauri::command(rename = "doc.fetch")]
 pub async fn doc_fetch(state: State<'_, AppState>, url: String) -> Result<DocMeta, IpcError> {
     if let Some((meta, _)) = state.cache.lock().expect("cache lock poisoned").get(&url) {
@@ -19,45 +19,34 @@ pub async fn doc_fetch(state: State<'_, AppState>, url: String) -> Result<DocMet
         .cache
         .lock()
         .expect("cache lock poisoned")
-        .put(url.clone(), (meta.clone(), raw.html));
+        .put(url.clone(), (meta.clone(), raw));
     Ok(meta)
 }
 
-/// `doc.html`：取缓存的原始 HTML（若未在缓存则现场拉取并放入缓存）。
+/// `doc.html`：取缓存的原始 HTML（仓库 Markdown 源则为空串）。
 #[tauri::command(rename = "doc.html")]
 pub async fn doc_html(state: State<'_, AppState>, url: String) -> Result<String, IpcError> {
-    let cached = state
-        .cache
-        .lock()
-        .expect("cache lock poisoned")
-        .get(&url)
-        .map(|(_, html)| html);
-
-    if let Some(html) = cached {
-        return Ok(html);
+    if let Some((_, raw)) = state.cache.lock().expect("cache lock poisoned").get(&url) {
+        return Ok(raw.html);
     }
 
-    // 缓存未命中时自动现场拉取，保证幂等与高容错
     let (meta, raw) = yohu_source::fetch_any(&state.registry, &state.http, &url)
         .await
         .map_err(ipc_source)?;
+    let html = raw.html.clone();
     state
         .cache
         .lock()
         .expect("cache lock poisoned")
-        .put(url.clone(), (meta, raw.html.clone()));
-    Ok(raw.html)
+        .put(url.clone(), (meta, raw));
+    Ok(html)
 }
 
-/// `doc.convert`：HTML → Markdown（若未在缓存则现场拉取兜底）。
+/// `doc.convert`：按源方言转 Markdown（若未在缓存则现场拉取兜底）。
 #[tauri::command(rename = "doc.convert")]
 pub async fn doc_convert(state: State<'_, AppState>, url: String) -> Result<String, IpcError> {
-    let (meta, html) = {
-        let cached = state
-            .cache
-            .lock()
-            .expect("cache lock poisoned")
-            .get(&url);
+    let (meta, raw) = {
+        let cached = state.cache.lock().expect("cache lock poisoned").get(&url);
         if let Some(pair) = cached {
             pair
         } else {
@@ -68,13 +57,15 @@ pub async fn doc_convert(state: State<'_, AppState>, url: String) -> Result<Stri
                 .cache
                 .lock()
                 .expect("cache lock poisoned")
-                .put(url.clone(), (meta.clone(), raw.html.clone()));
-            (meta, raw.html)
+                .put(url.clone(), (meta.clone(), raw.clone()));
+            (meta, raw)
         }
     };
-    tokio::task::spawn_blocking(move || yohu_library::convert_html(&meta, &html, &url, Default::default()))
-        .await
-        .map_err(ipc)
+    tokio::task::spawn_blocking(move || {
+        yohu_library::convert_document(&meta, &raw, &url, Default::default())
+    })
+    .await
+    .map_err(ipc)
 }
 
 /// `doc.history`：预览历史快照（LRU，最新在前）。
@@ -90,8 +81,7 @@ pub async fn doc_export(
     url: String,
     target_dir: Option<String>,
 ) -> Result<String, IpcError> {
-    // 1. 获取 meta 与 HTML（若未在缓存则现场拉取）
-    let (meta, html) = {
+    let (meta, raw) = {
         let cached = state.cache.lock().expect("cache lock poisoned").get(&url);
         if let Some(pair) = cached {
             pair
@@ -103,12 +93,11 @@ pub async fn doc_export(
                 .cache
                 .lock()
                 .expect("cache lock poisoned")
-                .put(url.clone(), (meta.clone(), raw.html.clone()));
-            (meta, raw.html)
+                .put(url.clone(), (meta.clone(), raw.clone()));
+            (meta, raw)
         }
     };
 
-    // 2. 确定保存目录与文件名
     let out_dir = match target_dir {
         Some(d) if !d.trim().is_empty() => std::path::PathBuf::from(d),
         _ => state.paths.library_root.clone(),
@@ -121,12 +110,11 @@ pub async fn doc_export(
     let md_content = tokio::task::spawn_blocking({
         let meta = meta.clone();
         let url = url.clone();
-        move || yohu_library::convert_html(&meta, &html, &url, Default::default())
+        move || yohu_library::export_document(&meta, &raw, &url, Default::default())
     })
     .await
     .map_err(ipc)?;
 
-    // 5. 原子写盘
     yohu_runtime::atomic_write(&md_path, md_content).map_err(ipc)?;
 
     Ok(md_path.to_string_lossy().into_owned())

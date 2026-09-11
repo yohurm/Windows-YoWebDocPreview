@@ -8,7 +8,7 @@ use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
-use yohu_protocol::{AppEvent, DocMeta};
+use yohu_protocol::{AppEvent, DocMeta, RawDoc};
 use yohu_source::{AdapterRegistry, HttpClient};
 
 use crate::paths::AppPaths;
@@ -16,7 +16,7 @@ use crate::settings_store::SettingsStore;
 
 /// 预览缓存（LRU 简化为容量上限的插入序表）
 pub struct Cache {
-    map: HashMap<String, (DocMeta, String)>, // url → (meta, html)
+    map: HashMap<String, (DocMeta, RawDoc)>, // url → (meta, raw)
     order: Vec<String>,
 }
 
@@ -27,7 +27,7 @@ impl Cache {
         Self { map: HashMap::new(), order: Vec::new() }
     }
 
-    pub fn put(&mut self, url: String, v: (DocMeta, String)) {
+    pub fn put(&mut self, url: String, v: (DocMeta, RawDoc)) {
         if self.map.contains_key(&url) {
             self.order.retain(|u| u != &url);
         } else if self.map.len() >= CACHE_CAP {
@@ -40,7 +40,7 @@ impl Cache {
         self.map.insert(url, v);
     }
 
-    pub fn get(&self, url: &str) -> Option<(DocMeta, String)> {
+    pub fn get(&self, url: &str) -> Option<(DocMeta, RawDoc)> {
         self.map.get(url).cloned()
     }
 
