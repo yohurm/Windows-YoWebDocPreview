@@ -270,3 +270,47 @@ async fn check_produces_update_list() {
     assert!(!result.items.iter().any(|i| i.slug == "w"));
     assert!(!result.items.iter().any(|i| i.slug == "README.md"));
 }
+
+#[tokio::test]
+async fn parse_after_fetch_matches_convert_and_has_outline() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(
+            r#"<html><head><title>解析集成</title></head><body><article>
+            <h1>解析集成</h1>
+            <p>这是正文内容段落一，包含足够多的文字以通过提取阈值。</p>
+            <h2>第二节</h2>
+            <p>第二段补充文字确保密度评分稳定通过最小长度判定逻辑要求。</p>
+            </article></body></html>"#,
+        ))
+        .mount(&server)
+        .await;
+
+    let url = format!("{}/doc", server.uri());
+    let (meta, raw) = yohu_source::fetch_any(&AdapterRegistry::with_defaults(), &client(), &url)
+        .await
+        .unwrap();
+    let parsed = yohu_library::parse_document(&meta, &raw, &url);
+    let converted = yohu_library::convert_document(&meta, &raw, &url, Default::default());
+    assert_eq!(parsed.markdown, converted);
+    assert!(
+        parsed.outline.iter().any(|n| n.text.contains("第二节")),
+        "{:?}",
+        parsed.outline
+    );
+    assert!(parsed.sections.iter().any(|s| s.heading.contains("解析集成")));
+}
+
+#[tokio::test]
+async fn parse_fetch_not_found() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .respond_with(ResponseTemplate::new(404))
+        .mount(&server)
+        .await;
+    let url = format!("{}/missing", server.uri());
+    let err = yohu_source::fetch_any(&AdapterRegistry::with_defaults(), &client(), &url)
+        .await
+        .unwrap_err();
+    assert_eq!(err.code(), "NOT_FOUND");
+}

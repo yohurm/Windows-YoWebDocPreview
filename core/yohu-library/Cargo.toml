@@ -10,6 +10,7 @@ yohu-domain = { path = "../yohu-domain" }
 yohu-md-convert = { path = "../yohu-md-convert" }
 yohu-md-huawei = { path = "../yohu-md-huawei" }
 yohu-md-github = { path = "../yohu-md-github" }
+yohu-ai = { path = "../yohu-ai" }
 yohu-source = { path = "../yohu-source" }
 yohu-runtime = { path = "../yohu-runtime" }
 tokio = { workspace = true }
