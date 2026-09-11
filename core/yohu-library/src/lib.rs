@@ -9,10 +9,13 @@ pub mod error;
 pub mod images;
 pub mod import;
 pub mod parse;
+pub mod scan;
 pub mod store;
+pub mod sync;
 
 pub use check::{run_check, CheckItem, CheckResult};
 pub use convert::{convert_document, convert_html, export_document, export_to_dir};
 pub use error::LibraryError;
 pub use parse::{parse_document, parse_markdown};
 pub use store::LibraryStore;
+pub use sync::{apply_sync, plan_sync};
