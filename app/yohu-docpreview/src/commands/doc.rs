@@ -1,7 +1,7 @@
 //! 文档域命令：拉取 / HTML 二段获取（ADR-W6）/ 转换 / 历史。
 
 use tauri::State;
-use yohu_protocol::{CatalogNode, DocMeta, FetchChannel, IpcError};
+use yohu_protocol::{CatalogNode, DocMeta, IpcError};
 
 use crate::commands::{ipc, ipc_source};
 use crate::state::AppState;
@@ -72,20 +72,7 @@ pub async fn doc_convert(state: State<'_, AppState>, url: String) -> Result<Stri
             (meta, raw.html)
         }
     };
-    let base_url = match meta.channel {
-        FetchChannel::GenericWeb => Some(url.clone()),
-        FetchChannel::Adapter => None,
-    };
-    let opts = yohu_md_convert::ConvertOptions {
-        title: meta.title.clone(),
-        update_time: meta.update_time.clone(),
-        source_url: url.clone(),
-        catalog: meta.doc_ref.catalog.clone(),
-        image_map: Default::default(),
-        device_types: meta.device_types.clone(),
-        base_url,
-    };
-    tokio::task::spawn_blocking(move || yohu_md_convert::html_to_markdown(&html, &opts))
+    tokio::task::spawn_blocking(move || yohu_library::convert_html(&meta, &html, &url, Default::default()))
         .await
         .map_err(ipc)
 }
@@ -131,24 +118,10 @@ pub async fn doc_export(
     let stem = yohu_domain::safe_stem(&meta.title);
     let md_path = out_dir.join(format!("{stem}.md"));
 
-    // 3. 准备转换选项
-    let base_url = match meta.channel {
-        FetchChannel::GenericWeb => Some(url.clone()),
-        FetchChannel::Adapter => None,
-    };
-    let opts = yohu_md_convert::ConvertOptions {
-        title: meta.title.clone(),
-        update_time: meta.update_time.clone(),
-        source_url: url.clone(),
-        catalog: meta.doc_ref.catalog.clone(),
-        image_map: Default::default(),
-        device_types: meta.device_types.clone(),
-        base_url,
-    };
-
-    // 4. HTML -> Markdown
-    let md_content = tokio::task::spawn_blocking(move || {
-        yohu_md_convert::html_to_markdown(&html, &opts)
+    let md_content = tokio::task::spawn_blocking({
+        let meta = meta.clone();
+        let url = url.clone();
+        move || yohu_library::convert_html(&meta, &html, &url, Default::default())
     })
     .await
     .map_err(ipc)?;
@@ -165,15 +138,7 @@ pub async fn doc_catalog(
     state: State<'_, AppState>,
     url: String,
 ) -> Result<Vec<CatalogNode>, IpcError> {
-    let (_, doc_ref) = state.registry.route(&url);
-    if doc_ref.source_id == "huawei-harmonyos" {
-        if let Some(cat) = &doc_ref.catalog {
-            let tree = yohu_source::fetch_catalog_tree(&state.http, cat)
-                .await
-                .map_err(ipc_source)?;
-            return Ok(tree);
-        }
-    }
-    // 默认或通用网页返回空列表（前端优雅降级）
-    Ok(Vec::new())
+    yohu_source::fetch_catalog(&state.registry, &state.http, &url)
+        .await
+        .map_err(ipc_source)
 }

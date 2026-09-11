@@ -1,28 +1,14 @@
-//! 主体转换：div/标题/行内格式/列表/段落/图片/标签剥离/实体/链接
-//! （Python 步骤 3、4、6、7、8、9、12、13、14、15）。
+//! 通用 HTML 变换：div / 行内 / 列表 / 段落 / 标签剥离 / 实体。
 
 use std::collections::HashMap;
 
 use regex::Regex;
 use std::sync::LazyLock;
 
-static H_MARKER_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?i)\[h[234]\]\s*").unwrap());
-static H_MARKER_NUM_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?i)\[h([2-4])\]").unwrap());
-static DEVICE_ATTR_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#"device-type="([^"]+)""#).unwrap());
+use crate::images::{self, ImageKind};
+
 static ANY_TAG_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"<[^>]+>").unwrap());
 
-/// device-type 属性值 → 展示名映射（同脚本 DEVICE_MAP）
-const DEVICE_MAP: &[(&str, &str)] = &[
-    ("phone", "Phone"),
-    ("2in1", "PC/2in1"),
-    ("tablet", "Tablet"),
-    ("wearable", "Wearable"),
-    ("tv", "TV"),
-];
-
-/// Step 3：剥离 div 包装为换行。
 pub fn strip_divs(md: &str) -> String {
     let open = Regex::new(r"<div[^>]*>").unwrap();
     let out = open.replace_all(md, "\n");
@@ -30,89 +16,6 @@ pub fn strip_divs(md: &str) -> String {
     close.replace_all(&out, "\n").into_owned()
 }
 
-/// Huawei API HTML → live-site heading level.
-/// Unmarked `h4` is a section (`h2`); `[h2]` / `[h3]` / `[h4]` are one level deeper than the marker.
-pub fn heading_level(tag: u8, marker: Option<u8>) -> u8 {
-    if tag <= 1 {
-        return 1;
-    }
-    match marker {
-        Some(2) => 3,
-        Some(n) => n.saturating_add(1).min(4),
-        None if tag == 4 => 2,
-        None => tag.min(4),
-    }
-}
-
-fn heading_marker(text: &str) -> Option<u8> {
-    H_MARKER_NUM_RE
-        .captures(text)
-        .and_then(|c| c.get(1)?.as_str().parse().ok())
-}
-
-/// Step 4：按官网层级映射标题；剔除 `[h2]` 标记；提取 device-type 行；
-/// 与文档标题相同的 h1 移除。
-pub fn headings(md: &str, title: &str) -> String {
-    let mut out = md.to_string();
-
-    // 移除与文档标题相同的 h1
-    if !title.is_empty() {
-        let pat = Regex::new(&format!(
-            r"(?s)<h1[^>]*>\s*{}\s*</h1>",
-            regex::escape(title)
-        ))
-        .unwrap();
-        out = pat.replace_all(&out, "").into_owned();
-    }
-
-    for tag_num in 1u8..=4 {
-        let tag = format!("h{tag_num}");
-        let re = Regex::new(&format!(r#"(?s)<{tag}([^>]*?)>(.*?)</{tag}>"#)).unwrap();
-        out = re
-            .replace_all(&out, |c: &regex::Captures| {
-                let attrs = &c[1];
-                let raw = &c[2];
-                let marker = heading_marker(raw);
-                let text = H_MARKER_RE.replace_all(raw, "").trim().to_string();
-                let prefix = "#".repeat(heading_level(tag_num, marker) as usize);
-                let device_line = DEVICE_ATTR_RE
-                    .captures(attrs)
-                    .map(|m| map_devices(&m[1]))
-                    .map(|mapped| format!("\n\n**支持设备：** {mapped}\n"))
-                    .unwrap_or_default();
-                format!("\n{prefix} {text}\n{device_line}")
-            })
-            .into_owned();
-    }
-    out
-}
-
-fn map_devices(raw: &str) -> String {
-    raw.split(',')
-        .map(|d| d.trim())
-        .map(|d| {
-            DEVICE_MAP
-                .iter()
-                .find(|(k, _)| *k == d)
-                .map(|(_, v)| *v)
-                .unwrap_or(d)
-        })
-        .collect::<Vec<&str>>()
-        .join(" | ")
-}
-
-/// 从 HTML 提取 `<h1 device-type="...">` 并映射为展示行
-/// `**支持设备：** Phone | ...`（对标 Python 在转换开头的 h1 设备提取）。
-pub fn extract_device_line(html: &str) -> String {
-    static RE: LazyLock<Regex> =
-        LazyLock::new(|| Regex::new(r#"<h1[^>]+device-type="([^"]+)""#).unwrap());
-    RE.captures(html)
-        .map(|c| format!("**支持设备：** {}", map_devices(&c[1])))
-        .unwrap_or_default()
-}
-
-/// 官网菜单路径会拆成相邻 `<strong>`：`Preferences</strong><strong>/</strong><strong>Settings`。
-/// 各自包 `**` 会得到 `****`，CommonMark 无法配对，星号漏到正文。
 fn merge_adjacent_bold(md: &str) -> String {
     static JOIN: LazyLock<Regex> = LazyLock::new(|| {
         Regex::new(r"(?i)</(?:strong|b)>\s*<(?:strong|b)(?:\s[^>]*)?>").unwrap()
@@ -127,23 +30,19 @@ fn merge_adjacent_bold(md: &str) -> String {
     }
 }
 
-/// Step 6：行内格式 strong/b/a。
 pub fn inline_formatting(md: &str) -> String {
     let md = merge_adjacent_bold(md);
     let strong = Regex::new(r"(?s)<strong[^>]*>(.*?)</strong>").unwrap();
     let md = strong.replace_all(&md, r"**${1}**").into_owned();
-    // 注意：<b 后必须跟空白或 >，避免误吞 <br>/<base> 等标签
     let bold = Regex::new(r"(?s)<b(?:\s[^>]*)?>(.*?)</b>").unwrap();
     let md = bold.replace_all(&md, r"**${1}**").into_owned();
     let link = Regex::new(r#"(?s)<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>"#).unwrap();
     link.replace_all(&md, "[${2}](${1})").into_owned()
 }
 
-/// Step 7：列表（ol 自动编号 / ul / li 内多段折叠）。
 pub fn lists(md: &str) -> String {
     let mut out = md.to_string();
 
-    // ol：提取 li 并自动编号
     let ol_re = Regex::new(r"(?s)<ol[^>]*>.*?</ol>").unwrap();
     out = ol_re
         .replace_all(&out, |seg: &regex::Captures| {
@@ -156,15 +55,14 @@ pub fn lists(md: &str) -> String {
         })
         .into_owned();
 
-    // 剩余 li 作为无序列表
     let li_re = Regex::new(r"(?s)<li[^>]*>(.*?)</li>").unwrap();
-    out = li_re.replace_all(&out, |c: &regex::Captures| format_li(&c[1], "-")).into_owned();
+    out = li_re
+        .replace_all(&out, |c: &regex::Captures| format_li(&c[1], "-"))
+        .into_owned();
 
-    // 去掉 ul/ol 包装
     let wrapper = Regex::new(r"</?[ou]l[^>]*>").unwrap();
     out = wrapper.replace_all(&out, "\n").into_owned();
 
-    // 清理列表项与表格行的前导缩进
     let indent = Regex::new(r"(?m)^[ \t]+(\d+\. | - )").unwrap();
     out = indent.replace_all(&out, "${1}").into_owned();
     let table_indent = Regex::new(r"(?m)^[ \t]+(\|)").unwrap();
@@ -192,7 +90,6 @@ fn format_li(inner: &str, prefix: &str) -> String {
     }
 }
 
-/// Step 8-9：段落/换行/span。
 pub fn paragraphs(md: &str) -> String {
     let p_open = Regex::new(r"<p[^>]*>").unwrap();
     let md = p_open.replace_all(md, "\n").into_owned();
@@ -204,93 +101,21 @@ pub fn paragraphs(md: &str) -> String {
     span.replace_all(&md, "").into_owned()
 }
 
-/// 官网行内齿轮：`class="IconPic notEnlarge"`，origin 约 21×20。
-/// 插图走块级 `![]()`；图标走 `![icon]()`，后处理不得再拆行。
-const INLINE_ICON_MAX_PX: u32 = 48;
-
-fn attr_u32(tag: &str, names: &[&str]) -> Option<u32> {
-    let lower = tag.to_ascii_lowercase();
-    for name in names {
-        let key = format!("{name}=\"");
-        if let Some(idx) = lower.find(&key) {
-            let rest = &tag[idx + key.len()..];
-            let end = rest.find('"')?;
-            return rest[..end].parse().ok();
-        }
-    }
-    None
+pub fn images(
+    md: &str,
+    image_map: &HashMap<String, String>,
+    classify: impl Fn(&str) -> ImageKind,
+    emit: impl Fn(ImageKind, &str) -> String,
+) -> String {
+    images::images(md, image_map, classify, emit)
 }
 
-fn class_has(tag: &str, token: &str) -> bool {
-    let lower = tag.to_ascii_lowercase();
-    let key = "class=\"";
-    let Some(idx) = lower.find(key) else {
-        return false;
-    };
-    let rest = &tag[idx + key.len()..];
-    let Some(end) = rest.find('"') else {
-        return false;
-    };
-    rest[..end]
-        .split_whitespace()
-        .any(|cls| cls.eq_ignore_ascii_case(token))
-}
-
-fn is_inline_icon(tag: &str) -> bool {
-    if class_has(tag, "IconPic") || class_has(tag, "notEnlarge") {
-        return true;
-    }
-    match (
-        attr_u32(tag, &["originwidth", "width"]),
-        attr_u32(tag, &["originheight", "height"]),
-    ) {
-        (Some(w), Some(h))
-            if w > 0 && h > 0 && w <= INLINE_ICON_MAX_PX && h <= INLINE_ICON_MAX_PX =>
-        {
-            true
-        }
-        _ => false,
-    }
-}
-
-/// Step 12：图片——先按 URL 映射替换，再转换 img 标签。
-pub fn images(md: &str, image_map: &HashMap<String, String>) -> String {
-    let mut out = md.to_string();
-    for (orig, local) in image_map {
-        out = out.replace(orig.as_str(), local.as_str());
-    }
-    // 对标 Python `re.sub(r'<img[^>]+>', ...)`：必须吞掉闭合 `>`，
-    // 否则残留孤立 `>` 会变成 Markdown 引用行（真实缺陷）。
-    let img_re = Regex::new(r#"<img[^>]+>"#).unwrap();
-    img_re
-        .replace_all(&out, |tag: &regex::Captures| {
-            let src = Regex::new(r#"src="([^"]+)""#)
-                .unwrap()
-                .captures(&tag[0])
-                .or_else(|| Regex::new(r"src='([^']+)'").unwrap().captures(&tag[0]));
-            match src.and_then(|c| c.get(1)) {
-                Some(s) => {
-                    let url = s.as_str().replace(' ', "%20");
-                    if is_inline_icon(&tag[0]) {
-                        format!("![icon]({url})")
-                    } else {
-                        format!("\n![]({url})\n")
-                    }
-                }
-                None => String::new(),
-            }
-        })
-        .into_owned()
-}
-
-/// Step 13：剥离剩余 HTML 标签（二次保护代码块）。
 pub fn strip_remaining_tags(md: &str) -> String {
     let fence = Regex::new(r"(?s)```.*?```").unwrap();
     let mut parts: Vec<String> = Vec::new();
     let mut last = 0usize;
     let mut out = String::new();
     for m in fence.find_iter(md) {
-        // 非代码区剥标签
         out.push_str(&ANY_TAG_RE.replace_all(&md[last..m.start()], ""));
         parts.push(m.as_str().to_string());
         out.push_str(&format!("\u{2}C{}\u{2}", parts.len() - 1));
@@ -303,7 +128,6 @@ pub fn strip_remaining_tags(md: &str) -> String {
     out
 }
 
-/// Step 14：实体解码。
 pub fn decode_entities(md: &str) -> String {
     const LT: &str = concat!("&", "lt;");
     const GT: &str = concat!("&", "gt;");
@@ -311,7 +135,6 @@ pub fn decode_entities(md: &str) -> String {
     const APOS: &str = concat!("&", "#39;");
     const NBSP: &str = concat!("&", "nbsp;");
     const AMP: &str = concat!("&", "amp;");
-    // 保护代码块后解码非代码区（代码块已在 Step10 解码，此处避免二次解码 &）
     let fence = Regex::new(r"(?s)```.*?```").unwrap();
     let mut out = String::new();
     let mut last = 0usize;
@@ -330,60 +153,5 @@ pub fn decode_entities(md: &str) -> String {
             .replace(APOS, "'")
             .replace(NBSP, " ")
             .replace(AMP, "&")
-    }
-}
-
-/// Step 15：相对链接补全为绝对 URL。
-///
-/// - `base_url = Some`（generic-web）：`/root/path` 补到基准页的 origin；
-///   `rel/path` 补到基准页所在目录；绝对/锚点/mailto 不动；
-/// - `base_url = None`：保留华为站 `/consumer/cn/doc/` 前缀补固定域名的脚本行为（黄金样本兼容）。
-pub fn fix_relative_links(md: &str, base_url: Option<&str>) -> String {
-    match base_url {
-        Some(base) => {
-            let base = base.trim_end_matches('/');
-            let origin = url_origin(base).unwrap_or_else(|| base.to_string());
-            let re = Regex::new(r"\]\(([^)]+)\)").unwrap();
-            re.replace_all(md, |c: &regex::Captures| {
-                let target = &c[1];
-                if target.starts_with("http://")
-                    || target.starts_with("https://")
-                    || target.starts_with('#')
-                    || target.starts_with("mailto:")
-                    || target.is_empty()
-                {
-                    format!("]({target})")
-                } else if let Some(rest) = target.strip_prefix('/') {
-                    format!("]({origin}/{rest})")
-                } else {
-                    // 相对页面路径：去掉基准 URL 的文件名部分再拼接
-                    let dir = base
-                        .rsplit_once('/')
-                        .map(|(d, _)| d.to_string())
-                        .unwrap_or_else(|| base.to_string());
-                    format!("]({dir}/{target})")
-                }
-            })
-            .into_owned()
-        }
-        None => {
-            let re = Regex::new(r"\[([^\]]*)\]\((/consumer/cn/doc/[^)\s]*)\)").unwrap();
-            re.replace_all(md, "[${1}](https://developer.huawei.com${2})")
-                .into_owned()
-        }
-    }
-}
-
-/// 提取 `scheme://host[:port]`（origin）；非标准形态返回 None。
-fn url_origin(url: &str) -> Option<String> {
-    let (scheme, rest) = url.split_once("://")?;
-    if scheme.is_empty() || rest.is_empty() {
-        return None;
-    }
-    let host = rest.split('/').next()?;
-    if host.is_empty() {
-        None
-    } else {
-        Some(format!("{scheme}://{host}"))
     }
 }

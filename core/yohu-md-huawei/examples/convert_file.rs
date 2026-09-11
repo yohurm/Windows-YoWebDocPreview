@@ -1,10 +1,8 @@
-//! 命令行转换：读 HTML 文件 → 输出 Markdown 文件（黄金样本导入与对比脚本使用）。
-//!
-//! 用法：convert_file <input.html> <title> <update_time> <source_url> <catalog> <output.md>
+//! 命令行转换：华为文档 HTML → Markdown（黄金样本导入脚本使用）。
 
 use std::path::PathBuf;
 
-use yohu_md_convert::{html_to_markdown, ConvertOptions};
+use yohu_md_huawei::{html_to_markdown, HuaweiConvertOptions};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -23,7 +21,7 @@ fn main() {
         eprintln!("读取 {} 失败: {e}", input.display());
         std::process::exit(1);
     });
-    let opts = ConvertOptions {
+    let opts = HuaweiConvertOptions {
         title: title.clone(),
         update_time,
         source_url,
@@ -35,7 +33,7 @@ fn main() {
         let _ = std::fs::create_dir_all(parent);
     }
     let chars = md.chars().count();
-    std::fs::write(&output, md).unwrap_or_else(|e| {
+    std::fs::write(&output, &md).unwrap_or_else(|e| {
         eprintln!("写入 {} 失败: {e}", output.display());
         std::process::exit(1);
     });

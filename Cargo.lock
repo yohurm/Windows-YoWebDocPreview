@@ -5043,7 +5043,7 @@ dependencies = [
  "tokio",
  "tokio-util",
  "yohu-domain",
- "yohu-md-convert",
+ "yohu-library",
  "yohu-protocol",
  "yohu-runtime",
  "yohu-source",
@@ -5073,6 +5073,7 @@ dependencies = [
  "wiremock",
  "yohu-domain",
  "yohu-md-convert",
+ "yohu-md-huawei",
  "yohu-protocol",
  "yohu-runtime",
  "yohu-source",
@@ -5084,6 +5085,16 @@ version = "0.1.0"
 dependencies = [
  "regex",
  "serde_json",
+]
+
+[[package]]
+name = "yohu-md-huawei"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "serde_json",
+ "yohu-domain",
+ "yohu-md-convert",
 ]
 
 [[package]]

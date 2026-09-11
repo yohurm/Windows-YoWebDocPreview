@@ -1,0 +1,13 @@
+[package]
+name = "yohu-md-huawei"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+yohu-md-convert = { path = "../yohu-md-convert" }
+yohu-domain = { path = "../yohu-domain" }
+regex = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }

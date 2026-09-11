@@ -3,7 +3,7 @@
 //! 架构边界：
 //! - 本 crate 是**唯一**引用 Tauri 的地方；
 //! - `commands/` 是薄命令层：参数反序列化 → core API → 结果序列化，禁止业务逻辑；
-//! - 所有业务能力在 core crates（protocol/runtime/domain/source/md-convert）；
+//! - 所有业务能力在 core crates（protocol/runtime/domain/source/library）；壳不直接依赖转换方言 crate；
 //! - 事件唯一出口是 `events.rs` 总线；命令与后台只 `tx.send(AppEvent)`。
 
 mod appearance;

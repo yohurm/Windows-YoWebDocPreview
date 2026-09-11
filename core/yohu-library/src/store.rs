@@ -105,24 +105,11 @@ impl LibraryStore {
             image_map
         };
 
-        // 4. 转换（generic-web 传页面 URL 作 base，相对链接补全）
+        // 4. 转换：按 source_id 选引擎，不用 channel / base_url 当华为开关
         if let Some(p) = progress {
             p("转换为 Markdown".into());
         }
-        let base_url = match meta.channel {
-            yohu_protocol::FetchChannel::GenericWeb => Some(url.to_string()),
-            yohu_protocol::FetchChannel::Adapter => None,
-        };
-        let opts = yohu_md_convert::ConvertOptions {
-            title: meta.title.clone(),
-            update_time: meta.update_time.clone(),
-            source_url: url.to_string(),
-            catalog: meta.doc_ref.catalog.clone(),
-            image_map,
-            device_types: meta.device_types.clone(),
-            base_url,
-        };
-        let markdown = yohu_md_convert::html_to_markdown(&raw.html, &opts);
+        let markdown = crate::convert_html(&meta, &raw.html, url, image_map);
 
         // 5. 写盘（原子写）
         atomic_write(&md_path, &markdown)?;

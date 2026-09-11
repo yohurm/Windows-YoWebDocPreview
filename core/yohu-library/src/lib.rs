@@ -4,11 +4,13 @@
 
 pub mod batch;
 pub mod check;
+pub mod convert;
 pub mod error;
 pub mod images;
 pub mod import;
 pub mod store;
 
 pub use check::{run_check, CheckItem, CheckResult};
+pub use convert::html_to_markdown as convert_html;
 pub use error::LibraryError;
 pub use store::LibraryStore;

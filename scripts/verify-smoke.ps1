@@ -53,14 +53,14 @@ Set-Location $RootDir
 $CargoRunner = Join-Path $RootDir "run_msvc_cargo.bat"
 
 Write-Host "`n[Step 3/5] Test Rust Core crates (zero Tauri)..."
-& cmd /c "$CargoRunner test -p yohu-protocol -p yohu-domain -p yohu-runtime -p yohu-source -p yohu-library"
+& cmd /c "$CargoRunner test -p yohu-protocol -p yohu-domain -p yohu-runtime -p yohu-source -p yohu-library -p yohu-md-convert"
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Rust core tests failed"
     exit 1
 }
 
 Write-Host "`n[Step 4/5] Run R4 golden parity & baseline gate..."
-& cmd /c "$CargoRunner test -p yohu-md-convert --test golden"
+& cmd /c "$CargoRunner test -p yohu-md-huawei"
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Golden gate test failed"
     exit 1

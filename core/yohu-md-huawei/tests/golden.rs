@@ -1,15 +1,8 @@
-//! 黄金样本门禁（v1 G2 / v2 R4，S 级验收）。
-//!
-//! 样本布局：`testdata/golden/<slug>/{input.html, meta.json, expected.md}`。
-//! - `expected.md` 冻结当前转换引擎输出（含华为标题层级映射，与官网一致）；
-//! - 对比经规范化（去行尾空白 + 折叠连续空行），只报内容差异；
-//! - 引擎有意变更时设 `YOHU_UPDATE_GOLDEN=1` 重写 `expected.md`；
-//! - 系统性偏差登记在 `testdata/golden/exceptions.md`（每条一行：`` - `<slug>` — 归因 ``），
-//!   登记后本测试跳过该样本并计入报告；未登记的差异一律失败。
+//! 华为黄金样本门禁。样本是华为开发者文档，走本方言。
 
 use std::path::{Path, PathBuf};
 
-use yohu_md_convert::{html_to_markdown, ConvertOptions};
+use yohu_md_huawei::{html_to_markdown, HuaweiConvertOptions};
 
 const GOLDEN_DIR: &str = "testdata/golden";
 const EXCEPTIONS_FILE: &str = "testdata/golden/exceptions.md";
@@ -24,7 +17,6 @@ fn repo_root() -> PathBuf {
         .unwrap_or_default()
 }
 
-/// 规范化：行尾空白、连续空行折叠、首尾空行去除。
 fn normalize(md: &str) -> String {
     let mut out = Vec::new();
     for line in md.split('\n') {
@@ -34,11 +26,9 @@ fn normalize(md: &str) -> String {
         }
         out.push(line.to_string());
     }
-    let s = out.join("\n");
-    s.trim().to_string()
+    out.join("\n").trim().to_string()
 }
 
-/// 解析豁免登记：形如 `` - `<slug>` — 说明 ``。
 fn registered_exceptions(root: &Path) -> std::collections::HashSet<String> {
     let text = match std::fs::read_to_string(root.join(EXCEPTIONS_FILE)) {
         Ok(t) => t,
@@ -55,7 +45,6 @@ fn registered_exceptions(root: &Path) -> std::collections::HashSet<String> {
     set
 }
 
-/// 差异行数（多重集合差：实际多出的行 + 期望多出的行），零依赖。
 fn line_delta(actual: &str, expected: &str) -> usize {
     use std::collections::HashMap;
     let mut a: HashMap<&str, usize> = HashMap::new();
@@ -95,7 +84,7 @@ fn run_sample(dir: &Path) -> Result<String, String> {
     let html = std::fs::read_to_string(dir.join("input.html")).map_err(|e| e.to_string())?;
     let meta = std::fs::read_to_string(dir.join("meta.json")).map_err(|e| e.to_string())?;
     let v: serde_json::Value = serde_json::from_str(&meta).map_err(|e| e.to_string())?;
-    let opts = ConvertOptions {
+    let opts = HuaweiConvertOptions {
         title: v.get("title").and_then(|x| x.as_str()).unwrap_or_default().to_string(),
         update_time: v.get("time").and_then(|x| x.as_str()).map(str::to_string),
         source_url: v.get("url").and_then(|x| x.as_str()).unwrap_or_default().to_string(),
@@ -112,7 +101,6 @@ fn run_sample(dir: &Path) -> Result<String, String> {
         std::fs::write(dir.join("expected.md"), &actual).map_err(|e| e.to_string())?;
         return Ok(format!("已重写 expected.md（{} 行）", na.lines().count()));
     }
-    // 首个差异 + 差异行数统计
     let (la, le): (Vec<&str>, Vec<&str>) = (na.lines().collect(), ne.lines().collect());
     let mut first: Option<(usize, &str, &str)> = None;
     for i in 0..la.len().max(le.len()) {
@@ -125,11 +113,10 @@ fn run_sample(dir: &Path) -> Result<String, String> {
     }
     let changes = line_delta(&na, &ne);
     Err(format!(
-        "{} 行 / 期望 {} 行 | 差异 {} 处{}\n  首个差异 @ 行 {}:\n    EXP : {}\n    GOT : {}",
+        "{} 行 / 期望 {} 行 | 差异 {} 处\n  首个差异 @ 行 {}:\n    EXP : {}\n    GOT : {}",
         na.lines().count(),
         ne.lines().count(),
         changes,
-        first.as_ref().map(|_| "").unwrap_or(""),
         first.map(|(n, _, _)| n).unwrap_or(0),
         first.map(|(_, _, b)| b.chars().take(120).collect::<String>()).unwrap_or_default(),
         first.map(|(_, a, _)| a.chars().take(120).collect::<String>()).unwrap_or_default(),
@@ -175,8 +162,9 @@ fn golden_samples_match_expected() {
             failed,
         );
     }
-    if !skipped.is_empty() {
-        println!("豁免登记跳过: {:?}", skipped);
-    }
-    println!("golden 门禁通过：{}/{} 篇零内容差异", dirs.len() - skipped.len(), dirs.len());
+    println!(
+        "golden 门禁通过：{}/{} 篇零内容差异",
+        dirs.len() - skipped.len(),
+        dirs.len()
+    );
 }

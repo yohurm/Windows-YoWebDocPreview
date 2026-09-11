@@ -17,7 +17,7 @@ serde_json = { workspace = true }
 yohu-protocol = { path = "../../core/yohu-protocol" }
 yohu-runtime = { path = "../../core/yohu-runtime" }
 yohu-domain = { path = "../../core/yohu-domain" }
-yohu-md-convert = { path = "../../core/yohu-md-convert" }
+yohu-library = { path = "../../core/yohu-library" }
 yohu-source = { path = "../../core/yohu-source" }
 tauri = { workspace = true }
 tauri-plugin-dialog = "2"

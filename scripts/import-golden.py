@@ -130,7 +130,7 @@ def main() -> int:
     target = int(sys.argv[1]) if len(sys.argv) > 1 else 50
 
     if not CONVERTER.exists():
-        print(f"缺少转换器 {CONVERTER}，先执行: cargo build --example convert_file -p yohu-md-convert")
+        print(f"缺少转换器 {CONVERTER}，先执行: cargo build --example convert_file -p yohu-md-huawei")
         return 1
 
     GOLDEN.mkdir(parents=True, exist_ok=True)
@@ -177,7 +177,7 @@ def main() -> int:
 
     print(
         f"\n完成：{len(samples)} 篇（Python parity {parity}，Rust 冻结 {baseline}）"
-        f"\n门禁：cargo test -p yohu-md-convert --test golden"
+        f"\n门禁：cargo test -p yohu-md-huawei --test golden"
     )
     return 0
 

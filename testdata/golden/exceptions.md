@@ -1,6 +1,6 @@
 # 黄金样本门禁豁免登记
 
-本文件记录黄金样本门禁（`cargo test -p yohu-md-convert --test golden`）中已知的系统性非阻塞差异。
+本文件记录黄金样本门禁（`cargo test -p yohu-md-huawei --test golden`）中已知的系统性非阻塞差异。
 
 ## 登记格式
 每条登记占用一行：
